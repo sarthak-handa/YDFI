@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Analytics Suite - v3.0</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; background-color: #f1f5f9; }
+        
+        /* Navigation Tabs */
+        .tab-btn { @apply text-slate-400 hover:text-white px-4 py-2 text-sm font-medium transition-colors border-b-2 border-transparent; }
+        .tab-btn.active { @apply text-white border-blue-500 bg-slate-800/50; }
+
+        /* Explorer Sidebar Controls */
+        .control-label { @apply text-xs font-bold text-slate-500 uppercase tracking-wide mb-1 block; }
+        .control-input { @apply w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none; }
+        .granularity-btn { @apply px-3 py-1.5 text-xs font-medium border border-slate-200 rounded hover:bg-slate-50 text-slate-600; }
+        .granularity-btn.active { @apply bg-blue-50 text-blue-700 border-blue-500; }
+
+        /* Dashboard Cards */
+        .chart-card {
+            background: white;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .chart-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;
+        }
+        .chart-title { font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
+        .chart-wrapper { flex-grow: 1; position: relative; width: 100%; min-height: 200px; }
+
+        /* Dashboard Grid Layout */
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            height: calc(100vh - 64px);
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="text-slate-900 h-screen flex flex-col overflow-hidden">
+
+    <header class="bg-slate-900 text-white h-16 flex-none z-50 shadow-md px-6 flex justify-between items-center">
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-1.5 rounded">
+                    <i class="fa-solid fa-industry text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight leading-none">CRM Analytics</h1>
+                    <p class="text-[10px] text-slate-400 font-medium">COLD ROLLING MILL OPS</p>
+                </div>
+            </div>
+            
+            <div class="flex bg-slate-800/50 rounded p-1 gap-1">
+                <button onclick="switchTab('explorer')" id="btn-explorer" class="tab-btn rounded">
+                    <i class="fa-solid fa-chart-line mr-2"></i>Explorer
+                </button>
+                <button onclick="switchTab('dashboard')" id="btn-dashboard" class="tab-btn active rounded">
+                    <i class="fa-solid fa-table-columns mr-2"></i>Dashboard
+                </button>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <div class="text-right hidden md:block">
+                <p class="text-[10px] text-slate-400 uppercase">Current Dataset</p>
+                <p id="fileNameDisplay" class="text-sm font-bold text-white">Production_Data.csv</p>
+            </div>
+            <label class="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2">
+                <i class="fa-solid fa-upload"></i> Load CSV
+                <input type="file" id="globalFileInput" accept=".csv" class="hidden">
+            </label>
+        </div>
+    </header>
+
+    <main class="flex-grow relative bg-slate-100 overflow-hidden">
+
+        <div id="view-explorer" class="absolute inset-0 flex hidden bg-white">
+            <aside class="w-80 border-r border-slate-200 flex-none flex flex-col h-full bg-white z-10 shadow-xl">
+                <div class="p-5 flex-grow overflow-y-auto space-y-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-blue-600"></i> Analysis Config
+                        </h2>
+                        <p class="text-xs text-slate-500">Slice and dice your production data.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="control-label">Metric (Y-Axis)</label>
+                            <select id="exp-y-axis" class="control-input">
+                                <option value="coil_count">Coil Count</option>
+                                <option value="energy">Energy (Sum)</option>
+                                <option value="avg_mpm">Average MPM</option>
+                                <option value="calc_weight">Calculated Weight (Sum)</option>
+                                <option value="max_mill_power" selected>Max Mill Power</option>
+                                <option value="time_run">Run Time (Sum)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="control-label">Dimension (X-Axis)</label>
+                            <select id="exp-x-axis" class="control-input">
+                                <option value="date" selected>Date / Time</option>
+                                <option value="coil_id">Coil Sequence</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="control-label">Granularity</label>
+                            <div class="flex gap-2">
+                                <button onclick="setExpGranularity('day')" class="granularity-btn active w-full">Day</button>
+                                <button onclick="setExpGranularity('week')" class="granularity-btn w-full">Week</button>
+                                <button onclick="setExpGranularity('month')" class="granularity-btn w-full">Month</button>
+                            </div>
+                        </div>
+                        <div class="pt-4 border-t border-slate-100">
+                            <label class="control-label">Date Range</label>
+                            <div class="grid grid-cols-2 gap-2 mb-2">
+                                <input type="date" id="exp-start" class="control-input text-xs">
+                                <input type="date" id="exp-end" class="control-input text-xs">
+                            </div>
+                            <button onclick="updateExplorer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded shadow-md transition-colors">
+                                <i class="fa-solid fa-rotate mr-1"></i> Update Chart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="flex-grow p-8 bg-slate-50 overflow-hidden flex flex-col">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex-grow p-6 flex flex-col">
+                    <h2 id="exp-chart-title" class="text-xl font-bold text-slate-800 mb-1">Analysis View</h2>
+                    <p id="exp-chart-subtitle" class="text-sm text-slate-500 mb-6">Generated Chart</p>
+                    <div class="flex-grow relative">
+                        <canvas id="explorerChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-dashboard" class="absolute inset-0 bg-slate-100 dashboard-container">
+            
+            <div class="grid grid-cols-4 gap-4 flex-none">
+                <div class="bg-white rounded p-4 border-l-4 border-slate-500 shadow-sm">
+                    <p class="text-[10px] uppercase font-bold text-slate-400">Coils Selected</p>
+                    <div class="flex items-baseline gap-2">
+                        <p id="kpi-coils" class="text-2xl font-bold text-slate-800">-</p>
+                        <p id="kpi-total" class="text-xs text-slate-400 font-medium">/ -</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded p-4 border-l-4 border-blue-500 shadow-sm">
+                    <p class="text-[10px] uppercase font-bold text-slate-400">Total Energy</p>
+                    <p id="kpi-energy" class="text-2xl font-bold text-blue-600">- <span class="text-xs text-slate-400">KWh</span></p>
+                </div>
+                <div class="bg-white rounded p-4 border-l-4 border-emerald-500 shadow-sm">
+                    <p class="text-[10px] uppercase font-bold text-slate-400">Avg Productivity</p>
+                    <p id="kpi-mpm" class="text-2xl font-bold text-emerald-600">- <span class="text-xs text-slate-400">MPM</span></p>
+                </div>
+                <div class="bg-white rounded p-4 border-l-4 border-purple-500 shadow-sm">
+                    <p class="text-[10px] uppercase font-bold text-slate-400">Calculated Weight</p>
+                    <p id="kpi-weight" class="text-2xl font-bold text-purple-600">- <span class="text-xs text-slate-400">MT</span></p>
+                </div>
+            </div>
+
+            <div id="filter-bar" class="hidden flex items-center justify-between bg-blue-100 text-blue-800 px-4 py-2 rounded border border-blue-200 text-sm">
+                <span id="filter-text" class="font-bold"></span>
+                <button onclick="resetFilters()" class="hover:text-blue-950 font-medium"><i class="fa-solid fa-xmark mr-1"></i> Clear Filter</button>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 h-[280px] flex-none">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fa-solid fa-bolt text-blue-500 mr-2"></i>Energy Consumption</h3>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="dashEnergy"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fa-solid fa-wave-square text-amber-500 mr-2"></i>Max Power Profile</h3>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="dashPower"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fa-solid fa-gauge-high text-emerald-500 mr-2"></i>Productivity (MPM)</h3>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="dashProd"></canvas></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 h-[280px] flex-none">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fa-solid fa-layer-group text-purple-500 mr-2"></i>Pass Distribution</h3>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="dashPass"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fa-solid fa-clock text-rose-500 mr-2"></i>Time Utilization</h3>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="dashTime"></canvas></div>
+                </div>
+            </div>
+
+            <div class="h-[300px] flex-none">
+                <div class="chart-card h-full">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fa-solid fa-ruler-horizontal text-slate-500 mr-2"></i>Output Thickness Distribution</h3>
+                        <span class="text-[10px] text-slate-400">Input Thickness shown on top of bars</span>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="dashThick"></canvas></div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        // --- CONFIG ---
+        Chart.register(ChartDataLabels);
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.font.size = 10;
+        Chart.defaults.maintainAspectRatio = false;
+        
+        const COLORS = {
+            blue: 'rgba(37, 99, 235, 1)', blueGhost: 'rgba(37, 99, 235, 0.15)',
+            emerald: 'rgba(16, 185, 129, 1)', emeraldGhost: 'rgba(16, 185, 129, 0.15)',
+            purple: 'rgba(139, 92, 246, 1)', purpleGhost: 'rgba(139, 92, 246, 0.15)',
+            amber: 'rgba(245, 158, 11, 1)', amberGhost: 'rgba(245, 158, 11, 0.15)',
+            slate: 'rgba(71, 85, 105, 1)', slateGhost: 'rgba(71, 85, 105, 0.15)',
+            rose: 'rgba(225, 29, 72, 1)', roseGhost: 'rgba(225, 29, 72, 0.15)'
+        };
+
+        let appState = {
+            fullData: [],
+            // Dashboard State
+            filteredData: [],
+            activeFilter: null,
+            dashCharts: {},
+            // Explorer State
+            expGranularity: 'day',
+            expChart: null
+        };
+
+        // --- DATA GENERATION (MOCK) ---
+        function generateData() {
+            const arr = [];
+            const dates = ['2025-11-17', '2025-11-18', '2025-11-19', '2025-11-20', '2025-11-21', '2025-11-22', '2025-11-23'];
+            for(let i=0; i<300; i++) {
+                const date = dates[Math.floor(Math.random()*dates.length)];
+                const pass = Math.floor(Math.random() * 5) + 3; // 3 to 7
+                const input = (Math.random() * 2 + 1.5).toFixed(2);
+                const output = (input * (Math.random() * 0.2 + 0.1)).toFixed(2); // Reduced
+                
+                arr.push({
+                    "Date": date,
+                    "Passes": pass,
+                    "Energy": Math.floor(Math.random() * 2000 + 800),
+                    "MaxPower": Math.floor(Math.random() * 2000 + 3000),
+                    "MPM": Math.floor(Math.random() * 400 + 400),
+                    "Weight": parseFloat((Math.random() * 15 + 10).toFixed(1)),
+                    "OutputThick": parseFloat(output),
+                    "InputThick": parseFloat(input),
+                    "RunTime": Math.random()*40 + 20,
+                    "IdleTime": Math.random()*10,
+                    "FeedTime": Math.random()*15
+                });
+            }
+            return arr.sort((a,b) => new Date(a.Date) - new Date(b.Date));
+        }
+
+        // --- NAVIGATION ---
+        function switchTab(view) {
+            document.getElementById('view-explorer').classList.toggle('hidden', view !== 'explorer');
+            document.getElementById('view-dashboard').classList.toggle('hidden', view !== 'dashboard');
+            
+            document.getElementById('btn-explorer').classList.toggle('active', view === 'explorer');
+            document.getElementById('btn-dashboard').classList.toggle('active', view === 'dashboard');
+
+            // Trigger updates to ensure resizing works
+            if(view === 'explorer') updateExplorer();
+            if(view === 'dashboard') updateDashboardCharts();
+        }
+
+        // --- EXPLORER LOGIC (Simplified from previous turn) ---
+        function setExpGranularity(g) {
+            appState.expGranularity = g;
+            document.querySelectorAll('.granularity-btn').forEach(b => {
+                b.classList.remove('active', 'bg-blue-50', 'text-blue-700', 'border-blue-500');
+            });
+            event.target.classList.add('active', 'bg-blue-50', 'text-blue-700', 'border-blue-500');
+            updateExplorer();
+        }
+
+        function updateExplorer() {
+            const ctx = document.getElementById('explorerChart').getContext('2d');
+            if(appState.expChart) appState.expChart.destroy();
+            
+            const metric = document.getElementById('exp-y-axis').value;
+            // Simple mapping logic for demo
+            const dataMap = {};
+            appState.fullData.forEach(d => {
+                const key = d.Date; // Simplification: always by date for demo
+                if(!dataMap[key]) dataMap[key] = 0;
+                
+                if(metric === 'coil_count') dataMap[key]++;
+                else if(metric === 'energy') dataMap[key] += d.Energy;
+                else if(metric === 'max_mill_power') dataMap[key] = Math.max(dataMap[key], d.MaxPower);
+                else dataMap[key] += (d.Weight || 0); // fallback
+            });
+
+            const labels = Object.keys(dataMap).sort();
+            const values = labels.map(l => dataMap[l]);
+
+            appState.expChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: metric.toUpperCase(),
+                        data: values,
+                        borderColor: COLORS.blue,
+                        backgroundColor: COLORS.blueGhost,
+                        fill: true, tension: 0.3
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            document.getElementById('exp-chart-title').innerText = metric.replace(/_/g, ' ').toUpperCase() + " OVER TIME";
+        }
+
+        // --- DASHBOARD LOGIC (Cross-Highlighting Engine) ---
+        function applyDashFilter(key, value) {
+            // Toggle off if same
+            if (appState.activeFilter && appState.activeFilter.key === key && appState.activeFilter.value == value) {
+                resetFilters();
+                return;
+            }
+
+            appState.activeFilter = { key, value };
+            
+            // Filter Data for KPIs (Subset)
+            appState.filteredData = appState.fullData.filter(d => {
+                if(key === 'OutputThick') return Math.abs(d.OutputThick - value) < 0.05; // Fuzzy match for floats
+                return d[key] == value;
+            });
+
+            // Show Badge
+            document.getElementById('filter-bar').classList.remove('hidden');
+            document.getElementById('filter-text').innerText = `Filtering by ${key}: ${value}`;
+
+            updateDashboardCharts();
+        }
+
+        function resetFilters() {
+            appState.activeFilter = null;
+            appState.filteredData = [...appState.fullData];
+            document.getElementById('filter-bar').classList.add('hidden');
+            updateDashboardCharts();
+        }
+
+        function updateDashboardCharts() {
+            // Update KPIs
+            const fd = appState.filteredData;
+            const full = appState.fullData;
+            
+            document.getElementById('kpi-coils').innerText = fd.length;
+            document.getElementById('kpi-total').innerText = "/ " + full.length;
+            
+            const sum = (d, k) => d.reduce((a,b)=>a+(b[k]||0),0);
+            const avg = (d, k) => d.length ? sum(d,k)/d.length : 0;
+
+            document.getElementById('kpi-energy').innerText = Math.round(sum(fd, 'Energy')).toLocaleString();
+            document.getElementById('kpi-mpm').innerText = Math.round(avg(fd, 'MPM'));
+            document.getElementById('kpi-weight').innerText = Math.round(sum(fd, 'Weight')).toLocaleString();
+
+            const common = { full: appState.fullData, filtered: appState.filteredData, filter: appState.activeFilter };
+
+            // Render ALL Charts with Highlight Logic
+            renderBar('dashEnergy', 'Date', 'Energy', COLORS.blue, COLORS.blueGhost, common);
+            renderLine('dashPower', common);
+            renderBar('dashProd', 'Date', 'MPM', COLORS.emerald, COLORS.emeraldGhost, { ...common, avg: true });
+            renderBar('dashPass', 'Passes', 'Count', COLORS.purple, COLORS.purpleGhost, common);
+            renderPie('dashTime', common);
+            renderBar('dashThick', 'OutputThick', 'Count', COLORS.slate, COLORS.slateGhost, { ...common, round: 2, labelKey: 'InputThick' });
+        }
+
+        // --- CHART RENDERERS (Ghost Bar Logic) ---
+        function groupData(data, key, valKey, type='sum', round=null) {
+            const map = {};
+            const counts = {};
+            data.forEach(d => {
+                let k = d[key];
+                if(round) k = parseFloat(k).toFixed(round);
+                
+                if(valKey === 'Count') {
+                    map[k] = (map[k]||0) + 1;
+                } else {
+                    map[k] = (map[k]||0) + (d[valKey]||0);
+                    counts[k] = (counts[k]||0) + 1;
+                }
+            });
+            
+            if(type === 'avg') {
+                Object.keys(map).forEach(k => map[k] = map[k] / counts[k]);
+            }
+            return map;
+        }
+
+        function renderBar(id, groupKey, valKey, colorSolid, colorGhost, { full, filtered, filter, avg=false, round=null, labelKey=null }) {
+            const fullMap = groupData(full, groupKey, valKey, avg?'avg':'sum', round);
+            
+            // For secondary label (Input Thickness on top of Output Thickness bars)
+            const labelMap = labelKey ? groupData(full, groupKey, labelKey, 'avg', round) : null;
+
+            const labels = Object.keys(fullMap).sort((a,b) => (parseFloat(a) || a) > (parseFloat(b) || b) ? 1 : -1);
+            
+            // Determine Data & Colors based on Filter State
+            const isSource = filter && filter.key === groupKey;
+            
+            // 1. Context Data (Ghost)
+            const dataFull = labels.map(l => fullMap[l]);
+            
+            // 2. Focused Data (Solid)
+            let dataFocus = [];
+            let bgColors = [];
+
+            if (isSource) {
+                // If this chart IS the filter, we show full bars but dim the unselected ones
+                dataFocus = dataFull;
+                bgColors = labels.map(l => {
+                    let match = l == filter.value;
+                    if(groupKey === 'OutputThick') match = Math.abs(parseFloat(l) - parseFloat(filter.value)) < 0.05;
+                    return match ? colorSolid : colorGhost;
+                });
+            } else if (filter) {
+                // If this chart is a TARGET, we calculate the subset
+                const subMap = groupData(filtered, groupKey, valKey, avg?'avg':'sum', round);
+                dataFocus = labels.map(l => subMap[l] || 0);
+                bgColors = colorSolid;
+            } else {
+                // No filter active
+                dataFocus = dataFull;
+                bgColors = colorSolid;
+            }
+
+            const datasets = [];
+            // Add Ghost Layer if needed (Target mode)
+            if (filter && !isSource) {
+                datasets.push({
+                    data: dataFull,
+                    backgroundColor: colorGhost,
+                    barPercentage: 0.9,
+                    categoryPercentage: 0.8,
+                    order: 2,
+                    label: 'Total'
+                });
+            }
+            // Main Layer
+            datasets.push({
+                data: dataFocus,
+                backgroundColor: bgColors,
+                barPercentage: (filter && !isSource) ? 0.5 : 0.9, // Skinnier if overlaying
+                categoryPercentage: 0.8,
+                order: 1,
+                label: 'Selected'
+            });
+
+            const config = {
+                type: 'bar',
+                data: { labels, datasets },
+                options: {
+                    onClick: (e, els) => {
+                        if(els.length > 0) applyDashFilter(groupKey, labels[els[0].index]);
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { mode: 'index', intersect: false },
+                        datalabels: {
+                            display: (ctx) => ctx.datasetIndex === datasets.length - 1, // Only on top layer
+                            color: isSource ? '#334155' : colorSolid.replace('1)', '1)'),
+                            anchor: 'end', align: 'end',
+                            font: { weight: 'bold' },
+                            formatter: (val, ctx) => {
+                                if(labelKey && labelMap) return "In: " + labelMap[labels[ctx.dataIndex]].toFixed(2);
+                                return Math.round(val);
+                            }
+                        }
+                    },
+                    scales: { 
+                        x: { stacked: true, grid: { display: false }, ticks: { maxRotation: 90, autoSkip: false } }, 
+                        y: { display: false } 
+                    }
+                }
+            };
+
+            if(appState.dashCharts[id]) appState.dashCharts[id].destroy();
+            appState.dashCharts[id] = new Chart(document.getElementById(id), config);
+        }
+
+        function renderLine(id, { full, filtered, filter }) {
+            // Helper to get max per pass
+            const getMap = (dset) => {
+                const m = {};
+                dset.forEach(d => { if(d.MaxPower > (m[d.Passes]||0)) m[d.Passes] = d.MaxPower; });
+                return m;
+            };
+            const fullMap = getMap(full);
+            const subMap = getMap(filtered);
+            const labels = Object.keys(fullMap).sort((a,b)=>a-b);
+
+            const datasets = [];
+            
+            // Ghost Line
+            if(filter) {
+                datasets.push({
+                    label: 'Total',
+                    data: labels.map(l => fullMap[l]),
+                    borderColor: 'rgba(203, 213, 225, 0.5)',
+                    borderDash: [5,5], borderWidth: 2, pointRadius: 0, tension: 0.4
+                });
+            }
+            // Main Line
+            datasets.push({
+                label: 'Selected',
+                data: labels.map(l => subMap[l]||0),
+                borderColor: COLORS.amber,
+                backgroundColor: COLORS.amber,
+                borderWidth: 2, pointRadius: 4, tension: 0.4
+            });
+
+            const config = {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    plugins: { legend: { display: false }, datalabels: { display: false } },
+                    scales: { x: { grid: {display:false} }, y: { display: false } }
+                }
+            };
+            if(appState.dashCharts[id]) appState.dashCharts[id].destroy();
+            appState.dashCharts[id] = new Chart(document.getElementById(id), config);
+        }
+
+        function renderPie(id, { filtered }) {
+            const sum = (k) => filtered.reduce((a,b)=>a+(b[k]||0),0);
+            const data = [sum('RunTime'), sum('FeedTime'), sum('IdleTime')];
+            const total = data.reduce((a,b)=>a+b,0);
+
+            const config = {
+                type: 'doughnut',
+                data: {
+                    labels: ['Run', 'Feed', 'Idle'],
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [COLORS.blue, COLORS.amber, COLORS.slate],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { position: 'right' },
+                        datalabels: {
+                            color: 'white',
+                            formatter: (val) => Math.round(val/total*100) + "%"
+                        }
+                    }
+                }
+            };
+            if(appState.dashCharts[id]) appState.dashCharts[id].destroy();
+            appState.dashCharts[id] = new Chart(document.getElementById(id), config);
+        }
+
+        // --- CSV HANDLING ---
+        document.getElementById('globalFileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if(file) {
+                document.getElementById('fileNameDisplay').innerText = file.name;
+                const r = new FileReader();
+                r.onload = (evt) => {
+                    // MOCK PARSE Logic replacement
+                    // In real app, you parse the CSV here. 
+                    // For demo, we just regenerate mock data to simulate "Loading"
+                    appState.fullData = generateData(); 
+                    resetFilters();
+                    if(!document.getElementById('view-explorer').classList.contains('hidden')) updateExplorer();
+                };
+                r.readAsText(file);
+            }
+        });
+
+        // --- INIT ---
+        window.onload = () => {
+            appState.fullData = generateData();
+            resetFilters(); // Init dashboard
+            // Default to Dashboard view
+            switchTab('dashboard');
+            
+            // Init date pickers
+            const d = new Date();
+            document.getElementById('exp-end').valueAsDate = d;
+            d.setDate(d.getDate()-7);
+            document.getElementById('exp-start').valueAsDate = d;
+        };
+
+    </script>
+</body>
+</html>
