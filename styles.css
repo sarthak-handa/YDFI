@@ -1,4 +1,4 @@
-/* ===== ACPPL GI Furnace Dashboard — styles.css ===== */
+/* ===== ACPPL GI Furnace Dashboard — styles.css (v2) ===== */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 /* ---------- Reset & Base ---------- */
@@ -80,9 +80,7 @@ body {
     color: #1e293b;
 }
 
-.header-nav-btn i {
-    font-size: 12px;
-}
+.header-nav-btn i { font-size: 12px; }
 
 /* ---------- Filter Bar ---------- */
 .filter-bar {
@@ -124,7 +122,6 @@ body {
     border-color: rgba(255,255,255,0.4);
 }
 
-/* Chrome date input icon colour fix */
 .filter-input::-webkit-calendar-picker-indicator {
     filter: invert(1);
     cursor: pointer;
@@ -166,6 +163,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    max-width: 1920px;
+    margin: 0 auto;
 }
 
 /* ---------- KPI Row ---------- */
@@ -182,13 +181,14 @@ body {
     border-left: 4px solid #94a3b8;
     box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     transition: box-shadow 0.2s;
+    position: relative;
 }
 
 .kpi-card:hover {
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-.kpi-card .kpi-label {
+.kpi-label {
     font-size: 10px;
     font-weight: 700;
     color: #94a3b8;
@@ -197,40 +197,41 @@ body {
     margin-bottom: 4px;
 }
 
-.kpi-card .kpi-value {
+.kpi-value {
     font-size: 26px;
     font-weight: 800;
     color: #1e293b;
     line-height: 1.1;
 }
 
-.kpi-card .kpi-unit {
+.kpi-unit {
     font-size: 12px;
     font-weight: 500;
     color: #94a3b8;
     margin-left: 4px;
 }
 
-.kpi-card .kpi-sub {
+.kpi-sub {
     font-size: 11px;
     color: #64748b;
     margin-top: 2px;
+    font-weight: 500;
 }
 
-/* KPI colour accents */
+/* KPI accent colours */
+.kpi-card.slate  { border-left-color: #475569; }
 .kpi-card.blue   { border-left-color: #3b82f6; }
 .kpi-card.blue   .kpi-value { color: #2563eb; }
-.kpi-card.green  { border-left-color: #10b981; }
-.kpi-card.green  .kpi-value { color: #059669; }
 .kpi-card.orange { border-left-color: #f59e0b; }
 .kpi-card.orange .kpi-value { color: #d97706; }
+.kpi-card.green  { border-left-color: #10b981; }
+.kpi-card.green  .kpi-value { color: #059669; }
 .kpi-card.purple { border-left-color: #8b5cf6; }
 .kpi-card.purple .kpi-value { color: #7c3aed; }
 .kpi-card.cyan   { border-left-color: #06b6d4; }
 .kpi-card.cyan   .kpi-value { color: #0891b2; }
 .kpi-card.red    { border-left-color: #ef4444; }
 .kpi-card.red    .kpi-value { color: #dc2626; }
-.kpi-card.slate  { border-left-color: #475569; }
 
 /* ---------- Chart Grid Rows ---------- */
 .chart-row-3 {
@@ -265,8 +266,8 @@ body {
 .chart-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
+    align-items: flex-start;
+    margin-bottom: 8px;
 }
 
 .chart-title {
@@ -280,14 +281,14 @@ body {
     gap: 8px;
 }
 
-.chart-title i {
-    font-size: 13px;
-}
+.chart-title i { font-size: 13px; }
 
 .chart-subtitle {
     font-size: 10px;
     color: #94a3b8;
     font-weight: 500;
+    text-align: right;
+    line-height: 1.4;
 }
 
 .chart-wrapper {
@@ -298,59 +299,16 @@ body {
 }
 
 .chart-wrapper.hero {
-    min-height: 320px;
-}
-
-/* ---------- CSV Upload Badge ---------- */
-.upload-area {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.upload-label {
-    cursor: pointer;
-    background: #3b82f6;
-    color: #fff;
-    font-family: inherit;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 8px 16px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: background 0.15s;
-}
-
-.upload-label:hover {
-    background: #2563eb;
-}
-
-.file-name {
-    font-size: 11px;
-    color: #64748b;
-    max-width: 160px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    min-height: 340px;
 }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1400px) {
-    .kpi-row {
-        grid-template-columns: repeat(3, 1fr);
-    }
+    .kpi-row { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 1024px) {
-    .kpi-row {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    .chart-row-3 {
-        grid-template-columns: 1fr;
-    }
-    .chart-row-2 {
-        grid-template-columns: 1fr;
-    }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .chart-row-3 { grid-template-columns: 1fr; }
+    .chart-row-2 { grid-template-columns: 1fr; }
 }

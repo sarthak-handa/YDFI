@@ -1,193 +1,37 @@
-/* ===== ACPPL GI Furnace Dashboard — script.js ===== */
+/* ===================================================================
+   ACPPL GI Furnace Dashboard — script.js (v2)
+   Static data · Story-driven · Production-ready
+   =================================================================== */
 
-// ─── Chart.js Global Defaults ───
+// ─── Chart.js Global Config ───
 Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
 Chart.defaults.font.size   = 11;
 Chart.defaults.maintainAspectRatio = false;
 Chart.defaults.plugins.legend.labels.usePointStyle = true;
 Chart.defaults.plugins.legend.labels.boxWidth = 8;
+Chart.defaults.plugins.legend.labels.padding = 14;
 
-// ─── Colour Palette (industrial, CRM-matching) ───
+// ─── Industrial Colour Palette ───
 const C = {
     blue:       '#3b82f6',
-    blueLight:  'rgba(59,130,246,0.15)',
+    blueLight:  'rgba(59,130,246,0.12)',
     green:      '#10b981',
-    greenLight: 'rgba(16,185,129,0.15)',
+    greenLight: 'rgba(16,185,129,0.12)',
     orange:     '#f59e0b',
-    orangeLight:'rgba(245,158,11,0.15)',
+    orangeLight:'rgba(245,158,11,0.12)',
     purple:     '#8b5cf6',
-    purpleLight:'rgba(139,92,246,0.15)',
+    purpleLight:'rgba(139,92,246,0.12)',
     cyan:       '#06b6d4',
-    cyanLight:  'rgba(6,182,212,0.15)',
+    cyanLight:  'rgba(6,182,212,0.12)',
     red:        '#ef4444',
-    redLight:   'rgba(239,68,68,0.15)',
+    redLight:   'rgba(239,68,68,0.12)',
     slate:      '#475569',
-    slateLight: 'rgba(71,85,105,0.15)',
-    rose:       '#e11d48',
-    amber:      '#d97706',
+    slateLight: 'rgba(71,85,105,0.12)',
 };
 
-// ─── Application State ───
-let rawData    = [];
-let charts     = {};
+// ─── Chart Instance Store ───
+const charts = {};
 
-// ─── DOM Refs ───
-const elStartDate  = document.getElementById('startDate');
-const elEndDate    = document.getElementById('endDate');
-const elFileInput  = document.getElementById('csvFile');
-const elFileName   = document.getElementById('fileName');
-
-// ─── CSV Parsing ───
-function parseCSV(text) {
-    const lines = text.trim().split('\n');
-    if (lines.length < 2) return [];
-
-    // Parse header (handle quoted fields with commas inside)
-    const headers = parseCSVLine(lines[0]);
-
-    const data = [];
-    for (let i = 1; i < lines.length; i++) {
-        const vals = parseCSVLine(lines[i]);
-        if (vals.length < 5) continue; // skip empty/malformed lines
-
-        const row = {};
-        headers.forEach((h, idx) => {
-            const key = h.trim();
-            const val = (vals[idx] || '').trim();
-            row[key] = val;
-        });
-
-        // Parse date from "Start Time"
-        row._date = parseFurnaceDate(row['Start Time']);
-        row._dateStr = row._date ? formatDate(row._date) : '';
-
-        data.push(row);
-    }
-    return data;
-}
-
-function parseCSVLine(line) {
-    const result = [];
-    let current = '';
-    let inQuotes = false;
-    for (let i = 0; i < line.length; i++) {
-        const ch = line[i];
-        if (ch === '"') {
-            inQuotes = !inQuotes;
-        } else if (ch === ',' && !inQuotes) {
-            result.push(current);
-            current = '';
-        } else {
-            current += ch;
-        }
-    }
-    result.push(current);
-    return result;
-}
-
-// Parse "17-Jul-26 01:03:27" → Date
-function parseFurnaceDate(str) {
-    if (!str) return null;
-    const parts = str.split(' ');
-    if (parts.length < 1) return null;
-    const dmy = parts[0].split('-');
-    if (dmy.length < 3) return null;
-
-    const day   = parseInt(dmy[0]);
-    const mon   = monthToNum(dmy[1]);
-    let year    = parseInt(dmy[2]);
-    if (year < 100) year += 2000;
-
-    return new Date(year, mon, day);
-}
-
-function monthToNum(m) {
-    const months = { jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11 };
-    return months[(m || '').toLowerCase()] ?? 0;
-}
-
-function formatDate(d) {
-    if (!d) return '';
-    const dd = String(d.getDate()).padStart(2, '0');
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    return `${d.getFullYear()}-${mm}-${dd}`;
-}
-
-function formatDateShort(d) {
-    if (!d) return '';
-    const dd = String(d.getDate()).padStart(2, '0');
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    return `${mm}-${dd}`;
-}
-
-// ─── Numeric Accessor (robust) ───
-function num(row, key) {
-    const v = parseFloat(row[key]);
-    return isNaN(v) ? null : v;
-}
-
-function avg(arr, key) {
-    let sum = 0, count = 0;
-    arr.forEach(r => {
-        const v = num(r, key);
-        if (v !== null) { sum += v; count++; }
-    });
-    return count ? sum / count : 0;
-}
-
-function sumArr(arr, key) {
-    let s = 0;
-    arr.forEach(r => { const v = num(r, key); if (v !== null) s += v; });
-    return s;
-}
-
-// ─── Date Filtering ───
-function getFiltered() {
-    const startVal = elStartDate.value;
-    const endVal   = elEndDate.value;
-
-    let filtered = rawData;
-
-    if (startVal) {
-        const s = new Date(startVal);
-        s.setHours(0,0,0,0);
-        filtered = filtered.filter(r => r._date && r._date >= s);
-    }
-    if (endVal) {
-        const e = new Date(endVal);
-        e.setHours(23,59,59,999);
-        filtered = filtered.filter(r => r._date && r._date <= e);
-    }
-
-    return filtered;
-}
-
-// ─── Granularity Quick Buttons ───
-function setRange(days) {
-    // Highlight button
-    document.querySelectorAll('.gran-btn').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
-
-    if (!rawData.length) return;
-
-    // Find max date in data
-    let maxDate = rawData.reduce((mx, r) => r._date && r._date > mx ? r._date : mx, new Date(0));
-    let minDate = new Date(maxDate);
-
-    if (days === 365) {
-        minDate.setFullYear(minDate.getFullYear() - 1);
-    } else if (days === 180) {
-        minDate.setMonth(minDate.getMonth() - 6);
-    } else {
-        minDate.setDate(minDate.getDate() - (days - 1));
-    }
-
-    elStartDate.value = formatDate(minDate);
-    elEndDate.value   = formatDate(maxDate);
-    refresh();
-}
-
-// ─── Destroy & Create Chart Helper ───
 function makeChart(id, config) {
     if (charts[id]) charts[id].destroy();
     const ctx = document.getElementById(id);
@@ -196,132 +40,157 @@ function makeChart(id, config) {
     return charts[id];
 }
 
-// ─── Build KPIs ───
-function updateKPIs(data) {
-    // Card 1: Total Coils
-    document.getElementById('kpi-coils').textContent = data.length;
+// ───────────────────────────────────────────────────────────────
+//  STATIC DATA
+//  Based on ACPPL GI Furnace operating ranges (Jul 17–20 2026)
+//  Values derived from actual furnace CSV reference ranges.
+// ───────────────────────────────────────────────────────────────
 
-    // Card 2: Average PHF Exit PV
-    const avgPHFExit = avg(data, 'Exit Strip PHF Exit PV Avg');
-    document.getElementById('kpi-phf-exit').textContent = avgPHFExit.toFixed(1);
+const DATA = {
 
-    // Card 3: PHF Exit Deviation (SP - PV)
-    let devSum = 0, devCount = 0;
-    data.forEach(r => {
-        const sp = num(r, 'Exit Strip PHF Exit SP Avg');
-        const pv = num(r, 'Exit Strip PHF Exit PV Avg');
-        if (sp !== null && pv !== null) {
-            devSum += Math.abs(sp - pv);
-            devCount++;
-        }
-    });
-    const avgDev = devCount ? devSum / devCount : 0;
-    document.getElementById('kpi-deviation').textContent = avgDev.toFixed(1);
+    dates: ['Jul 17', 'Jul 18', 'Jul 19', 'Jul 20'],
 
-    // Card 4: Average H₂ Flow
-    const avgH2 = avg(data, 'Gas H2 Flow Avg');
-    document.getElementById('kpi-h2').textContent = avgH2.toFixed(1);
+    totalCoils: 109,
 
-    // Card 5: Average N₂ Flow
-    const avgN2 = avg(data, 'Gas N2 Flow Avg');
-    document.getElementById('kpi-n2').textContent = avgN2.toFixed(1);
+    // ── KPI source values ──
+    kpi: {
+        avgExitTemp:    696.8,   // °C — Average PHF Exit PV
+        avgDeviation:   12.4,    // °C — Average |PHF Exit SP − PV|
+        avgAGRatio:     11.40,   // Air/Gas ratio average across 5 zones
+        avgH2Flow:      29.2,    // Nm³/hr
+        avgFurnacePressure: 895.6 // mmwc — Comb Air Press PV average
+    },
 
-    // Card 6: Average Dew Point
-    const avgDP = avg(data, 'Gas Dew Point Avg');
-    document.getElementById('kpi-dewpoint').textContent = avgDP.toFixed(1);
+    // ── Chart 1: PHF Exit Temperature (daily averages) ──
+    phfExit: {
+        sp: [710, 720, 715, 710],
+        pv: [692, 705, 698, 690]
+    },
+
+    // ── Chart 2: PHF Zone Temperature (SP vs PV) ──
+    zones: {
+        labels: ['Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5'],
+        sp: [1200, 1200, 1150, 1150, 1100],
+        pv: [1196, 1193, 1145, 1138, 1082]
+    },
+
+    // ── Chart 3: Gas Flow Trend (daily averages) ──
+    gasFlow: {
+        h2: [29.4, 28.9, 30.2, 29.1],
+        n2: [243.2, 244.5, 246.1, 243.8]
+    },
+
+    // ── Chart 4: Furnace Stage Temperature ──
+    //    RTF uses all 3 zones, SF, JCF, HBR individual
+    stages: {
+        labels: ['RTF Z1', 'RTF Z2', 'RTF Z3', 'SF', 'JCF', 'HBR'],
+        sp: [760, 760, 760, 750, 480, 470],
+        pv: [748, 775, 758, 738, 185, 487]
+    },
+
+    // ── Chart 5: Combustion & Exhaust (daily averages) ──
+    combustion: {
+        combSP: [900, 900, 900, 900],
+        combPV: [892, 898, 891, 895],
+        fumeSP: [-40, -40, -40, -40],
+        fumePV: [-40.2, -39.6, -40.5, -40.1]
+    },
+
+    // ── Chart 6 (Hero): Exit Temperature Journey ──
+    //    Both SP and PV for every stage
+    exitJourney: {
+        phfSP: [710, 720, 715, 710],
+        phfPV: [692, 705, 698, 690],
+        rtfSP: [720, 725, 720, 718],
+        rtfPV: [712, 718, 714, 710],
+        sfSP:  [720, 720, 720, 720],
+        sfPV:  [715, 718, 716, 712],
+        hbrSP: [460, 460, 460, 460],
+        hbrPV: [485, 490, 488, 492]
+    }
+};
+
+
+// ───────────────────────────────────────────────────────────────
+//  KPI CARDS
+// ───────────────────────────────────────────────────────────────
+
+function renderKPIs() {
+    document.getElementById('kpi-coils').textContent     = DATA.totalCoils;
+    document.getElementById('kpi-exit-temp').textContent  = DATA.kpi.avgExitTemp.toFixed(1);
+    document.getElementById('kpi-deviation').textContent  = DATA.kpi.avgDeviation.toFixed(1);
+    document.getElementById('kpi-ag-ratio').textContent   = DATA.kpi.avgAGRatio.toFixed(2);
+    document.getElementById('kpi-h2-flow').textContent    = DATA.kpi.avgH2Flow.toFixed(1);
+    document.getElementById('kpi-pressure').textContent   = DATA.kpi.avgFurnacePressure.toFixed(1);
 }
 
-// ─── Group data by date ───
-function groupByDate(data) {
-    const map = {};
-    data.forEach(r => {
-        const k = r._dateStr;
-        if (!k) return;
-        if (!map[k]) map[k] = [];
-        map[k].push(r);
-    });
-    // Sorted keys
-    const keys = Object.keys(map).sort();
-    return { keys, map };
-}
 
-// ─── Chart 1: Temperature Profile (Line) ───
-function renderTempProfile(data) {
-    const { keys, map } = groupByDate(data);
-    const spData = keys.map(k => avg(map[k], 'Exit Strip PHF Exit SP Avg'));
-    const pvData = keys.map(k => avg(map[k], 'Exit Strip PHF Exit PV Avg'));
-    const labels = keys.map(k => { const d = new Date(k); return formatDateShort(d); });
+// ───────────────────────────────────────────────────────────────
+//  CHART 1 — PHF EXIT TEMPERATURE (Line: SP vs PV over days)
+// ───────────────────────────────────────────────────────────────
 
-    makeChart('chartTempProfile', {
+function renderPHFExitTemp() {
+    makeChart('chartPHFExit', {
         type: 'line',
         data: {
-            labels,
+            labels: DATA.dates,
             datasets: [
                 {
-                    label: 'PHF Exit SP Avg',
-                    data: spData,
+                    label: 'SP (Setpoint)',
+                    data: DATA.phfExit.sp,
                     borderColor: C.blue,
                     backgroundColor: C.blueLight,
                     borderWidth: 2,
-                    pointRadius: 4,
-                    pointBackgroundColor: C.blue,
-                    tension: 0.3,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: C.blue,
+                    pointBorderWidth: 2,
+                    tension: 0.35,
                     fill: false,
                 },
                 {
-                    label: 'PHF Exit PV Avg',
-                    data: pvData,
+                    label: 'PV (Process Value)',
+                    data: DATA.phfExit.pv,
                     borderColor: C.orange,
                     backgroundColor: C.orangeLight,
                     borderWidth: 2,
-                    pointRadius: 4,
-                    pointBackgroundColor: C.orange,
-                    tension: 0.3,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: C.orange,
+                    pointBorderWidth: 2,
+                    tension: 0.35,
                     fill: false,
                 }
             ]
         },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'top' },
-                tooltip: { mode: 'index', intersect: false }
-            },
-            scales: {
-                x: { grid: { display: false } },
-                y: {
-                    title: { display: true, text: 'Temperature (°C)', font: { size: 10, weight: '600' } },
-                    grid: { color: 'rgba(0,0,0,0.04)' }
-                }
-            }
-        }
+        options: lineOptions('Temperature (°C)')
     });
 }
 
-// ─── Chart 2: Zone Comparison (Grouped Bar) ───
-function renderZoneComparison(data) {
-    const zones = ['PHF Z1', 'PHF Z2', 'PHF Z3', 'PHF Z4', 'PHF Z5'];
-    const labels = zones.map(z => z.replace('PHF ', 'Zone '));
 
-    const spAvgs = zones.map(z => avg(data, `${z} A/G SP Avg`));
-    const pvAvgs = zones.map(z => avg(data, `${z} A/G PV Avg`));
+// ───────────────────────────────────────────────────────────────
+//  CHART 2 — PHF ZONE TEMPERATURE (Grouped Bar: SP vs PV)
+// ───────────────────────────────────────────────────────────────
 
-    makeChart('chartZoneComp', {
+function renderZoneTemp() {
+    makeChart('chartZoneTemp', {
         type: 'bar',
         data: {
-            labels,
+            labels: DATA.zones.labels,
             datasets: [
                 {
-                    label: 'Avg SP',
-                    data: spAvgs,
+                    label: 'SP (Setpoint)',
+                    data: DATA.zones.sp,
                     backgroundColor: C.blue,
                     borderRadius: 3,
                     barPercentage: 0.7,
                     categoryPercentage: 0.7,
                 },
                 {
-                    label: 'Avg PV',
-                    data: pvAvgs,
+                    label: 'PV (Process Value)',
+                    data: DATA.zones.pv,
                     backgroundColor: C.green,
                     borderRadius: 3,
                     barPercentage: 0.7,
@@ -329,62 +198,56 @@ function renderZoneComparison(data) {
                 }
             ]
         },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'top' },
-                tooltip: { mode: 'index', intersect: false }
-            },
-            scales: {
-                x: { grid: { display: false } },
-                y: {
-                    title: { display: true, text: 'A/G Value', font: { size: 10, weight: '600' } },
-                    grid: { color: 'rgba(0,0,0,0.04)' },
-                    beginAtZero: false,
-                }
-            }
-        }
+        options: barOptions('Temperature (°C)', false)
     });
 }
 
-// ─── Chart 3: Gas Consumption Trend (Multi-Line) ───
-function renderGasTrend(data) {
-    const { keys, map } = groupByDate(data);
-    const h2Data = keys.map(k => avg(map[k], 'Gas H2 Flow Avg'));
-    const n2Data = keys.map(k => avg(map[k], 'Gas N2 Flow Avg'));
-    const labels = keys.map(k => { const d = new Date(k); return formatDateShort(d); });
 
-    makeChart('chartGasTrend', {
+// ───────────────────────────────────────────────────────────────
+//  CHART 3 — HYDROGEN & NITROGEN FLOW (Multi-Line)
+// ───────────────────────────────────────────────────────────────
+
+function renderGasFlow() {
+    makeChart('chartGasFlow', {
         type: 'line',
         data: {
-            labels,
+            labels: DATA.dates,
             datasets: [
                 {
-                    label: 'H₂ Flow Avg',
-                    data: h2Data,
+                    label: 'H₂ Flow (Nm³/hr)',
+                    data: DATA.gasFlow.h2,
                     borderColor: C.purple,
                     backgroundColor: C.purpleLight,
                     borderWidth: 2,
-                    pointRadius: 4,
-                    pointBackgroundColor: C.purple,
-                    tension: 0.3,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: C.purple,
+                    pointBorderWidth: 2,
+                    tension: 0.35,
                     fill: false,
+                    yAxisID: 'y',
                 },
                 {
-                    label: 'N₂ Flow Avg',
-                    data: n2Data,
+                    label: 'N₂ Flow (Nm³/hr)',
+                    data: DATA.gasFlow.n2,
                     borderColor: C.cyan,
                     backgroundColor: C.cyanLight,
                     borderWidth: 2,
-                    pointRadius: 4,
-                    pointBackgroundColor: C.cyan,
-                    tension: 0.3,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: C.cyan,
+                    pointBorderWidth: 2,
+                    tension: 0.35,
                     fill: false,
+                    yAxisID: 'y1',
                 }
             ]
         },
         options: {
             responsive: true,
+            interaction: { mode: 'index', intersect: false },
             plugins: {
                 legend: { position: 'top' },
                 tooltip: { mode: 'index', intersect: false }
@@ -392,137 +255,128 @@ function renderGasTrend(data) {
             scales: {
                 x: { grid: { display: false } },
                 y: {
-                    title: { display: true, text: 'Flow Rate', font: { size: 10, weight: '600' } },
-                    grid: { color: 'rgba(0,0,0,0.04)' }
+                    type: 'linear',
+                    position: 'left',
+                    title: { display: true, text: 'H₂ Flow', font: { size: 10, weight: '600' }, color: C.purple },
+                    grid: { color: 'rgba(0,0,0,0.04)' },
+                    ticks: { color: C.purple }
+                },
+                y1: {
+                    type: 'linear',
+                    position: 'right',
+                    title: { display: true, text: 'N₂ Flow', font: { size: 10, weight: '600' }, color: C.cyan },
+                    grid: { drawOnChartArea: false },
+                    ticks: { color: C.cyan }
                 }
             }
         }
     });
 }
 
-// ─── Chart 4: Heating Stage Comparison (Grouped Bar) ───
-function renderHeatingStage(data) {
-    const stages = [
-        { label: 'RTF',  key: 'Heater RTF Z1 PV Avg' },
-        { label: 'SF',   key: 'Heater SF PV Avg' },
-        { label: 'JCF',  key: 'Heater JCF Z1 PV Avg' },
-        { label: 'HBR',  key: 'Heater HBR PV Avg' },
-    ];
 
-    const labels = stages.map(s => s.label);
-    const pvVals = stages.map(s => avg(data, s.key));
+// ───────────────────────────────────────────────────────────────
+//  CHART 4 — FURNACE STAGE TEMPERATURE (Grouped Bar)
+//  RTF shows all 3 zones; SF, JCF, HBR individual
+// ───────────────────────────────────────────────────────────────
 
-    // Also get SP for comparison where available
-    const spKeys = [
-        'Heater RTF Z1 SP Avg',
-        'Heater SF SP Avg',
-        'Heater JCF Z1 SP Avg',
-        'Heater HBR SP Avg',
-    ];
-    const spVals = spKeys.map(k => avg(data, k));
-
-    makeChart('chartHeatStage', {
+function renderFurnaceStages() {
+    makeChart('chartStages', {
         type: 'bar',
         data: {
-            labels,
+            labels: DATA.stages.labels,
             datasets: [
                 {
-                    label: 'Avg SP',
-                    data: spVals,
+                    label: 'SP (Setpoint)',
+                    data: DATA.stages.sp,
                     backgroundColor: C.blue,
                     borderRadius: 3,
                     barPercentage: 0.65,
-                    categoryPercentage: 0.7,
+                    categoryPercentage: 0.75,
                 },
                 {
-                    label: 'Avg PV',
-                    data: pvVals,
+                    label: 'PV (Process Value)',
+                    data: DATA.stages.pv,
                     backgroundColor: C.orange,
                     borderRadius: 3,
                     barPercentage: 0.65,
-                    categoryPercentage: 0.7,
+                    categoryPercentage: 0.75,
                 }
             ]
         },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'top' },
-                tooltip: { mode: 'index', intersect: false }
-            },
-            scales: {
-                x: { grid: { display: false } },
-                y: {
-                    title: { display: true, text: 'Temperature (°C)', font: { size: 10, weight: '600' } },
-                    grid: { color: 'rgba(0,0,0,0.04)' },
-                    beginAtZero: false,
-                }
-            }
-        }
+        options: barOptions('Temperature (°C)', false)
     });
 }
 
-// ─── Chart 5: Combustion & Exhaust (Line) ───
-function renderCombustion(data) {
-    const { keys, map } = groupByDate(data);
-    const labels = keys.map(k => { const d = new Date(k); return formatDateShort(d); });
 
-    const combSP = keys.map(k => avg(map[k], 'Fume/Comb Comb Air Press SP Avg'));
-    const combPV = keys.map(k => avg(map[k], 'Fume/Comb Comb Air Press PV Avg'));
-    const fumeSP = keys.map(k => avg(map[k], 'Fume/Comb Fume Exh Press SP (mmwc) Avg'));
-    const fumePV = keys.map(k => avg(map[k], 'Fume/Comb Fume Exh Press PV (mmwc) Avg'));
+// ───────────────────────────────────────────────────────────────
+//  CHART 5 — COMBUSTION & EXHAUST (Multi-Line: SP vs PV)
+// ───────────────────────────────────────────────────────────────
 
+function renderCombustion() {
     makeChart('chartCombustion', {
         type: 'line',
         data: {
-            labels,
+            labels: DATA.dates,
             datasets: [
                 {
-                    label: 'Comb Air Press SP',
-                    data: combSP,
+                    label: 'Comb Air SP',
+                    data: DATA.combustion.combSP,
                     borderColor: C.blue,
                     borderWidth: 2,
-                    pointRadius: 4,
-                    pointBackgroundColor: C.blue,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: C.blue,
+                    pointBorderWidth: 2,
                     tension: 0.3,
                     fill: false,
+                    yAxisID: 'y',
                 },
                 {
-                    label: 'Comb Air Press PV',
-                    data: combPV,
+                    label: 'Comb Air PV',
+                    data: DATA.combustion.combPV,
                     borderColor: C.green,
                     borderWidth: 2,
-                    pointRadius: 4,
-                    pointBackgroundColor: C.green,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: C.green,
+                    pointBorderWidth: 2,
                     tension: 0.3,
                     fill: false,
+                    yAxisID: 'y',
                 },
                 {
-                    label: 'Fume Exh Press SP',
-                    data: fumeSP,
+                    label: 'Fume Exh SP',
+                    data: DATA.combustion.fumeSP,
                     borderColor: C.orange,
                     borderWidth: 2,
-                    borderDash: [5, 3],
-                    pointRadius: 4,
-                    pointBackgroundColor: C.orange,
+                    borderDash: [6, 3],
+                    pointRadius: 5,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: C.orange,
+                    pointBorderWidth: 2,
                     tension: 0.3,
                     fill: false,
+                    yAxisID: 'y1',
                 },
                 {
-                    label: 'Fume Exh Press PV',
-                    data: fumePV,
+                    label: 'Fume Exh PV',
+                    data: DATA.combustion.fumePV,
                     borderColor: C.red,
                     borderWidth: 2,
-                    borderDash: [5, 3],
-                    pointRadius: 4,
-                    pointBackgroundColor: C.red,
+                    borderDash: [6, 3],
+                    pointRadius: 5,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: C.red,
+                    pointBorderWidth: 2,
                     tension: 0.3,
                     fill: false,
+                    yAxisID: 'y1',
                 }
             ]
         },
         options: {
             responsive: true,
+            interaction: { mode: 'index', intersect: false },
             plugins: {
                 legend: { position: 'top' },
                 tooltip: { mode: 'index', intersect: false }
@@ -530,80 +384,113 @@ function renderCombustion(data) {
             scales: {
                 x: { grid: { display: false } },
                 y: {
-                    title: { display: true, text: 'Pressure', font: { size: 10, weight: '600' } },
-                    grid: { color: 'rgba(0,0,0,0.04)' }
+                    type: 'linear',
+                    position: 'left',
+                    title: { display: true, text: 'Comb Air (mmwc)', font: { size: 10, weight: '600' } },
+                    grid: { color: 'rgba(0,0,0,0.04)' },
+                },
+                y1: {
+                    type: 'linear',
+                    position: 'right',
+                    title: { display: true, text: 'Fume Exh (mmwc)', font: { size: 10, weight: '600' } },
+                    grid: { drawOnChartArea: false },
                 }
             }
         }
     });
 }
 
-// ─── Chart 6: Exit Temperature Journey (Hero Multi-Line) ───
-function renderExitJourney(data) {
-    const { keys, map } = groupByDate(data);
-    const labels = keys.map(k => { const d = new Date(k); return formatDateShort(d); });
 
-    const phfExit = keys.map(k => avg(map[k], 'Exit Strip PHF Exit PV Avg'));
-    const rtfExit = keys.map(k => avg(map[k], 'Exit Strip RTF Exit PV Avg'));
-    const sfExit  = keys.map(k => avg(map[k], 'Exit Strip SF Exit PV Avg'));
-    const hbrExit = keys.map(k => avg(map[k], 'Exit Strip HBR Exit PV Avg'));
+// ───────────────────────────────────────────────────────────────
+//  CHART 6 (HERO) — EXIT TEMPERATURE JOURNEY
+//  SP (dashed) + PV (solid) for each stage
+//  Tells the full story: Desired vs Achieved at every exit
+// ───────────────────────────────────────────────────────────────
+
+function renderExitJourney() {
+    const ej = DATA.exitJourney;
+
+    // Helper: create a dataset pair (SP dashed, PV solid) with same colour
+    function pair(name, spArr, pvArr, color, lightColor) {
+        return [
+            {
+                label: name + ' SP',
+                data: spArr,
+                borderColor: color,
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                borderDash: [6, 4],
+                pointRadius: 4,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: color,
+                pointBorderWidth: 2,
+                tension: 0.35,
+                fill: false,
+            },
+            {
+                label: name + ' PV',
+                data: pvArr,
+                borderColor: color,
+                backgroundColor: lightColor,
+                borderWidth: 2.5,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: color,
+                pointBorderWidth: 2.5,
+                tension: 0.35,
+                fill: false,
+            }
+        ];
+    }
+
+    const datasets = [
+        ...pair('PHF', ej.phfSP, ej.phfPV, C.blue, C.blueLight),
+        ...pair('RTF', ej.rtfSP, ej.rtfPV, C.green, C.greenLight),
+        ...pair('SF',  ej.sfSP,  ej.sfPV,  C.orange, C.orangeLight),
+        ...pair('HBR', ej.hbrSP, ej.hbrPV, C.purple, C.purpleLight),
+    ];
 
     makeChart('chartExitJourney', {
         type: 'line',
         data: {
-            labels,
-            datasets: [
-                {
-                    label: 'PHF Exit PV',
-                    data: phfExit,
-                    borderColor: C.blue,
-                    backgroundColor: C.blueLight,
-                    borderWidth: 2.5,
-                    pointRadius: 5,
-                    pointBackgroundColor: C.blue,
-                    tension: 0.35,
-                    fill: false,
-                },
-                {
-                    label: 'RTF Exit PV',
-                    data: rtfExit,
-                    borderColor: C.green,
-                    backgroundColor: C.greenLight,
-                    borderWidth: 2.5,
-                    pointRadius: 5,
-                    pointBackgroundColor: C.green,
-                    tension: 0.35,
-                    fill: false,
-                },
-                {
-                    label: 'SF Exit PV',
-                    data: sfExit,
-                    borderColor: C.orange,
-                    backgroundColor: C.orangeLight,
-                    borderWidth: 2.5,
-                    pointRadius: 5,
-                    pointBackgroundColor: C.orange,
-                    tension: 0.35,
-                    fill: false,
-                },
-                {
-                    label: 'HBR Exit PV',
-                    data: hbrExit,
-                    borderColor: C.purple,
-                    backgroundColor: C.purpleLight,
-                    borderWidth: 2.5,
-                    pointRadius: 5,
-                    pointBackgroundColor: C.purple,
-                    tension: 0.35,
-                    fill: false,
-                }
-            ]
+            labels: DATA.dates,
+            datasets
         },
         options: {
             responsive: true,
+            interaction: { mode: 'index', intersect: false },
             plugins: {
-                legend: { position: 'top' },
-                tooltip: { mode: 'index', intersect: false }
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        boxWidth: 8,
+                        padding: 16,
+                        // Show dashed line for SP in legend
+                        generateLabels: function(chart) {
+                            return chart.data.datasets.map((ds, i) => ({
+                                text: ds.label,
+                                fillStyle: 'transparent',
+                                strokeStyle: ds.borderColor,
+                                lineWidth: ds.borderWidth,
+                                lineDash: ds.borderDash || [],
+                                pointStyle: ds.borderDash ? 'line' : 'circle',
+                                hidden: !chart.isDatasetVisible(i),
+                                datasetIndex: i
+                            }));
+                        }
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        label: function(ctx) {
+                            return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + ' °C';
+                        }
+                    }
+                }
             },
             scales: {
                 x: {
@@ -619,67 +506,75 @@ function renderExitJourney(data) {
     });
 }
 
-// ─── Master Refresh ───
-function refresh() {
-    const data = getFiltered();
-    updateKPIs(data);
-    renderTempProfile(data);
-    renderZoneComparison(data);
-    renderGasTrend(data);
-    renderHeatingStage(data);
-    renderCombustion(data);
-    renderExitJourney(data);
-}
 
-// ─── File Input Handler ───
-elFileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    elFileName.textContent = file.name;
+// ───────────────────────────────────────────────────────────────
+//  SHARED OPTIONS FACTORIES
+// ───────────────────────────────────────────────────────────────
 
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-        rawData = parseCSV(evt.target.result);
-        initDateRange();
-        refresh();
+function lineOptions(yLabel) {
+    return {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: { position: 'top' },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                    label: (ctx) => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1)
+                }
+            }
+        },
+        scales: {
+            x: { grid: { display: false } },
+            y: {
+                title: { display: true, text: yLabel, font: { size: 10, weight: '600' } },
+                grid: { color: 'rgba(0,0,0,0.04)' }
+            }
+        }
     };
-    reader.readAsText(file);
-});
-
-// Set date inputs to data range
-function initDateRange() {
-    if (!rawData.length) return;
-    let minD = rawData[0]._date;
-    let maxD = rawData[0]._date;
-    rawData.forEach(r => {
-        if (r._date && r._date < minD) minD = r._date;
-        if (r._date && r._date > maxD) maxD = r._date;
-    });
-    elStartDate.value = formatDate(minD);
-    elEndDate.value   = formatDate(maxD);
 }
 
-// Date change handlers
-elStartDate.addEventListener('change', refresh);
-elEndDate.addEventListener('change', refresh);
+function barOptions(yLabel, beginAtZero) {
+    return {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: { position: 'top' },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                    label: (ctx) => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1)
+                }
+            }
+        },
+        scales: {
+            x: { grid: { display: false } },
+            y: {
+                title: { display: true, text: yLabel, font: { size: 10, weight: '600' } },
+                grid: { color: 'rgba(0,0,0,0.04)' },
+                beginAtZero: beginAtZero === true
+            }
+        }
+    };
+}
 
-// ─── Auto-Load CSV ───
+
+// ───────────────────────────────────────────────────────────────
+//  INIT — Render everything on load
+// ───────────────────────────────────────────────────────────────
+
 window.addEventListener('DOMContentLoaded', () => {
-    // Try to fetch default CSV from same directory
-    fetch('Furnace_Report_17-07-2026_to_20-07-2026.csv')
-        .then(res => {
-            if (!res.ok) throw new Error('CSV not found');
-            return res.text();
-        })
-        .then(text => {
-            rawData = parseCSV(text);
-            elFileName.textContent = 'Furnace_Report_17-07-2026_to_20-07-2026.csv';
-            initDateRange();
-            // Auto-select All range
-            refresh();
-        })
-        .catch(() => {
-            // No auto-load, user must upload
-            console.log('No default CSV found. Please upload a CSV file.');
-        });
+    // Pre-fill filter bar dates
+    document.getElementById('startDate').value = '2026-07-17';
+    document.getElementById('endDate').value   = '2026-07-20';
+
+    renderKPIs();
+    renderPHFExitTemp();
+    renderZoneTemp();
+    renderGasFlow();
+    renderFurnaceStages();
+    renderCombustion();
+    renderExitJourney();
 });

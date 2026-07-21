@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ACPPL GI Furnace — Industrial Analytics</title>
-    <meta name="description" content="ACPPL GI Furnace Analytics Dashboard — temperature profiles, gas consumption, zone comparison and exit temperature journey for plant engineers.">
+    <meta name="description" content="ACPPL GI Furnace Analytics Dashboard — setpoint vs process tracking, zone temperatures, gas flow, combustion health and exit temperature journey.">
 
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,13 +39,6 @@
             <button class="header-nav-btn">
                 <i class="fa-solid fa-bolt"></i> Back to Live View
             </button>
-            <div class="upload-area">
-                <label class="upload-label" for="csvFile">
-                    <i class="fa-solid fa-upload"></i> Load CSV
-                </label>
-                <input type="file" id="csvFile" accept=".csv" style="display:none">
-                <span id="fileName" class="file-name">No file loaded</span>
-            </div>
         </div>
     </header>
 
@@ -53,120 +46,158 @@
     <div class="filter-bar">
         <div class="filter-group">
             <span class="filter-label">Start</span>
-            <input type="date" id="startDate" class="filter-input">
+            <input type="date" id="startDate" class="filter-input" value="2026-07-17">
         </div>
         <div class="filter-group">
             <span class="filter-label">End</span>
-            <input type="date" id="endDate" class="filter-input">
+            <input type="date" id="endDate" class="filter-input" value="2026-07-20">
         </div>
         <div class="granularity-group">
-            <button class="gran-btn" onclick="setRange(1)">1D</button>
-            <button class="gran-btn" onclick="setRange(7)">7D</button>
-            <button class="gran-btn active" onclick="setRange(30)">30D</button>
-            <button class="gran-btn" onclick="setRange(180)">6M</button>
-            <button class="gran-btn" onclick="setRange(365)">1Y</button>
+            <button class="gran-btn">1D</button>
+            <button class="gran-btn active">7D</button>
+            <button class="gran-btn">30D</button>
+            <button class="gran-btn">6M</button>
+            <button class="gran-btn">1Y</button>
         </div>
     </div>
 
     <!-- ═══════ DASHBOARD ═══════ -->
     <main class="dashboard">
 
-        <!-- KPI Row -->
+        <!-- ── KPI Row ────────────────────────────────────── -->
         <section class="kpi-row">
+
+            <!-- 1. Total Coils — throughput -->
             <div class="kpi-card slate">
                 <div class="kpi-label">Total Coils</div>
                 <div class="kpi-value" id="kpi-coils">—</div>
             </div>
+
+            <!-- 2. Average Exit Temperature — process -->
             <div class="kpi-card blue">
-                <div class="kpi-label">Avg PHF Exit PV</div>
-                <div class="kpi-value" id="kpi-phf-exit">—<span class="kpi-unit">°C</span></div>
+                <div class="kpi-label">Avg Exit Temperature</div>
+                <div class="kpi-value" id="kpi-exit-temp">—<span class="kpi-unit">°C</span></div>
+                <div class="kpi-sub">PHF Exit PV</div>
             </div>
+
+            <!-- 3. Average Temperature Deviation — quality -->
             <div class="kpi-card orange">
-                <div class="kpi-label">Avg PHF Exit Deviation</div>
+                <div class="kpi-label">Avg Temperature Deviation</div>
                 <div class="kpi-value" id="kpi-deviation">—<span class="kpi-unit">°C</span></div>
                 <div class="kpi-sub">|SP − PV| average</div>
             </div>
+
+            <!-- 4. Average A/G Ratio — combustion -->
+            <div class="kpi-card green">
+                <div class="kpi-label">Avg A/G Ratio</div>
+                <div class="kpi-value" id="kpi-ag-ratio">—</div>
+                <div class="kpi-sub">Air / Gas across zones</div>
+            </div>
+
+            <!-- 5. Average H₂ Flow — gas -->
             <div class="kpi-card purple">
                 <div class="kpi-label">Avg H₂ Flow</div>
-                <div class="kpi-value" id="kpi-h2">—<span class="kpi-unit"></span></div>
+                <div class="kpi-value" id="kpi-h2-flow">—<span class="kpi-unit">Nm³/hr</span></div>
             </div>
+
+            <!-- 6. Average Furnace Pressure — pressure -->
             <div class="kpi-card cyan">
-                <div class="kpi-label">Avg N₂ Flow</div>
-                <div class="kpi-value" id="kpi-n2">—<span class="kpi-unit"></span></div>
+                <div class="kpi-label">Avg Furnace Pressure</div>
+                <div class="kpi-value" id="kpi-pressure">—<span class="kpi-unit">mmwc</span></div>
+                <div class="kpi-sub">Comb Air PV</div>
             </div>
-            <div class="kpi-card green">
-                <div class="kpi-label">Avg Dew Point</div>
-                <div class="kpi-value" id="kpi-dewpoint">—<span class="kpi-unit">°C</span></div>
-            </div>
+
         </section>
 
-        <!-- Row 1 — Three Charts -->
+        <!-- ── Row 1 — Three Charts ───────────────────────── -->
         <section class="chart-row-3">
-            <!-- Chart 1: Temperature Profile -->
+
+            <!-- Chart 1: PHF Exit Temperature -->
             <div class="chart-card">
                 <div class="chart-header">
-                    <h3 class="chart-title"><i class="fa-solid fa-temperature-high" style="color:#3b82f6"></i> Temperature Profile</h3>
-                    <span class="chart-subtitle">PHF Exit SP vs PV</span>
+                    <h3 class="chart-title">
+                        <i class="fa-solid fa-temperature-high" style="color:#3b82f6"></i>
+                        PHF Exit Temperature
+                    </h3>
+                    <span class="chart-subtitle">SP vs PV · Daily Avg</span>
                 </div>
                 <div class="chart-wrapper">
-                    <canvas id="chartTempProfile"></canvas>
+                    <canvas id="chartPHFExit"></canvas>
                 </div>
             </div>
 
-            <!-- Chart 2: Zone Comparison -->
+            <!-- Chart 2: PHF Zone Temperature -->
             <div class="chart-card">
                 <div class="chart-header">
-                    <h3 class="chart-title"><i class="fa-solid fa-layer-group" style="color:#10b981"></i> Zone Comparison</h3>
-                    <span class="chart-subtitle">PHF Zones 1–5</span>
+                    <h3 class="chart-title">
+                        <i class="fa-solid fa-layer-group" style="color:#10b981"></i>
+                        PHF Zone Temperature
+                    </h3>
+                    <span class="chart-subtitle">Zones 1–5 · SP vs PV</span>
                 </div>
                 <div class="chart-wrapper">
-                    <canvas id="chartZoneComp"></canvas>
+                    <canvas id="chartZoneTemp"></canvas>
                 </div>
             </div>
 
-            <!-- Chart 3: Gas Consumption Trend -->
+            <!-- Chart 3: Hydrogen & Nitrogen Flow -->
             <div class="chart-card">
                 <div class="chart-header">
-                    <h3 class="chart-title"><i class="fa-solid fa-wind" style="color:#8b5cf6"></i> Gas Consumption Trend</h3>
-                    <span class="chart-subtitle">H₂ &amp; N₂ Flow</span>
+                    <h3 class="chart-title">
+                        <i class="fa-solid fa-wind" style="color:#8b5cf6"></i>
+                        Hydrogen &amp; Nitrogen Flow
+                    </h3>
+                    <span class="chart-subtitle">Daily Avg · Nm³/hr</span>
                 </div>
                 <div class="chart-wrapper">
-                    <canvas id="chartGasTrend"></canvas>
+                    <canvas id="chartGasFlow"></canvas>
                 </div>
             </div>
+
         </section>
 
-        <!-- Row 2 — Two Charts -->
+        <!-- ── Row 2 — Two Charts ─────────────────────────── -->
         <section class="chart-row-2">
-            <!-- Chart 4: Heating Stage Comparison -->
+
+            <!-- Chart 4: Furnace Stage Temperature -->
             <div class="chart-card">
                 <div class="chart-header">
-                    <h3 class="chart-title"><i class="fa-solid fa-fire" style="color:#f59e0b"></i> Heating Stage Comparison</h3>
-                    <span class="chart-subtitle">RTF · SF · JCF · HBR</span>
+                    <h3 class="chart-title">
+                        <i class="fa-solid fa-fire" style="color:#f59e0b"></i>
+                        Furnace Stage Temperature
+                    </h3>
+                    <span class="chart-subtitle">RTF (Z1·Z2·Z3) · SF · JCF · HBR</span>
                 </div>
                 <div class="chart-wrapper">
-                    <canvas id="chartHeatStage"></canvas>
+                    <canvas id="chartStages"></canvas>
                 </div>
             </div>
 
             <!-- Chart 5: Combustion & Exhaust -->
             <div class="chart-card">
                 <div class="chart-header">
-                    <h3 class="chart-title"><i class="fa-solid fa-gauge-high" style="color:#ef4444"></i> Combustion &amp; Exhaust</h3>
-                    <span class="chart-subtitle">Air Press &amp; Fume Exhaust</span>
+                    <h3 class="chart-title">
+                        <i class="fa-solid fa-gauge-high" style="color:#ef4444"></i>
+                        Combustion &amp; Exhaust
+                    </h3>
+                    <span class="chart-subtitle">Comb Air &amp; Fume Exh · SP vs PV</span>
                 </div>
                 <div class="chart-wrapper">
                     <canvas id="chartCombustion"></canvas>
                 </div>
             </div>
+
         </section>
 
-        <!-- Row 3 — Full Width Hero Chart -->
+        <!-- ── Row 3 — Hero Chart (Full Width) ────────────── -->
         <section class="chart-row-1">
             <div class="chart-card">
                 <div class="chart-header">
-                    <h3 class="chart-title"><i class="fa-solid fa-route" style="color:#475569"></i> Exit Temperature Journey</h3>
-                    <span class="chart-subtitle">Complete furnace story — PHF → RTF → SF → HBR</span>
+                    <h3 class="chart-title">
+                        <i class="fa-solid fa-route" style="color:#475569"></i>
+                        Exit Temperature Journey
+                    </h3>
+                    <span class="chart-subtitle">Desired vs Achieved · PHF → RTF → SF → HBR &nbsp;│&nbsp; ── SP &nbsp; ─ PV</span>
                 </div>
                 <div class="chart-wrapper hero">
                     <canvas id="chartExitJourney"></canvas>
