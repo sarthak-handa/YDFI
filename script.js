@@ -1,580 +1,237 @@
-/* ===================================================================
-   ACPPL GI Furnace Dashboard — script.js (v2)
-   Static data · Story-driven · Production-ready
-   =================================================================== */
+/* ACPPL GI Furnace Dashboard — script.js v3
+   Stage-by-stage · Static data · Report-aligned */
 
-// ─── Chart.js Global Config ───
 Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
-Chart.defaults.font.size   = 11;
+Chart.defaults.font.size = 11;
 Chart.defaults.maintainAspectRatio = false;
 Chart.defaults.plugins.legend.labels.usePointStyle = true;
 Chart.defaults.plugins.legend.labels.boxWidth = 8;
 Chart.defaults.plugins.legend.labels.padding = 14;
 
-// ─── Industrial Colour Palette ───
 const C = {
-    blue:       '#3b82f6',
-    blueLight:  'rgba(59,130,246,0.12)',
-    green:      '#10b981',
-    greenLight: 'rgba(16,185,129,0.12)',
-    orange:     '#f59e0b',
-    orangeLight:'rgba(245,158,11,0.12)',
-    purple:     '#8b5cf6',
-    purpleLight:'rgba(139,92,246,0.12)',
-    cyan:       '#06b6d4',
-    cyanLight:  'rgba(6,182,212,0.12)',
-    red:        '#ef4444',
-    redLight:   'rgba(239,68,68,0.12)',
-    slate:      '#475569',
-    slateLight: 'rgba(71,85,105,0.12)',
+    blue:'#3b82f6', blueL:'rgba(59,130,246,.12)',
+    green:'#10b981', greenL:'rgba(16,185,129,.12)',
+    orange:'#f59e0b', orangeL:'rgba(245,158,11,.12)',
+    purple:'#8b5cf6', purpleL:'rgba(139,92,246,.12)',
+    cyan:'#06b6d4', cyanL:'rgba(6,182,212,.12)',
+    red:'#ef4444', redL:'rgba(239,68,68,.12)',
+    slate:'#475569'
 };
 
-// ─── Chart Instance Store ───
 const charts = {};
+function mk(id, cfg) { if(charts[id]) charts[id].destroy(); charts[id]=new Chart(document.getElementById(id),cfg); }
 
-function makeChart(id, config) {
-    if (charts[id]) charts[id].destroy();
-    const ctx = document.getElementById(id);
-    if (!ctx) return null;
-    charts[id] = new Chart(ctx, config);
-    return charts[id];
-}
+// ════════════════════════════════════════════════════
+//  STATIC DATA — based on actual ACPPL furnace ranges
+// ════════════════════════════════════════════════════
 
-// ───────────────────────────────────────────────────────────────
-//  STATIC DATA
-//  Based on ACPPL GI Furnace operating ranges (Jul 17–20 2026)
-//  Values derived from actual furnace CSV reference ranges.
-// ───────────────────────────────────────────────────────────────
+const D = {
+    dates: ['Jul 17','Jul 18','Jul 19','Jul 20'],
 
-const DATA = {
-
-    dates: ['Jul 17', 'Jul 18', 'Jul 19', 'Jul 20'],
-
+    // KPIs
     totalCoils: 109,
+    phfAvgPV: 1150.8,  // avg of 5 zone PVs
+    rtfAvgPV: 760.3,   // avg of 3 zone PVs
+    sfAvgPV: 738.0,
+    hbrAvgPV: 487.0,
+    avgAG: 11.40,
 
-    // ── KPI source values ──
-    kpi: {
-        avgExitTemp:    696.8,   // °C — Average PHF Exit PV
-        avgDeviation:   12.4,    // °C — Average |PHF Exit SP − PV|
-        avgAGRatio:     11.40,   // Air/Gas ratio average across 5 zones
-        avgH2Flow:      29.2,    // Nm³/hr
-        avgFurnacePressure: 895.6 // mmwc — Comb Air Press PV average
-    },
+    // PHF Zone Temperature
+    phfZones: ['Zone 1','Zone 2','Zone 3','Zone 4','Zone 5'],
+    phfTempSP: [1200, 1200, 1150, 1150, 1100],
+    phfTempPV: [1196, 1193, 1145, 1138, 1082],
 
-    // ── Chart 1: PHF Exit Temperature (daily averages) ──
-    phfExit: {
-        sp: [710, 720, 715, 710],
-        pv: [692, 705, 698, 690]
-    },
+    // PHF Zone A/G
+    phfAGSP: [12.00, 11.50, 11.00, 10.50, 12.00],
+    phfAGPV: [12.01, 11.50, 11.01, 10.50, 11.97],
 
-    // ── Chart 2: PHF Zone Temperature (SP vs PV) ──
-    zones: {
-        labels: ['Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5'],
-        sp: [1200, 1200, 1150, 1150, 1100],
-        pv: [1196, 1193, 1145, 1138, 1082]
-    },
+    // PHF Exit (daily)
+    phfExitSP: [710, 720, 715, 710],
+    phfExitPV: [692, 705, 698, 690],
 
-    // ── Chart 3: Gas Flow Trend (daily averages) ──
-    gasFlow: {
-        h2: [29.4, 28.9, 30.2, 29.1],
-        n2: [243.2, 244.5, 246.1, 243.8]
-    },
+    // RTF Zone Temperature
+    rtfZones: ['Zone 1','Zone 2','Zone 3'],
+    rtfTempSP: [760, 760, 760],
+    rtfTempPV: [748, 775, 758],
 
-    // ── Chart 4: Furnace Stage Temperature ──
-    //    RTF uses all 3 zones, SF, JCF, HBR individual
-    stages: {
-        labels: ['RTF Z1', 'RTF Z2', 'RTF Z3', 'SF', 'JCF', 'HBR'],
-        sp: [760, 760, 760, 750, 480, 470],
-        pv: [748, 775, 758, 738, 185, 487]
-    },
+    // RTF Exit (daily)
+    rtfExitSP: [720, 725, 720, 718],
+    rtfExitPV: [712, 718, 714, 710],
 
-    // ── Chart 5: Combustion & Exhaust (daily averages) ──
-    combustion: {
-        combSP: [900, 900, 900, 900],
-        combPV: [892, 898, 891, 895],
-        fumeSP: [-40, -40, -40, -40],
-        fumePV: [-40.2, -39.6, -40.5, -40.1]
-    },
+    // SF (daily)
+    sfTempSP: [750, 750, 750, 750],
+    sfTempPV: [738, 742, 735, 740],
+    sfExitSP: [720, 720, 720, 720],
+    sfExitPV: [715, 718, 716, 712],
 
-    // ── Chart 6 (Hero): Exit Temperature Journey ──
-    //    Both SP and PV for every stage
-    exitJourney: {
-        phfSP: [710, 720, 715, 710],
-        phfPV: [692, 705, 698, 690],
-        rtfSP: [720, 725, 720, 718],
-        rtfPV: [712, 718, 714, 710],
-        sfSP:  [720, 720, 720, 720],
-        sfPV:  [715, 718, 716, 712],
-        hbrSP: [460, 460, 460, 460],
-        hbrPV: [485, 490, 488, 492]
-    }
+    // JCF Zone PV (no SP tracking for Z2/Z3)
+    jcfZones: ['Zone 1','Zone 2','Zone 3'],
+    jcfPV: [185, 195, 202],
+
+    // HBR Exit (daily)
+    hbrExitSP: [460, 460, 460, 460],
+    hbrExitPV: [485, 490, 488, 492],
+
+    // Gas (daily)
+    h2Flow: [29.4, 28.9, 30.2, 29.1],
+    n2Flow: [243.2, 244.5, 246.1, 243.8],
+    o2:     [42, 38, 45, 40],
+    dewPt:  [-22.1, -21.5, -23.0, -22.4],
+
+    // Combustion (daily)
+    combSP: [900, 900, 900, 900],
+    combPV: [892, 898, 891, 895],
+    fumeSP: [-40, -40, -40, -40],
+    fumePV: [-40.2, -39.6, -40.5, -40.1]
 };
 
+// ════════════════════════════════════════════════════
+//  SHARED CHART CONFIG BUILDERS
+// ════════════════════════════════════════════════════
 
-// ───────────────────────────────────────────────────────────────
-//  KPI CARDS
-// ───────────────────────────────────────────────────────────────
-
-function renderKPIs() {
-    document.getElementById('kpi-coils').textContent     = DATA.totalCoils;
-    document.getElementById('kpi-exit-temp').textContent  = DATA.kpi.avgExitTemp.toFixed(1);
-    document.getElementById('kpi-deviation').textContent  = DATA.kpi.avgDeviation.toFixed(1);
-    document.getElementById('kpi-ag-ratio').textContent   = DATA.kpi.avgAGRatio.toFixed(2);
-    document.getElementById('kpi-h2-flow').textContent    = DATA.kpi.avgH2Flow.toFixed(1);
-    document.getElementById('kpi-pressure').textContent   = DATA.kpi.avgFurnacePressure.toFixed(1);
-}
-
-
-// ───────────────────────────────────────────────────────────────
-//  CHART 1 — PHF EXIT TEMPERATURE (Line: SP vs PV over days)
-// ───────────────────────────────────────────────────────────────
-
-function renderPHFExitTemp() {
-    makeChart('chartPHFExit', {
-        type: 'line',
-        data: {
-            labels: DATA.dates,
-            datasets: [
-                {
-                    label: 'SP (Setpoint)',
-                    data: DATA.phfExit.sp,
-                    borderColor: C.blue,
-                    backgroundColor: C.blueLight,
-                    borderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: C.blue,
-                    pointBorderWidth: 2,
-                    tension: 0.35,
-                    fill: false,
-                },
-                {
-                    label: 'PV (Process Value)',
-                    data: DATA.phfExit.pv,
-                    borderColor: C.orange,
-                    backgroundColor: C.orangeLight,
-                    borderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: C.orange,
-                    pointBorderWidth: 2,
-                    tension: 0.35,
-                    fill: false,
-                }
-            ]
-        },
-        options: lineOptions('Temperature (°C)')
-    });
-}
-
-
-// ───────────────────────────────────────────────────────────────
-//  CHART 2 — PHF ZONE TEMPERATURE (Grouped Bar: SP vs PV)
-// ───────────────────────────────────────────────────────────────
-
-function renderZoneTemp() {
-    makeChart('chartZoneTemp', {
-        type: 'bar',
-        data: {
-            labels: DATA.zones.labels,
-            datasets: [
-                {
-                    label: 'SP (Setpoint)',
-                    data: DATA.zones.sp,
-                    backgroundColor: C.blue,
-                    borderRadius: 3,
-                    barPercentage: 0.7,
-                    categoryPercentage: 0.7,
-                },
-                {
-                    label: 'PV (Process Value)',
-                    data: DATA.zones.pv,
-                    backgroundColor: C.green,
-                    borderRadius: 3,
-                    barPercentage: 0.7,
-                    categoryPercentage: 0.7,
-                }
-            ]
-        },
-        options: barOptions('Temperature (°C)', false)
-    });
-}
-
-
-// ───────────────────────────────────────────────────────────────
-//  CHART 3 — HYDROGEN & NITROGEN FLOW (Multi-Line)
-// ───────────────────────────────────────────────────────────────
-
-function renderGasFlow() {
-    makeChart('chartGasFlow', {
-        type: 'line',
-        data: {
-            labels: DATA.dates,
-            datasets: [
-                {
-                    label: 'H₂ Flow (Nm³/hr)',
-                    data: DATA.gasFlow.h2,
-                    borderColor: C.purple,
-                    backgroundColor: C.purpleLight,
-                    borderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: C.purple,
-                    pointBorderWidth: 2,
-                    tension: 0.35,
-                    fill: false,
-                    yAxisID: 'y',
-                },
-                {
-                    label: 'N₂ Flow (Nm³/hr)',
-                    data: DATA.gasFlow.n2,
-                    borderColor: C.cyan,
-                    backgroundColor: C.cyanLight,
-                    borderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: C.cyan,
-                    pointBorderWidth: 2,
-                    tension: 0.35,
-                    fill: false,
-                    yAxisID: 'y1',
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            interaction: { mode: 'index', intersect: false },
-            plugins: {
-                legend: { position: 'top' },
-                tooltip: { mode: 'index', intersect: false }
-            },
-            scales: {
-                x: { grid: { display: false } },
-                y: {
-                    type: 'linear',
-                    position: 'left',
-                    title: { display: true, text: 'H₂ Flow', font: { size: 10, weight: '600' }, color: C.purple },
-                    grid: { color: 'rgba(0,0,0,0.04)' },
-                    ticks: { color: C.purple }
-                },
-                y1: {
-                    type: 'linear',
-                    position: 'right',
-                    title: { display: true, text: 'N₂ Flow', font: { size: 10, weight: '600' }, color: C.cyan },
-                    grid: { drawOnChartArea: false },
-                    ticks: { color: C.cyan }
-                }
-            }
-        }
-    });
-}
-
-
-// ───────────────────────────────────────────────────────────────
-//  CHART 4 — FURNACE STAGE TEMPERATURE (Grouped Bar)
-//  RTF shows all 3 zones; SF, JCF, HBR individual
-// ───────────────────────────────────────────────────────────────
-
-function renderFurnaceStages() {
-    makeChart('chartStages', {
-        type: 'bar',
-        data: {
-            labels: DATA.stages.labels,
-            datasets: [
-                {
-                    label: 'SP (Setpoint)',
-                    data: DATA.stages.sp,
-                    backgroundColor: C.blue,
-                    borderRadius: 3,
-                    barPercentage: 0.65,
-                    categoryPercentage: 0.75,
-                },
-                {
-                    label: 'PV (Process Value)',
-                    data: DATA.stages.pv,
-                    backgroundColor: C.orange,
-                    borderRadius: 3,
-                    barPercentage: 0.65,
-                    categoryPercentage: 0.75,
-                }
-            ]
-        },
-        options: barOptions('Temperature (°C)', false)
-    });
-}
-
-
-// ───────────────────────────────────────────────────────────────
-//  CHART 5 — COMBUSTION & EXHAUST (Multi-Line: SP vs PV)
-// ───────────────────────────────────────────────────────────────
-
-function renderCombustion() {
-    makeChart('chartCombustion', {
-        type: 'line',
-        data: {
-            labels: DATA.dates,
-            datasets: [
-                {
-                    label: 'Comb Air SP',
-                    data: DATA.combustion.combSP,
-                    borderColor: C.blue,
-                    borderWidth: 2,
-                    pointRadius: 5,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: C.blue,
-                    pointBorderWidth: 2,
-                    tension: 0.3,
-                    fill: false,
-                    yAxisID: 'y',
-                },
-                {
-                    label: 'Comb Air PV',
-                    data: DATA.combustion.combPV,
-                    borderColor: C.green,
-                    borderWidth: 2,
-                    pointRadius: 5,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: C.green,
-                    pointBorderWidth: 2,
-                    tension: 0.3,
-                    fill: false,
-                    yAxisID: 'y',
-                },
-                {
-                    label: 'Fume Exh SP',
-                    data: DATA.combustion.fumeSP,
-                    borderColor: C.orange,
-                    borderWidth: 2,
-                    borderDash: [6, 3],
-                    pointRadius: 5,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: C.orange,
-                    pointBorderWidth: 2,
-                    tension: 0.3,
-                    fill: false,
-                    yAxisID: 'y1',
-                },
-                {
-                    label: 'Fume Exh PV',
-                    data: DATA.combustion.fumePV,
-                    borderColor: C.red,
-                    borderWidth: 2,
-                    borderDash: [6, 3],
-                    pointRadius: 5,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: C.red,
-                    pointBorderWidth: 2,
-                    tension: 0.3,
-                    fill: false,
-                    yAxisID: 'y1',
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            interaction: { mode: 'index', intersect: false },
-            plugins: {
-                legend: { position: 'top' },
-                tooltip: { mode: 'index', intersect: false }
-            },
-            scales: {
-                x: { grid: { display: false } },
-                y: {
-                    type: 'linear',
-                    position: 'left',
-                    title: { display: true, text: 'Comb Air (mmwc)', font: { size: 10, weight: '600' } },
-                    grid: { color: 'rgba(0,0,0,0.04)' },
-                },
-                y1: {
-                    type: 'linear',
-                    position: 'right',
-                    title: { display: true, text: 'Fume Exh (mmwc)', font: { size: 10, weight: '600' } },
-                    grid: { drawOnChartArea: false },
-                }
-            }
-        }
-    });
-}
-
-
-// ───────────────────────────────────────────────────────────────
-//  CHART 6 (HERO) — EXIT TEMPERATURE JOURNEY
-//  SP (dashed) + PV (solid) for each stage
-//  Tells the full story: Desired vs Achieved at every exit
-// ───────────────────────────────────────────────────────────────
-
-function renderExitJourney() {
-    const ej = DATA.exitJourney;
-
-    // Helper: create a dataset pair (SP dashed, PV solid) with same colour
-    function pair(name, spArr, pvArr, color, lightColor) {
-        return [
-            {
-                label: name + ' SP',
-                data: spArr,
-                borderColor: color,
-                backgroundColor: 'transparent',
-                borderWidth: 2,
-                borderDash: [6, 4],
-                pointRadius: 4,
-                pointBackgroundColor: '#fff',
-                pointBorderColor: color,
-                pointBorderWidth: 2,
-                tension: 0.35,
-                fill: false,
-            },
-            {
-                label: name + ' PV',
-                data: pvArr,
-                borderColor: color,
-                backgroundColor: lightColor,
-                borderWidth: 2.5,
-                pointRadius: 5,
-                pointHoverRadius: 8,
-                pointBackgroundColor: '#fff',
-                pointBorderColor: color,
-                pointBorderWidth: 2.5,
-                tension: 0.35,
-                fill: false,
-            }
-        ];
-    }
-
-    const datasets = [
-        ...pair('PHF', ej.phfSP, ej.phfPV, C.blue, C.blueLight),
-        ...pair('RTF', ej.rtfSP, ej.rtfPV, C.green, C.greenLight),
-        ...pair('SF',  ej.sfSP,  ej.sfPV,  C.orange, C.orangeLight),
-        ...pair('HBR', ej.hbrSP, ej.hbrPV, C.purple, C.purpleLight),
-    ];
-
-    makeChart('chartExitJourney', {
-        type: 'line',
-        data: {
-            labels: DATA.dates,
-            datasets
-        },
-        options: {
-            responsive: true,
-            interaction: { mode: 'index', intersect: false },
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true,
-                        boxWidth: 8,
-                        padding: 16,
-                        // Show dashed line for SP in legend
-                        generateLabels: function(chart) {
-                            return chart.data.datasets.map((ds, i) => ({
-                                text: ds.label,
-                                fillStyle: 'transparent',
-                                strokeStyle: ds.borderColor,
-                                lineWidth: ds.borderWidth,
-                                lineDash: ds.borderDash || [],
-                                pointStyle: ds.borderDash ? 'line' : 'circle',
-                                hidden: !chart.isDatasetVisible(i),
-                                datasetIndex: i
-                            }));
-                        }
-                    }
-                },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                    callbacks: {
-                        label: function(ctx) {
-                            return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + ' °C';
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    grid: { display: false },
-                    title: { display: true, text: 'Date', font: { size: 10, weight: '600' } }
-                },
-                y: {
-                    title: { display: true, text: 'Temperature (°C)', font: { size: 10, weight: '600' } },
-                    grid: { color: 'rgba(0,0,0,0.04)' }
-                }
-            }
-        }
-    });
-}
-
-
-// ───────────────────────────────────────────────────────────────
-//  SHARED OPTIONS FACTORIES
-// ───────────────────────────────────────────────────────────────
-
-function lineOptions(yLabel) {
+function barCfg(labels, datasets, yLabel) {
     return {
-        responsive: true,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-            legend: { position: 'top' },
-            tooltip: {
-                mode: 'index',
-                intersect: false,
-                callbacks: {
-                    label: (ctx) => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1)
-                }
-            }
-        },
-        scales: {
-            x: { grid: { display: false } },
-            y: {
-                title: { display: true, text: yLabel, font: { size: 10, weight: '600' } },
-                grid: { color: 'rgba(0,0,0,0.04)' }
+        type:'bar', data:{labels, datasets},
+        options:{
+            responsive:true, interaction:{mode:'index',intersect:false},
+            plugins:{legend:{position:'top'},tooltip:{mode:'index',intersect:false}},
+            scales:{
+                x:{grid:{display:false}},
+                y:{title:{display:true,text:yLabel,font:{size:10,weight:'600'}},grid:{color:'rgba(0,0,0,.04)'},beginAtZero:false}
             }
         }
     };
 }
 
-function barOptions(yLabel, beginAtZero) {
+function lineCfg(labels, datasets, yLabel) {
     return {
-        responsive: true,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-            legend: { position: 'top' },
-            tooltip: {
-                mode: 'index',
-                intersect: false,
-                callbacks: {
-                    label: (ctx) => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1)
-                }
-            }
-        },
-        scales: {
-            x: { grid: { display: false } },
-            y: {
-                title: { display: true, text: yLabel, font: { size: 10, weight: '600' } },
-                grid: { color: 'rgba(0,0,0,0.04)' },
-                beginAtZero: beginAtZero === true
+        type:'line', data:{labels, datasets},
+        options:{
+            responsive:true, interaction:{mode:'index',intersect:false},
+            plugins:{legend:{position:'top'},tooltip:{mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)}}},
+            scales:{
+                x:{grid:{display:false}},
+                y:{title:{display:true,text:yLabel,font:{size:10,weight:'600'}},grid:{color:'rgba(0,0,0,.04)'}}
             }
         }
     };
 }
 
+function dualLineCfg(labels, datasets, yL, yR) {
+    return {
+        type:'line', data:{labels, datasets},
+        options:{
+            responsive:true, interaction:{mode:'index',intersect:false},
+            plugins:{legend:{position:'top'},tooltip:{mode:'index',intersect:false}},
+            scales:{
+                x:{grid:{display:false}},
+                y:{position:'left',title:{display:true,text:yL,font:{size:10,weight:'600'}},grid:{color:'rgba(0,0,0,.04)'}},
+                y1:{position:'right',title:{display:true,text:yR,font:{size:10,weight:'600'}},grid:{drawOnChartArea:false}}
+            }
+        }
+    };
+}
 
-// ───────────────────────────────────────────────────────────────
-//  INIT — Render everything on load
-// ───────────────────────────────────────────────────────────────
+function barDS(label, data, color) {
+    return {label, data, backgroundColor:color, borderRadius:3, barPercentage:.7, categoryPercentage:.7};
+}
+
+function lineDS(label, data, color, opts={}) {
+    return {label, data, borderColor:color, borderWidth:2, pointRadius:4, pointHoverRadius:6, pointBackgroundColor:'#fff', pointBorderColor:color, pointBorderWidth:2, tension:.35, fill:false, ...opts};
+}
+
+// ════════════════════════════════════════════════════
+//  RENDER ALL
+// ════════════════════════════════════════════════════
 
 window.addEventListener('DOMContentLoaded', () => {
-    // Pre-fill filter bar dates
-    document.getElementById('startDate').value = '2026-07-17';
-    document.getElementById('endDate').value   = '2026-07-20';
 
-    renderKPIs();
-    renderPHFExitTemp();
-    renderZoneTemp();
-    renderGasFlow();
-    renderFurnaceStages();
-    renderCombustion();
-    renderExitJourney();
+    // ── KPIs ──
+    document.getElementById('kpi-coils').textContent = D.totalCoils;
+    document.getElementById('kpi-phf').textContent = D.phfAvgPV.toFixed(1);
+    document.getElementById('kpi-rtf').textContent = D.rtfAvgPV.toFixed(1);
+    document.getElementById('kpi-sf').textContent = D.sfAvgPV.toFixed(1);
+    document.getElementById('kpi-hbr').textContent = D.hbrAvgPV.toFixed(1);
+    document.getElementById('kpi-ag').textContent = D.avgAG.toFixed(2);
+
+    // ── PHF Zone Temperature ──
+    mk('phfZoneTemp', barCfg(D.phfZones, [
+        barDS('SP', D.phfTempSP, C.blue),
+        barDS('PV', D.phfTempPV, C.green)
+    ], 'Temperature (°C)'));
+
+    // ── PHF Zone A/G ──
+    mk('phfZoneAG', barCfg(D.phfZones, [
+        barDS('SP', D.phfAGSP, C.blue),
+        barDS('PV', D.phfAGPV, C.green)
+    ], 'A/G Ratio'));
+
+    // ── PHF Exit ──
+    mk('phfExit', lineCfg(D.dates, [
+        lineDS('SP', D.phfExitSP, C.blue),
+        lineDS('PV', D.phfExitPV, C.orange)
+    ], 'Temperature (°C)'));
+
+    // ── RTF Zone Temperature ──
+    mk('rtfZoneTemp', barCfg(D.rtfZones, [
+        barDS('SP', D.rtfTempSP, C.blue),
+        barDS('PV', D.rtfTempPV, C.green)
+    ], 'Temperature (°C)'));
+
+    // ── RTF Exit ──
+    mk('rtfExit', lineCfg(D.dates, [
+        lineDS('SP', D.rtfExitSP, C.blue),
+        lineDS('PV', D.rtfExitPV, C.green)
+    ], 'Temperature (°C)'));
+
+    // ── SF Heater Temperature ──
+    mk('sfTemp', lineCfg(D.dates, [
+        lineDS('SP', D.sfTempSP, C.blue),
+        lineDS('PV', D.sfTempPV, C.orange)
+    ], 'Temperature (°C)'));
+
+    // ── SF Exit ──
+    mk('sfExit', lineCfg(D.dates, [
+        lineDS('SP', D.sfExitSP, C.blue),
+        lineDS('PV', D.sfExitPV, C.orange)
+    ], 'Temperature (°C)'));
+
+    // ── JCF Zone Temperature ──
+    mk('jcfZone', {
+        type:'bar', data:{labels:D.jcfZones, datasets:[
+            barDS('PV', D.jcfPV, C.purple)
+        ]},
+        options:{
+            responsive:true,
+            plugins:{legend:{position:'top'},tooltip:{mode:'index',intersect:false}},
+            scales:{x:{grid:{display:false}},y:{title:{display:true,text:'Temperature (°C)',font:{size:10,weight:'600'}},grid:{color:'rgba(0,0,0,.04)'},beginAtZero:false}}
+        }
+    });
+
+    // ── HBR Exit ──
+    mk('hbrExit', lineCfg(D.dates, [
+        lineDS('SP', D.hbrExitSP, C.blue),
+        lineDS('PV', D.hbrExitPV, C.purple)
+    ], 'Temperature (°C)'));
+
+    // ── H₂ & N₂ Flow ──
+    mk('gasFlow', dualLineCfg(D.dates, [
+        lineDS('H₂ Flow', D.h2Flow, C.purple, {yAxisID:'y'}),
+        lineDS('N₂ Flow', D.n2Flow, C.cyan, {yAxisID:'y1'})
+    ], 'H₂ (Nm³/hr)', 'N₂ (Nm³/hr)'));
+
+    // ── O₂ & Dew Point ──
+    mk('gasO2Dew', dualLineCfg(D.dates, [
+        lineDS('O₂ (ppm)', D.o2, C.red, {yAxisID:'y'}),
+        lineDS('Dew Point (°C)', D.dewPt, C.slate, {yAxisID:'y1'})
+    ], 'O₂ (ppm)', 'Dew Point (°C)'));
+
+    // ── Combustion & Fume Exhaust ──
+    mk('gasCombFume', dualLineCfg(D.dates, [
+        lineDS('Comb Air SP', D.combSP, C.blue, {yAxisID:'y'}),
+        lineDS('Comb Air PV', D.combPV, C.green, {yAxisID:'y'}),
+        lineDS('Fume Exh SP', D.fumeSP, C.orange, {yAxisID:'y1', borderDash:[6,3]}),
+        lineDS('Fume Exh PV', D.fumePV, C.red, {yAxisID:'y1', borderDash:[6,3]})
+    ], 'Comb Air (mmwc)', 'Fume Exh (mmwc)'));
+
 });
