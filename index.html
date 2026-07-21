@@ -13,206 +13,141 @@
 </head>
 <body>
 
-    <!-- HEADER -->
     <header class="top-header">
         <div class="header-left">
             <img src="YDLOGO.png" alt="Yogiji Digi" class="header-logo">
-            <div class="header-text">
-                <h1>ACPPL GI FURNACE</h1>
-                <p>Industrial Furnace Analytics</p>
-            </div>
+            <div class="header-text"><h1>ACPPL GI FURNACE</h1><p>Industrial Furnace Analytics</p></div>
         </div>
         <div class="header-right">
-            <button class="header-nav-btn"><i class="fa-solid fa-chart-line"></i> Custom Trends</button>
-            <button class="header-nav-btn"><i class="fa-solid fa-file-lines"></i> Reports</button>
-            <button class="header-nav-btn"><i class="fa-solid fa-bolt"></i> Back to Live View</button>
+            <button class="nav-btn"><i class="fa-solid fa-chart-line"></i> Custom Trends</button>
+            <button class="nav-btn"><i class="fa-solid fa-file-lines"></i> Reports</button>
+            <button class="nav-btn"><i class="fa-solid fa-bolt"></i> Back to Live View</button>
+            <label class="upload-label" for="csvFile"><i class="fa-solid fa-upload"></i> Load CSV</label>
+            <input type="file" id="csvFile" accept=".csv" style="display:none">
+            <span id="fileName" class="file-name">Demo Data</span>
         </div>
     </header>
 
-    <!-- FILTER BAR -->
     <div class="filter-bar">
-        <div class="filter-group">
-            <span class="filter-label">Start</span>
-            <input type="date" id="startDate" class="filter-input" value="2026-07-17">
-        </div>
-        <div class="filter-group">
-            <span class="filter-label">End</span>
-            <input type="date" id="endDate" class="filter-input" value="2026-07-20">
-        </div>
-        <div class="granularity-group">
-            <button class="gran-btn">1D</button>
-            <button class="gran-btn active">7D</button>
-            <button class="gran-btn">30D</button>
-            <button class="gran-btn">6M</button>
-            <button class="gran-btn">1Y</button>
+        <div class="filter-group"><span class="filter-label">Start</span><input type="date" id="startDate" class="filter-input" value="2026-07-17"></div>
+        <div class="filter-group"><span class="filter-label">End</span><input type="date" id="endDate" class="filter-input" value="2026-07-20"></div>
+        <div class="gran-group">
+            <button class="gran-btn">1D</button><button class="gran-btn active">7D</button><button class="gran-btn">30D</button><button class="gran-btn">6M</button><button class="gran-btn">1Y</button>
         </div>
     </div>
 
-    <!-- DASHBOARD -->
     <main class="dashboard">
 
-        <!-- ═══ KPI ROW ═══ -->
+        <!-- KPI ROW -->
         <section class="kpi-row">
-            <div class="kpi-card slate">
-                <div class="kpi-label">Total Coils</div>
-                <div class="kpi-value" id="kpi-coils">—</div>
-            </div>
-            <div class="kpi-card blue">
-                <div class="kpi-label">PHF Avg Temp</div>
-                <div class="kpi-value" id="kpi-phf">—<span class="kpi-unit">°C</span></div>
-                <div class="kpi-sub">Zone average PV</div>
-            </div>
-            <div class="kpi-card green">
-                <div class="kpi-label">RTF Avg Temp</div>
-                <div class="kpi-value" id="kpi-rtf">—<span class="kpi-unit">°C</span></div>
-                <div class="kpi-sub">Zone average PV</div>
-            </div>
-            <div class="kpi-card orange">
-                <div class="kpi-label">SF Avg Temp</div>
-                <div class="kpi-value" id="kpi-sf">—<span class="kpi-unit">°C</span></div>
-            </div>
-            <div class="kpi-card purple">
-                <div class="kpi-label">HBR Avg Temp</div>
-                <div class="kpi-value" id="kpi-hbr">—<span class="kpi-unit">°C</span></div>
-            </div>
-            <div class="kpi-card cyan">
-                <div class="kpi-label">Avg A/G Ratio</div>
-                <div class="kpi-value" id="kpi-ag">—</div>
-                <div class="kpi-sub">Across all PHF zones</div>
-            </div>
+            <div class="kpi-card slate"><div class="kpi-label">Total Coils</div><div class="kpi-value" id="k-coils">—</div></div>
+            <div class="kpi-card blue"><div class="kpi-label">PHF Exit Avg</div><div class="kpi-value" id="k-phf">—<span class="kpi-unit">°C</span></div></div>
+            <div class="kpi-card green"><div class="kpi-label">RTF Exit Avg</div><div class="kpi-value" id="k-rtf">—<span class="kpi-unit">°C</span></div></div>
+            <div class="kpi-card orange"><div class="kpi-label">SF Exit Avg</div><div class="kpi-value" id="k-sf">—<span class="kpi-unit">°C</span></div></div>
+            <div class="kpi-card purple"><div class="kpi-label">HBR Exit Avg</div><div class="kpi-value" id="k-hbr">—<span class="kpi-unit">°C</span></div></div>
+            <div class="kpi-card cyan"><div class="kpi-label">Avg A/G Ratio</div><div class="kpi-value" id="k-ag">—</div></div>
         </section>
 
-        <!-- ═══ PRE HEAT FURNACE ═══ -->
-        <div class="section-divider">
-            <span class="section-icon icon-phf"><i class="fa-solid fa-fire"></i></span>
-            <h2>Pre Heat Furnace (PHF)</h2>
-            <span class="section-line"></span>
+        <!-- ═══ PHF ═══ -->
+        <div class="stage-module">
+            <div class="stage-head">
+                <span class="stage-icon icon-phf"><i class="fa-solid fa-fire"></i></span>
+                <h2>Pre Heat Furnace (PHF)</h2>
+                <span id="phf-status" class="status-badge status-green">🟢 Healthy</span>
+            </div>
+            <div class="stage-metrics">
+                <div class="sm"><span class="sm-label">Avg Temp</span><span class="sm-value" id="phf-avgtemp">—</span></div>
+                <div class="sm"><span class="sm-label">Avg A/G</span><span class="sm-value" id="phf-avgag">—</span></div>
+                <div class="sm"><span class="sm-label">Exit PV</span><span class="sm-value" id="phf-exit">—</span></div>
+                <div class="sm"><span class="sm-label">Deviation</span><span class="sm-value" id="phf-dev">—</span></div>
+                <div class="sm"><span class="sm-label">Mode</span><span class="sm-value small" id="phf-mode">—</span></div>
+            </div>
+            <div class="stage-charts cols-3">
+                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-temperature-high" style="color:#3b82f6"></i> Zone Temperature</h3><span class="chart-subtitle">Z1–Z5 · SP vs PV</span></div><div class="chart-wrapper"><canvas id="phfZoneTemp"></canvas></div></div>
+                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-sliders" style="color:#10b981"></i> Zone A/G Ratio</h3><span class="chart-subtitle">Z1–Z5 · SP vs PV</span></div><div class="chart-wrapper"><canvas id="phfZoneAG"></canvas></div></div>
+                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-arrow-right-from-bracket" style="color:#f59e0b"></i> PHF Exit</h3><span class="chart-subtitle">Per Coil · SP vs PV</span></div><div class="chart-wrapper"><canvas id="phfExit"></canvas></div></div>
+            </div>
         </div>
-        <section class="chart-row-3">
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title"><i class="fa-solid fa-temperature-high" style="color:#3b82f6"></i> Zone Temperature</h3>
-                    <span class="chart-subtitle">Z1–Z5 · SP vs PV</span>
-                </div>
-                <div class="chart-wrapper"><canvas id="phfZoneTemp"></canvas></div>
-            </div>
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title"><i class="fa-solid fa-sliders" style="color:#10b981"></i> Zone A/G Ratio</h3>
-                    <span class="chart-subtitle">Z1–Z5 · SP vs PV</span>
-                </div>
-                <div class="chart-wrapper"><canvas id="phfZoneAG"></canvas></div>
-            </div>
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title"><i class="fa-solid fa-arrow-right-from-bracket" style="color:#f59e0b"></i> PHF Exit Temperature</h3>
-                    <span class="chart-subtitle">Daily · SP vs PV</span>
-                </div>
-                <div class="chart-wrapper"><canvas id="phfExit"></canvas></div>
-            </div>
-        </section>
 
-        <!-- ═══ RADIANT TUBE FURNACE ═══ -->
-        <div class="section-divider">
-            <span class="section-icon icon-rtf"><i class="fa-solid fa-circle-radiation"></i></span>
-            <h2>Radiant Tube Furnace (RTF)</h2>
-            <span class="section-line"></span>
+        <!-- ═══ RTF ═══ -->
+        <div class="stage-module">
+            <div class="stage-head">
+                <span class="stage-icon icon-rtf"><i class="fa-solid fa-circle-radiation"></i></span>
+                <h2>Radiant Tube Furnace (RTF)</h2>
+                <span id="rtf-status" class="status-badge status-green">🟢 Healthy</span>
+            </div>
+            <div class="stage-metrics">
+                <div class="sm"><span class="sm-label">Avg Temp</span><span class="sm-value" id="rtf-avgtemp">—</span></div>
+                <div class="sm"><span class="sm-label">Exit PV</span><span class="sm-value" id="rtf-exit">—</span></div>
+                <div class="sm"><span class="sm-label">Deviation</span><span class="sm-value" id="rtf-dev">—</span></div>
+                <div class="sm"><span class="sm-label">Mode</span><span class="sm-value small" id="rtf-mode">—</span></div>
+            </div>
+            <div class="stage-charts cols-2">
+                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-temperature-high" style="color:#10b981"></i> RTF Zone Temperature</h3><span class="chart-subtitle">Z1·Z2·Z3 · SP vs PV</span></div><div class="chart-wrapper"><canvas id="rtfZoneTemp"></canvas></div></div>
+                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-arrow-right-from-bracket" style="color:#10b981"></i> RTF Exit</h3><span class="chart-subtitle">Per Coil · SP vs PV</span></div><div class="chart-wrapper"><canvas id="rtfExit"></canvas></div></div>
+            </div>
         </div>
-        <section class="chart-row-2">
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title"><i class="fa-solid fa-temperature-high" style="color:#10b981"></i> RTF Zone Temperature</h3>
-                    <span class="chart-subtitle">Z1·Z2·Z3 · SP vs PV</span>
-                </div>
-                <div class="chart-wrapper"><canvas id="rtfZoneTemp"></canvas></div>
-            </div>
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title"><i class="fa-solid fa-arrow-right-from-bracket" style="color:#10b981"></i> RTF Exit Temperature</h3>
-                    <span class="chart-subtitle">Daily · SP vs PV</span>
-                </div>
-                <div class="chart-wrapper"><canvas id="rtfExit"></canvas></div>
-            </div>
-        </section>
 
-        <!-- ═══ SOAKING FURNACE ═══ -->
-        <div class="section-divider">
-            <span class="section-icon icon-sf"><i class="fa-solid fa-droplet"></i></span>
-            <h2>Soaking Furnace (SF)</h2>
-            <span class="section-line"></span>
+        <!-- ═══ SF ═══ -->
+        <div class="stage-module">
+            <div class="stage-head">
+                <span class="stage-icon icon-sf"><i class="fa-solid fa-droplet"></i></span>
+                <h2>Soaking Furnace (SF)</h2>
+                <span id="sf-status" class="status-badge status-green">🟢 Healthy</span>
+            </div>
+            <div class="stage-metrics">
+                <div class="sm"><span class="sm-label">Heater PV</span><span class="sm-value" id="sf-heater">—</span></div>
+                <div class="sm"><span class="sm-label">Exit PV</span><span class="sm-value" id="sf-exit">—</span></div>
+                <div class="sm"><span class="sm-label">Deviation</span><span class="sm-value" id="sf-dev">—</span></div>
+                <div class="sm"><span class="sm-label">Mode</span><span class="sm-value small" id="sf-mode">—</span></div>
+            </div>
+            <div class="stage-charts cols-2">
+                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-temperature-high" style="color:#f59e0b"></i> SF Heater</h3><span class="chart-subtitle">Per Coil · SP vs PV</span></div><div class="chart-wrapper"><canvas id="sfTemp"></canvas></div></div>
+                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-arrow-right-from-bracket" style="color:#f59e0b"></i> SF Exit</h3><span class="chart-subtitle">Per Coil · SP vs PV</span></div><div class="chart-wrapper"><canvas id="sfExit"></canvas></div></div>
+            </div>
         </div>
-        <section class="chart-row-2">
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title"><i class="fa-solid fa-temperature-high" style="color:#f59e0b"></i> SF Heater Temperature</h3>
-                    <span class="chart-subtitle">Daily · SP vs PV</span>
-                </div>
-                <div class="chart-wrapper"><canvas id="sfTemp"></canvas></div>
-            </div>
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title"><i class="fa-solid fa-arrow-right-from-bracket" style="color:#f59e0b"></i> SF Exit Temperature</h3>
-                    <span class="chart-subtitle">Daily · SP vs PV</span>
-                </div>
-                <div class="chart-wrapper"><canvas id="sfExit"></canvas></div>
-            </div>
-        </section>
 
-        <!-- ═══ JET COOLING + HBR ═══ -->
-        <div class="section-divider">
-            <span class="section-icon icon-jcf"><i class="fa-solid fa-snowflake"></i></span>
-            <h2>Jet Cooling Furnace (JCF) + Hot Bridle Roll (HBR)</h2>
-            <span class="section-line"></span>
+        <!-- ═══ JCF + HBR ═══ -->
+        <div class="stage-module">
+            <div class="stage-head">
+                <span class="stage-icon icon-jcf"><i class="fa-solid fa-snowflake"></i></span>
+                <h2>Jet Cooling (JCF) + Hot Bridle Roll (HBR)</h2>
+                <span id="jcf-status" class="status-badge status-green">🟢 Healthy</span>
+            </div>
+            <div class="stage-metrics">
+                <div class="sm"><span class="sm-label">JCF Z1 PV</span><span class="sm-value" id="jcf-z1">—</span></div>
+                <div class="sm"><span class="sm-label">HBR PV</span><span class="sm-value" id="hbr-pv">—</span></div>
+                <div class="sm"><span class="sm-label">HBR Exit</span><span class="sm-value" id="hbr-exit">—</span></div>
+                <div class="sm"><span class="sm-label">HBR Mode</span><span class="sm-value small" id="hbr-mode">—</span></div>
+            </div>
+            <div class="stage-charts cols-2">
+                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-snowflake" style="color:#8b5cf6"></i> JCF Zone Temperature</h3><span class="chart-subtitle">Z1·Z2·Z3 · PV</span></div><div class="chart-wrapper"><canvas id="jcfZone"></canvas></div></div>
+                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-gear" style="color:#8b5cf6"></i> HBR Exit</h3><span class="chart-subtitle">Per Coil · SP vs PV</span></div><div class="chart-wrapper"><canvas id="hbrExitChart"></canvas></div></div>
+            </div>
         </div>
-        <section class="chart-row-2">
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title"><i class="fa-solid fa-snowflake" style="color:#8b5cf6"></i> JCF Zone Temperature</h3>
-                    <span class="chart-subtitle">Z1·Z2·Z3 · PV</span>
-                </div>
-                <div class="chart-wrapper"><canvas id="jcfZone"></canvas></div>
-            </div>
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title"><i class="fa-solid fa-gear" style="color:#8b5cf6"></i> HBR Exit Temperature</h3>
-                    <span class="chart-subtitle">Daily · SP vs PV</span>
-                </div>
-                <div class="chart-wrapper"><canvas id="hbrExit"></canvas></div>
-            </div>
-        </section>
 
         <!-- ═══ GAS & COMBUSTION ═══ -->
-        <div class="section-divider">
-            <span class="section-icon icon-gas"><i class="fa-solid fa-wind"></i></span>
-            <h2>Gas &amp; Combustion</h2>
-            <span class="section-line"></span>
+        <div class="stage-module">
+            <div class="stage-head">
+                <span class="stage-icon icon-gas"><i class="fa-solid fa-wind"></i></span>
+                <h2>Gas &amp; Combustion</h2>
+                <span id="gas-status" class="status-badge status-green">🟢 Normal</span>
+            </div>
+            <div class="stage-metrics">
+                <div class="sm"><span class="sm-label">Avg H₂ Flow</span><span class="sm-value" id="gas-h2">—</span></div>
+                <div class="sm"><span class="sm-label">Avg N₂ Flow</span><span class="sm-value" id="gas-n2">—</span></div>
+                <div class="sm"><span class="sm-label">Avg O₂</span><span class="sm-value" id="gas-o2">—</span></div>
+                <div class="sm"><span class="sm-label">Avg Dew Pt</span><span class="sm-value" id="gas-dew">—</span></div>
+                <div class="sm"><span class="sm-label">Comb Air PV</span><span class="sm-value" id="gas-comb">—</span></div>
+            </div>
+            <div class="stage-charts cols-3">
+                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-wind" style="color:#06b6d4"></i> H₂ &amp; N₂ Flow</h3><span class="chart-subtitle">Per Coil</span></div><div class="chart-wrapper"><canvas id="gasFlow"></canvas></div></div>
+                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-vial" style="color:#ef4444"></i> O₂ &amp; Dew Point</h3><span class="chart-subtitle">Per Coil</span></div><div class="chart-wrapper"><canvas id="gasO2"></canvas></div></div>
+                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-gauge-high" style="color:#475569"></i> Combustion &amp; Fume</h3><span class="chart-subtitle">SP vs PV</span></div><div class="chart-wrapper"><canvas id="gasComb"></canvas></div></div>
+            </div>
         </div>
-        <section class="chart-row-3">
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title"><i class="fa-solid fa-wind" style="color:#06b6d4"></i> H₂ &amp; N₂ Flow</h3>
-                    <span class="chart-subtitle">Daily · Nm³/hr</span>
-                </div>
-                <div class="chart-wrapper"><canvas id="gasFlow"></canvas></div>
-            </div>
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title"><i class="fa-solid fa-vial" style="color:#ef4444"></i> O₂ &amp; Dew Point</h3>
-                    <span class="chart-subtitle">Daily</span>
-                </div>
-                <div class="chart-wrapper"><canvas id="gasO2Dew"></canvas></div>
-            </div>
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title"><i class="fa-solid fa-gauge-high" style="color:#475569"></i> Combustion &amp; Fume Exhaust</h3>
-                    <span class="chart-subtitle">SP vs PV · mmwc</span>
-                </div>
-                <div class="chart-wrapper"><canvas id="gasCombFume"></canvas></div>
-            </div>
-        </section>
 
     </main>
-
     <script src="script.js"></script>
 </body>
 </html>
