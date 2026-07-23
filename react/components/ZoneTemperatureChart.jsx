@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
-import Chart from 'chart.js/auto';
+import React from 'react';
+import { Chart } from 'react-chartjs-2';
+import 'chart.js/auto';
 
 export default function ZoneTemperatureChart({ 
     title, 
@@ -12,25 +13,7 @@ export default function ZoneTemperatureChart({
     pvData, 
     yTitle 
 }) {
-    const canvasRef = useRef(null);
-    const chartInstance = useRef(null);
-
-    useEffect(() => {
-        if (chartInstance.current) {
-            chartInstance.current.destroy();
-        }
-
-        const ctx = canvasRef.current.getContext('2d');
-        const config = configFactory(labels, spData, pvData, yTitle);
-        
-        chartInstance.current = new Chart(ctx, config);
-
-        return () => {
-            if (chartInstance.current) {
-                chartInstance.current.destroy();
-            }
-        };
-    }, [configFactory, labels, spData, pvData, yTitle]);
+    const config = configFactory(labels, spData, pvData, yTitle);
 
     return (
         <div className="chart-card">
@@ -41,7 +24,7 @@ export default function ZoneTemperatureChart({
                 <span className="chart-subtitle">{subtitle}</span>
             </div>
             <div className="chart-wrapper">
-                <canvas ref={canvasRef}></canvas>
+                <Chart type={config.type} data={config.data} options={config.options} />
             </div>
         </div>
     );

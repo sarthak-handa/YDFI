@@ -1,27 +1,10 @@
-import React, { useEffect, useRef } from 'react';
-import Chart from 'chart.js/auto';
+import React from 'react';
+import { Pie } from 'react-chartjs-2';
+import 'chart.js/auto';
 import { C } from '../utils/chartHelpers';
 
 export default function GasPanel({ configFactory, labels, data, colors, rawData }) {
-    const canvasRef = useRef(null);
-    const chartInstance = useRef(null);
-
-    useEffect(() => {
-        if (chartInstance.current) {
-            chartInstance.current.destroy();
-        }
-
-        const ctx = canvasRef.current.getContext('2d');
-        const config = configFactory(labels, data, colors);
-        
-        chartInstance.current = new Chart(ctx, config);
-
-        return () => {
-            if (chartInstance.current) {
-                chartInstance.current.destroy();
-            }
-        };
-    }, [configFactory, labels, data, colors]);
+    const config = configFactory(labels, data, colors);
 
     return (
         <div className="chart-card">
@@ -32,7 +15,7 @@ export default function GasPanel({ configFactory, labels, data, colors, rawData 
                 <span className="chart-subtitle">Single Pie Chart Overview</span>
             </div>
             <div className="chart-wrapper">
-                <canvas ref={canvasRef}></canvas>
+                <Pie data={config.data} options={config.options} />
             </div>
             <div className="gas-summary-chips">
                 <div className="gas-chip">
