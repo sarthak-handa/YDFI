@@ -53,19 +53,23 @@
             <div class="stage-head">
                 <span class="stage-icon icon-phf"><i class="fa-solid fa-fire"></i></span>
                 <h2>Pre Heat Furnace (PHF)</h2>
-                <span id="phf-status" class="status-badge status-green">🟢 Healthy</span>
+                <span id="phf-mode-badge" class="mode-badge mode-manual"><i class="fa-solid fa-hand"></i> MANUAL MODE</span>
             </div>
-            <div class="stage-metrics">
-                <div class="sm"><span class="sm-label">Avg Temp</span><span class="sm-value" id="phf-avgtemp">—</span></div>
-                <div class="sm"><span class="sm-label">Avg A/G</span><span class="sm-value" id="phf-avgag">—</span></div>
-                <div class="sm"><span class="sm-label">Exit PV</span><span class="sm-value" id="phf-exit">—</span></div>
-                <div class="sm"><span class="sm-label">Deviation</span><span class="sm-value" id="phf-dev">—</span></div>
-                <div class="sm"><span class="sm-label">Mode</span><span class="sm-value small" id="phf-mode">—</span></div>
-            </div>
-            <div class="stage-charts cols-3">
-                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-temperature-high" style="color:#3b82f6"></i> Zone Temperature</h3><span class="chart-subtitle">Z1–Z5 · SP vs PV</span></div><div class="chart-wrapper"><canvas id="phfZoneTemp"></canvas></div></div>
-                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-sliders" style="color:#10b981"></i> Zone A/G Ratio</h3><span class="chart-subtitle">Z1–Z5 · SP vs PV</span></div><div class="chart-wrapper"><canvas id="phfZoneAG"></canvas></div></div>
-                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-arrow-right-from-bracket" style="color:#f59e0b"></i> PHF Exit</h3><span class="chart-subtitle">Per Coil · SP vs PV</span></div><div class="chart-wrapper"><canvas id="phfExit"></canvas></div></div>
+            <div class="stage-charts cols-2">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#3b82f6"></i> Zone &amp; Exit Temperature</h3>
+                        <span class="chart-subtitle">Z1–Z5 + Exit · Connected Line</span>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="phfZoneTemp"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fa-solid fa-sliders" style="color:#10b981"></i> Zone A/G Ratio</h3>
+                        <span class="chart-subtitle">Z1–Z5 · SP vs PV</span>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="phfZoneAG"></canvas></div>
+                </div>
             </div>
         </div>
 
@@ -74,17 +78,16 @@
             <div class="stage-head">
                 <span class="stage-icon icon-rtf"><i class="fa-solid fa-circle-radiation"></i></span>
                 <h2>Radiant Tube Furnace (RTF)</h2>
-                <span id="rtf-status" class="status-badge status-green">🟢 Healthy</span>
+                <span id="rtf-mode-badge" class="mode-badge mode-auto"><i class="fa-solid fa-robot"></i> AUTO MODE</span>
             </div>
-            <div class="stage-metrics">
-                <div class="sm"><span class="sm-label">Avg Temp</span><span class="sm-value" id="rtf-avgtemp">—</span></div>
-                <div class="sm"><span class="sm-label">Exit PV</span><span class="sm-value" id="rtf-exit">—</span></div>
-                <div class="sm"><span class="sm-label">Deviation</span><span class="sm-value" id="rtf-dev">—</span></div>
-                <div class="sm"><span class="sm-label">Mode</span><span class="sm-value small" id="rtf-mode">—</span></div>
-            </div>
-            <div class="stage-charts cols-2">
-                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-temperature-high" style="color:#10b981"></i> RTF Zone Temperature</h3><span class="chart-subtitle">Z1·Z2·Z3 · SP vs PV</span></div><div class="chart-wrapper"><canvas id="rtfZoneTemp"></canvas></div></div>
-                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-arrow-right-from-bracket" style="color:#10b981"></i> RTF Exit</h3><span class="chart-subtitle">Per Coil · SP vs PV</span></div><div class="chart-wrapper"><canvas id="rtfExit"></canvas></div></div>
+            <div class="stage-charts cols-1">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#10b981"></i> RTF Zone &amp; Exit Temperature</h3>
+                        <span class="chart-subtitle">Z1–Z3 + Exit · Connected Line</span>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="rtfZoneTemp"></canvas></div>
+                </div>
             </div>
         </div>
 
@@ -93,17 +96,16 @@
             <div class="stage-head">
                 <span class="stage-icon icon-sf"><i class="fa-solid fa-droplet"></i></span>
                 <h2>Soaking Furnace (SF)</h2>
-                <span id="sf-status" class="status-badge status-green">🟢 Healthy</span>
+                <span id="sf-mode-badge" class="mode-badge mode-auto"><i class="fa-solid fa-robot"></i> AUTO MODE</span>
             </div>
-            <div class="stage-metrics">
-                <div class="sm"><span class="sm-label">Heater PV</span><span class="sm-value" id="sf-heater">—</span></div>
-                <div class="sm"><span class="sm-label">Exit PV</span><span class="sm-value" id="sf-exit">—</span></div>
-                <div class="sm"><span class="sm-label">Deviation</span><span class="sm-value" id="sf-dev">—</span></div>
-                <div class="sm"><span class="sm-label">Mode</span><span class="sm-value small" id="sf-mode">—</span></div>
-            </div>
-            <div class="stage-charts cols-2">
-                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-temperature-high" style="color:#f59e0b"></i> SF Heater</h3><span class="chart-subtitle">Per Coil · SP vs PV</span></div><div class="chart-wrapper"><canvas id="sfTemp"></canvas></div></div>
-                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-arrow-right-from-bracket" style="color:#f59e0b"></i> SF Exit</h3><span class="chart-subtitle">Per Coil · SP vs PV</span></div><div class="chart-wrapper"><canvas id="sfExit"></canvas></div></div>
+            <div class="stage-charts cols-1">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#f59e0b"></i> SF Heater &amp; Exit Temperature</h3>
+                        <span class="chart-subtitle">Heater + Exit · Connected Line</span>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="sfZoneTemp"></canvas></div>
+                </div>
             </div>
         </div>
 
@@ -112,17 +114,16 @@
             <div class="stage-head">
                 <span class="stage-icon icon-jcf"><i class="fa-solid fa-snowflake"></i></span>
                 <h2>Jet Cooling (JCF) + Hot Bridle Roll (HBR)</h2>
-                <span id="jcf-status" class="status-badge status-green">🟢 Healthy</span>
+                <span id="jcf-mode-badge" class="mode-badge mode-manual"><i class="fa-solid fa-hand"></i> MANUAL MODE</span>
             </div>
-            <div class="stage-metrics">
-                <div class="sm"><span class="sm-label">JCF Z1 PV</span><span class="sm-value" id="jcf-z1">—</span></div>
-                <div class="sm"><span class="sm-label">HBR PV</span><span class="sm-value" id="hbr-pv">—</span></div>
-                <div class="sm"><span class="sm-label">HBR Exit</span><span class="sm-value" id="hbr-exit">—</span></div>
-                <div class="sm"><span class="sm-label">HBR Mode</span><span class="sm-value small" id="hbr-mode">—</span></div>
-            </div>
-            <div class="stage-charts cols-2">
-                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-snowflake" style="color:#8b5cf6"></i> JCF Zone Temperature</h3><span class="chart-subtitle">Z1·Z2·Z3 · PV</span></div><div class="chart-wrapper"><canvas id="jcfZone"></canvas></div></div>
-                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-gear" style="color:#8b5cf6"></i> HBR Exit</h3><span class="chart-subtitle">Per Coil · SP vs PV</span></div><div class="chart-wrapper"><canvas id="hbrExitChart"></canvas></div></div>
+            <div class="stage-charts cols-1">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#8b5cf6"></i> JCF &amp; HBR Exit Temperature</h3>
+                        <span class="chart-subtitle">Z1–Z3 + Exit · Connected Line</span>
+                    </div>
+                    <div class="chart-wrapper"><canvas id="jcfZoneTemp"></canvas></div>
+                </div>
             </div>
         </div>
 
@@ -130,20 +131,36 @@
         <div class="stage-module">
             <div class="stage-head">
                 <span class="stage-icon icon-gas"><i class="fa-solid fa-wind"></i></span>
-                <h2>Gas &amp; Combustion</h2>
-                <span id="gas-status" class="status-badge status-green">🟢 Normal</span>
-            </div>
-            <div class="stage-metrics">
-                <div class="sm"><span class="sm-label">Avg H₂ Flow</span><span class="sm-value" id="gas-h2">—</span></div>
-                <div class="sm"><span class="sm-label">Avg N₂ Flow</span><span class="sm-value" id="gas-n2">—</span></div>
-                <div class="sm"><span class="sm-label">Avg O₂</span><span class="sm-value" id="gas-o2">—</span></div>
-                <div class="sm"><span class="sm-label">Avg Dew Pt</span><span class="sm-value" id="gas-dew">—</span></div>
-                <div class="sm"><span class="sm-label">Comb Air PV</span><span class="sm-value" id="gas-comb">—</span></div>
+                <h2>Gas &amp; Atmosphere Parameters</h2>
             </div>
             <div class="stage-charts cols-3">
-                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-wind" style="color:#06b6d4"></i> H₂ &amp; N₂ Flow</h3><span class="chart-subtitle">Per Coil</span></div><div class="chart-wrapper"><canvas id="gasFlow"></canvas></div></div>
-                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-vial" style="color:#ef4444"></i> O₂ &amp; Dew Point</h3><span class="chart-subtitle">Per Coil</span></div><div class="chart-wrapper"><canvas id="gasO2"></canvas></div></div>
-                <div class="chart-card"><div class="chart-header"><h3 class="chart-title"><i class="fa-solid fa-gauge-high" style="color:#475569"></i> Combustion &amp; Fume</h3><span class="chart-subtitle">SP vs PV</span></div><div class="chart-wrapper"><canvas id="gasComb"></canvas></div></div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fa-solid fa-pie-chart" style="color:#06b6d4"></i> H₂ &amp; N₂ Gas Mix</h3>
+                        <span class="chart-subtitle">Atmosphere Flow (Nm³/h)</span>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="gasFlowDonut"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fa-solid fa-pie-chart" style="color:#ef4444"></i> O₂ &amp; Dew Point</h3>
+                        <span class="chart-subtitle">Atmosphere Purity</span>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="gasO2Donut"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fa-solid fa-pie-chart" style="color:#475569"></i> Combustion Air Pressure</h3>
+                        <span class="chart-subtitle">SP vs PV (mmwc)</span>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="gasCombDonut"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
 
