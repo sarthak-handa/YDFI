@@ -73,7 +73,7 @@
             </div>
         </div>
 
-        <!-- ═══ SAME LANE ROW: RTF & JCF ═══ -->
+        <!-- ═══ SAME LANE ROW 1: RTF & JCF ═══ -->
         <div class="stage-row cols-2">
             
             <!-- ═══ RTF ═══ -->
@@ -114,42 +114,47 @@
 
         </div>
 
-        <!-- ═══ SF ═══ -->
-        <div class="stage-module">
-            <div class="stage-head">
-                <span class="stage-icon icon-sf"><i class="fa-solid fa-droplet"></i></span>
-                <h2>Soaking Furnace (SF)</h2>
-                <span id="sf-mode-badge" class="mode-badge mode-auto"><i class="fa-solid fa-robot"></i> AUTO MODE</span>
-            </div>
-            <div class="stage-charts cols-1">
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#f59e0b"></i> SF Heater &amp; Exit Temperature</h3>
-                        <span class="chart-subtitle">Heater + Exit · Connected Line</span>
-                    </div>
-                    <div class="chart-wrapper"><canvas id="sfZoneTemp"></canvas></div>
-                </div>
-            </div>
-        </div>
+        <!-- ═══ SAME LANE ROW 2: SF & GAS ═══ -->
+        <div class="stage-row cols-2">
 
-        <!-- ═══ GAS & COMBUSTION (SINGLE UNIFIED CHART) ═══ -->
-        <div class="stage-module">
-            <div class="stage-head">
-                <span class="stage-icon icon-gas"><i class="fa-solid fa-wind"></i></span>
-                <h2>Gas &amp; Atmosphere Parameters</h2>
-            </div>
-            <div class="stage-charts cols-1">
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fa-solid fa-pie-chart" style="color:#06b6d4"></i> Unified Atmosphere &amp; Combustion Parameters</h3>
-                        <span class="chart-subtitle">Single Chart Overview</span>
+            <!-- ═══ SF ═══ -->
+            <div class="stage-module">
+                <div class="stage-head">
+                    <span class="stage-icon icon-sf"><i class="fa-solid fa-droplet"></i></span>
+                    <h2>Soaking Furnace (SF)</h2>
+                    <span id="sf-mode-badge" class="mode-badge mode-auto"><i class="fa-solid fa-robot"></i> AUTO MODE</span>
+                </div>
+                <div class="stage-charts cols-1">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#f59e0b"></i> SF Heater &amp; Exit Temperature</h3>
+                            <span class="chart-subtitle">Heater + Exit · Connected Line</span>
+                        </div>
+                        <div class="chart-wrapper"><canvas id="sfZoneTemp"></canvas></div>
                     </div>
-                    <div class="chart-wrapper">
-                        <canvas id="gasUnifiedDonut"></canvas>
-                    </div>
-                    <div class="gas-summary-chips" id="gasSummaryChips"></div>
                 </div>
             </div>
+
+            <!-- ═══ GAS & COMBUSTION (SINGLE UNIFIED CHART) ═══ -->
+            <div class="stage-module">
+                <div class="stage-head">
+                    <span class="stage-icon icon-gas"><i class="fa-solid fa-wind"></i></span>
+                    <h2>Gas &amp; Atmosphere Parameters</h2>
+                </div>
+                <div class="stage-charts cols-1">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title"><i class="fa-solid fa-pie-chart" style="color:#06b6d4"></i> Atmosphere &amp; Combustion</h3>
+                            <span class="chart-subtitle">Single Chart Overview</span>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="gasUnifiedDonut"></canvas>
+                        </div>
+                        <div class="gas-summary-chips" id="gasSummaryChips"></div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
     </main>
