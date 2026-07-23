@@ -59,21 +59,21 @@
                 <div class="chart-card">
                     <div class="chart-header">
                         <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#3b82f6"></i> Zone Temperature</h3>
-                        <span class="chart-subtitle">Z1 • Z2 • Z3 • Z4 • Z5 • EXIT PV</span>
+                        <span class="chart-subtitle">Z1 • Z2 • Z3 • Z4 • Z5 • EXIT PV · Connected Line</span>
                     </div>
                     <div class="chart-wrapper"><canvas id="phfZoneTemp"></canvas></div>
                 </div>
                 <div class="chart-card">
                     <div class="chart-header">
-                        <h3 class="chart-title"><i class="fa-solid fa-sliders" style="color:#10b981"></i> Air Gas Ratio</h3>
-                        <span class="chart-subtitle">Z1 • Z2 • Z3 • Z4 • Z5</span>
+                        <h3 class="chart-title"><i class="fa-solid fa-chart-column" style="color:#10b981"></i> Air Gas Ratio</h3>
+                        <span class="chart-subtitle">Z1 • Z2 • Z3 • Z4 • Z5 · Clustered Column</span>
                     </div>
                     <div class="chart-wrapper"><canvas id="phfZoneAG"></canvas></div>
                 </div>
             </div>
         </div>
 
-        <!-- ═══ PROCESS ROW 1: RTF & SF (Material Flow Sequence) ═══ -->
+        <!-- ═══ PROCESS ROW 1: RTF & SF ═══ -->
         <div class="stage-row cols-2">
             
             <!-- ═══ RTF ═══ -->
@@ -87,7 +87,7 @@
                     <div class="chart-card">
                         <div class="chart-header">
                             <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#10b981"></i> Zone Temperature</h3>
-                            <span class="chart-subtitle">Z1 • Z2 • Z3 • EXIT PV</span>
+                            <span class="chart-subtitle">Z1 • Z2 • Z3 • EXIT PV · Connected Line</span>
                         </div>
                         <div class="chart-wrapper"><canvas id="rtfZoneTemp"></canvas></div>
                     </div>
@@ -104,8 +104,8 @@
                 <div class="stage-charts cols-1">
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#f59e0b"></i> Zone Temperature</h3>
-                            <span class="chart-subtitle">HEATER • EXIT PV</span>
+                            <h3 class="chart-title"><i class="fa-solid fa-chart-area" style="color:#f59e0b"></i> Zone Temperature</h3>
+                            <span class="chart-subtitle">HEATER • EXIT PV · Line &amp; Column Combo</span>
                         </div>
                         <div class="chart-wrapper"><canvas id="sfZoneTemp"></canvas></div>
                     </div>
@@ -114,7 +114,7 @@
 
         </div>
 
-        <!-- ═══ PROCESS ROW 2: JCF & GAS (Material Flow Sequence) ═══ -->
+        <!-- ═══ PROCESS ROW 2: JCF & GAS ═══ -->
         <div class="stage-row cols-2">
 
             <!-- ═══ JCF + HBR ═══ -->
@@ -127,15 +127,15 @@
                 <div class="stage-charts cols-1">
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#8b5cf6"></i> Zone Temperature</h3>
-                            <span class="chart-subtitle">Z1 • Z2 • Z3 • EXIT PV</span>
+                            <h3 class="chart-title"><i class="fa-solid fa-chart-column" style="color:#8b5cf6"></i> Zone Temperature</h3>
+                            <span class="chart-subtitle">Z1 • Z2 • Z3 • EXIT PV · Clustered Column</span>
                         </div>
                         <div class="chart-wrapper"><canvas id="jcfZoneTemp"></canvas></div>
                     </div>
                 </div>
             </div>
 
-            <!-- ═══ GAS & COMBUSTION ═══ -->
+            <!-- ═══ GAS & COMBUSTION (PIE CHART) ═══ -->
             <div class="stage-module accent-gas">
                 <div class="stage-head">
                     <span class="stage-icon icon-gas"><i class="fa-solid fa-wind"></i></span>
@@ -145,10 +145,10 @@
                     <div class="chart-card">
                         <div class="chart-header">
                             <h3 class="chart-title"><i class="fa-solid fa-pie-chart" style="color:#06b6d4"></i> Atmosphere &amp; Combustion</h3>
-                            <span class="chart-subtitle">H₂ • N₂ • O₂ • DEW PT • COMB AIR</span>
+                            <span class="chart-subtitle">Single Pie Chart Overview</span>
                         </div>
                         <div class="chart-wrapper">
-                            <canvas id="gasUnifiedDonut"></canvas>
+                            <canvas id="gasPieChart"></canvas>
                         </div>
                         <div class="gas-summary-chips" id="gasSummaryChips"></div>
                     </div>

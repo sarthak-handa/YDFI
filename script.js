@@ -1,5 +1,5 @@
-/* ACPPL GI Furnace Dashboard — script.js v7
-   Industrial Dashboard Design Standard (Siemens / ABB / Ignition Perspective Style) */
+/* ACPPL GI Furnace Dashboard — script.js v8
+   Chart Diversity: Line, Clustered Column, Combo Line & Column, Pie Chart */
 
 Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
 Chart.defaults.font.size = 11;
@@ -8,7 +8,6 @@ Chart.defaults.plugins.legend.labels.usePointStyle = true;
 Chart.defaults.plugins.legend.labels.boxWidth = 8;
 Chart.defaults.plugins.legend.labels.padding = 16;
 
-// Standard Industrial Palette (Item 7: Blue = SP, Green = PV)
 const C = {
     spBlue: '#3b82f6',      // SP (Set Point) Always Blue
     pvGreen: '#10b981',     // PV (Process Value) Always Green
@@ -84,7 +83,7 @@ function avg(arr) {
 }
 
 // ════════════════════════════════════════════════════
-//  MODE PILL BADGE UPDATER (Item 5)
+//  MODE PILL BADGE UPDATER
 // ════════════════════════════════════════════════════
 
 function updateModeBadge(elId, modeStr) {
@@ -120,34 +119,35 @@ function renderAll() {
     updateModeBadge('sf-mode-badge', D.sfMode);
     updateModeBadge('jcf-mode-badge', D.hbrMode);
 
-    // 3. PHF Charts (Full Width, Item 1 & 6: Z1..Z5, EXIT PV)
+    // 3. PHF Charts
+    // PHF Zone Temp: Line Chart with connected dots
     const phfLabels = [...D.phfZones, 'EXIT PV'];
     const phfSP = [...D.phfZoneSP, avg(D.phfExitSP)];
     const phfPV = [...D.phfZonePV, avg(D.phfExitPV)];
     mk('phfZoneTemp', lineChartSPPV(phfLabels, phfSP, phfPV, 'Temperature (°C)'));
     
-    // Air Gas Ratio (Item 9: Same SP/PV line style as temp)
-    mk('phfZoneAG', lineChartSPPV(D.phfZones, D.phfZoneAGSP, D.phfZoneAGPV, 'Air / Gas Ratio'));
+    // PHF Air Gas Ratio: Clustered Column Chart
+    mk('phfZoneAG', clusteredColumnChartSPPV(D.phfZones, D.phfZoneAGSP, D.phfZoneAGPV, 'Air / Gas Ratio'));
 
-    // 4. RTF Chart (Row 2, Left)
+    // 4. RTF Chart: Line Chart
     const rtfLabels = [...D.rtfZones, 'EXIT PV'];
     const rtfSP = [...D.rtfZoneSP, avg(D.rtfExitSP)];
     const rtfPV = [...D.rtfZonePV, avg(D.rtfExitPV)];
     mk('rtfZoneTemp', lineChartSPPV(rtfLabels, rtfSP, rtfPV, 'Temperature (°C)'));
 
-    // 5. SF Chart (Row 2, Right - Production Flow: PHF → RTF → SF!)
+    // 5. SF Chart: Line & Clustered Column Combo Chart
     const sfLabels = ['HEATER', 'EXIT PV'];
     const sfSP = [avg(D.sfHeaterSP), avg(D.sfExitSP)];
     const sfPV = [avg(D.sfHeaterPV), avg(D.sfExitPV)];
-    mk('sfZoneTemp', lineChartSPPV(sfLabels, sfSP, sfPV, 'Temperature (°C)'));
+    mk('sfZoneTemp', comboLineColumnChartSPPV(sfLabels, sfSP, sfPV, 'Temperature (°C)'));
 
-    // 6. JCF + HBR Chart (Row 3, Left - Production Flow: JCF → HBR → Gas!)
+    // 6. JCF + HBR Chart: Clustered Column Chart
     const jcfLabels = ['Z1', 'Z2', 'Z3', 'EXIT PV'];
     const jcfSP = [...D.jcfZoneSP, avg(D.hbrExitSP)];
     const jcfPV = [...D.jcfZonePV, avg(D.hbrExitPV)];
-    mk('jcfZoneTemp', lineChartSPPV(jcfLabels, jcfSP, jcfPV, 'Temperature (°C)'));
+    mk('jcfZoneTemp', clusteredColumnChartSPPV(jcfLabels, jcfSP, jcfPV, 'Temperature (°C)'));
 
-    // 7. Single Unified Gas & Atmosphere Donut Chart (Row 3, Right)
+    // 7. SINGLE UNIFIED GAS & ATMOSPHERE PIE CHART
     const avgH2 = avg(D.h2Flow);
     const avgN2 = avg(D.n2Flow);
     const avgO2 = avg(D.o2);
@@ -170,9 +170,9 @@ function renderAll() {
     ];
     const gasColors = [C.cyan, C.purple, C.red, C.slate, C.indigo];
 
-    mk('gasUnifiedDonut', singleUnifiedGasDonut(gasLabels, gasData, gasColors));
+    mk('gasPieChart', singleUnifiedGasPie(gasLabels, gasData, gasColors));
 
-    // Update Gas Summary Chips below chart
+    // Update Gas Summary Chips
     const chipsContainer = document.getElementById('gasSummaryChips');
     if (chipsContainer) {
         chipsContainer.innerHTML = `
@@ -186,7 +186,7 @@ function renderAll() {
 }
 
 // ════════════════════════════════════════════════════
-//  CONNECTED LINE CHART FACTORY (Item 7 & 8: SP Blue Always Top, PV Green Always Bottom)
+//  1. CONNECTED LINE CHART FACTORY
 // ════════════════════════════════════════════════════
 
 function lineChartSPPV(labels, spData, pvData, yTitle) {
@@ -227,62 +227,140 @@ function lineChartSPPV(labels, spData, pvData, yTitle) {
                 }
             ]
         },
-        options: {
-            responsive: true,
-            interaction: { mode: 'index', intersect: false },
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true,
-                        boxWidth: 8,
-                        font: { size: 12, weight: '700' }
-                    }
+        options: commonOptions(yTitle)
+    };
+}
+
+// ════════════════════════════════════════════════════
+//  2. CLUSTERED COLUMN CHART FACTORY
+// ════════════════════════════════════════════════════
+
+function clusteredColumnChartSPPV(labels, spData, pvData, yTitle) {
+    return {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'SP (Set Point)',
+                    data: spData,
+                    backgroundColor: C.spBlue,
+                    borderRadius: 4,
+                    barPercentage: 0.65,
+                    categoryPercentage: 0.7
                 },
-                // Item 8: Custom Hover Value Labels (Zone 3 \n SP : 874°C \n PV : 868°C)
-                tooltip: {
-                    padding: 12,
-                    cornerRadius: 8,
-                    titleFont: { size: 12, weight: '800' },
-                    bodyFont: { size: 12, weight: '600' },
-                    callbacks: {
-                        title: function(items) {
-                            if (!items || !items.length) return '';
-                            const l = items[0].label;
-                            return l.startsWith('Z') ? `Zone ${l.replace('Z','')}` : l;
-                        },
-                        label: function(ctx) {
-                            const isSP = ctx.dataset.label.startsWith('SP');
-                            const dsTag = isSP ? 'SP' : 'PV';
-                            const unit = yTitle.includes('°C') ? '°C' : (yTitle.includes('Ratio') ? '' : '');
-                            const valStr = typeof ctx.raw === 'number' ? (yTitle.includes('Ratio') ? ctx.raw.toFixed(2) : ctx.raw.toFixed(1)) : ctx.raw;
-                            return `  ${dsTag} : ${valStr}${unit}`;
-                        }
-                    }
+                {
+                    label: 'PV (Process Value)',
+                    data: pvData,
+                    backgroundColor: C.pvGreen,
+                    borderRadius: 4,
+                    barPercentage: 0.65,
+                    categoryPercentage: 0.7
+                }
+            ]
+        },
+        options: commonOptions(yTitle)
+    };
+}
+
+// ════════════════════════════════════════════════════
+//  3. LINE & CLUSTERED COLUMN COMBO CHART FACTORY
+// ════════════════════════════════════════════════════
+
+function comboLineColumnChartSPPV(labels, spData, pvData, yTitle) {
+    return {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    type: 'bar',
+                    label: 'SP (Set Point)',
+                    data: spData,
+                    backgroundColor: C.spBlue,
+                    borderRadius: 4,
+                    barPercentage: 0.5
+                },
+                {
+                    type: 'line',
+                    label: 'PV (Process Value)',
+                    data: pvData,
+                    borderColor: C.pvGreen,
+                    backgroundColor: C.pvGreen,
+                    borderWidth: 3,
+                    pointStyle: 'circle',
+                    pointRadius: 6,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: C.pvGreen,
+                    pointBorderWidth: 3,
+                    tension: 0.2,
+                    fill: false
+                }
+            ]
+        },
+        options: commonOptions(yTitle)
+    };
+}
+
+// ════════════════════════════════════════════════════
+//  COMMON CHART OPTIONS (Custom Tooltips & Formatting)
+// ════════════════════════════════════════════════════
+
+function commonOptions(yTitle) {
+    return {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    usePointStyle: true,
+                    boxWidth: 8,
+                    font: { size: 12, weight: '700' }
                 }
             },
-            scales: {
-                x: {
-                    grid: { display: false },
-                    ticks: { font: { weight: '700', size: 11 } }
-                },
-                y: {
-                    title: { display: true, text: yTitle, font: { weight: '700' } },
-                    grid: { color: 'rgba(0, 0, 0, 0.04)' },
-                    beginAtZero: false
+            tooltip: {
+                padding: 12,
+                cornerRadius: 8,
+                titleFont: { size: 12, weight: '800' },
+                bodyFont: { size: 12, weight: '600' },
+                callbacks: {
+                    title: function(items) {
+                        if (!items || !items.length) return '';
+                        const l = items[0].label;
+                        return l.startsWith('Z') ? `Zone ${l.replace('Z','')}` : l;
+                    },
+                    label: function(ctx) {
+                        const isSP = ctx.dataset.label.startsWith('SP');
+                        const dsTag = isSP ? 'SP' : 'PV';
+                        const unit = yTitle.includes('°C') ? '°C' : '';
+                        const valStr = typeof ctx.raw === 'number' ? (yTitle.includes('Ratio') ? ctx.raw.toFixed(2) : ctx.raw.toFixed(1)) : ctx.raw;
+                        return `  ${dsTag} : ${valStr}${unit}`;
+                    }
                 }
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { font: { weight: '700', size: 11 } }
+            },
+            y: {
+                title: { display: true, text: yTitle, font: { weight: '700' } },
+                grid: { color: 'rgba(0, 0, 0, 0.04)' },
+                beginAtZero: false
             }
         }
     };
 }
 
 // ════════════════════════════════════════════════════
-//  SINGLE UNIFIED GAS DONUT CHART FACTORY
+//  4. SINGLE UNIFIED GAS PIE CHART FACTORY
 // ════════════════════════════════════════════════════
 
-function singleUnifiedGasDonut(labels, data, colors) {
+function singleUnifiedGasPie(labels, data, colors) {
     return {
-        type: 'doughnut',
+        type: 'pie',
         data: {
             labels: labels,
             datasets: [{
@@ -295,7 +373,6 @@ function singleUnifiedGasDonut(labels, data, colors) {
         },
         options: {
             responsive: true,
-            cutout: '68%',
             plugins: {
                 legend: {
                     position: 'top',
