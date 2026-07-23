@@ -1,22 +1,23 @@
-/* ACPPL GI Furnace Dashboard — script.js v6
-   Line charts for Zone + Exit Temperatures · Mode Badges · RTF & JCF in same lane · Single Unified Gas Donut Chart */
+/* ACPPL GI Furnace Dashboard — script.js v7
+   Industrial Dashboard Design Standard (Siemens / ABB / Ignition Perspective Style) */
 
 Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
 Chart.defaults.font.size = 11;
 Chart.defaults.maintainAspectRatio = false;
 Chart.defaults.plugins.legend.labels.usePointStyle = true;
 Chart.defaults.plugins.legend.labels.boxWidth = 8;
-Chart.defaults.plugins.legend.labels.padding = 14;
+Chart.defaults.plugins.legend.labels.padding = 16;
 
+// Standard Industrial Palette (Item 7: Blue = SP, Green = PV)
 const C = {
-    blue:'#3b82f6', blueL:'rgba(59,130,246,.15)',
-    indigo:'#6366f1', indigoL:'rgba(99,102,241,.15)',
-    green:'#10b981', greenL:'rgba(16,185,129,.15)',
-    orange:'#f59e0b', orangeL:'rgba(245,158,11,.15)',
-    purple:'#8b5cf6', purpleL:'rgba(139,92,246,.15)',
-    cyan:'#06b6d4', cyanL:'rgba(6,182,212,.15)',
-    red:'#ef4444', redL:'rgba(239,68,68,.15)',
-    slate:'#475569', slateL:'rgba(71,85,105,.15)'
+    spBlue: '#3b82f6',      // SP (Set Point) Always Blue
+    pvGreen: '#10b981',     // PV (Process Value) Always Green
+    cyan: '#06b6d4',
+    purple: '#8b5cf6',
+    red: '#ef4444',
+    slate: '#475569',
+    indigo: '#6366f1',
+    orange: '#f59e0b'
 };
 
 const charts = {};
@@ -27,14 +28,14 @@ function mk(id, cfg) {
 }
 
 // ════════════════════════════════════════════════════
-//  DEFAULT STATIC DATA (Representative Coils & Zones)
+//  DEFAULT STATIC DATA
 // ════════════════════════════════════════════════════
 
 let D = {
     coils: ['C07G0864','C07G0628','C07G0629','C07G0627','C07G0949','C07G0625','C07G0948','C07G0952','C07G0767','C07G0621'],
 
     // PHF Zones
-    phfZones: ['Zone 1','Zone 2','Zone 3','Zone 4','Zone 5'],
+    phfZones: ['Z1','Z2','Z3','Z4','Z5'],
     phfZoneSP: [1200, 1200, 1150, 1150, 1100],
     phfZonePV: [1196, 1195, 1147, 1140, 1085],
     phfZoneAGSP: [12.0, 11.5, 11.0, 10.5, 12.0],
@@ -43,7 +44,7 @@ let D = {
     phfExitPV: [728, 748, 750, 740, 738, 745, 732, 747, 741, 751],
 
     // RTF Zones
-    rtfZones: ['Zone 1','Zone 2','Zone 3'],
+    rtfZones: ['Z1','Z2','Z3'],
     rtfZoneSP: [770, 770, 770],
     rtfZonePV: [752, 780, 771],
     rtfExitSP: [750, 750, 750, 750, 740, 740, 740, 740, 740, 740],
@@ -83,7 +84,7 @@ function avg(arr) {
 }
 
 // ════════════════════════════════════════════════════
-//  MODE BADGE UPDATER
+//  MODE PILL BADGE UPDATER (Item 5)
 // ════════════════════════════════════════════════════
 
 function updateModeBadge(elId, modeStr) {
@@ -91,9 +92,7 @@ function updateModeBadge(elId, modeStr) {
     if (!el) return;
     const isAuto = modeStr.toUpperCase() === 'AUTO';
     el.className = `mode-badge ${isAuto ? 'mode-auto' : 'mode-manual'}`;
-    el.innerHTML = isAuto 
-        ? `<i class="fa-solid fa-robot"></i> AUTO MODE` 
-        : `<i class="fa-solid fa-hand"></i> MANUAL MODE`;
+    el.innerHTML = `<span class="mode-dot"></span> ${isAuto ? 'AUTO' : 'MANUAL'}`;
 }
 
 // ════════════════════════════════════════════════════
@@ -121,32 +120,34 @@ function renderAll() {
     updateModeBadge('sf-mode-badge', D.sfMode);
     updateModeBadge('jcf-mode-badge', D.hbrMode);
 
-    // 3. PHF Charts
-    const phfLabels = [...D.phfZones, 'PHF Exit'];
+    // 3. PHF Charts (Full Width, Item 1 & 6: Z1..Z5, EXIT PV)
+    const phfLabels = [...D.phfZones, 'EXIT PV'];
     const phfSP = [...D.phfZoneSP, avg(D.phfExitSP)];
     const phfPV = [...D.phfZonePV, avg(D.phfExitPV)];
-    mk('phfZoneTemp', lineChartSPPV(phfLabels, phfSP, phfPV, 'Temperature (°C)', C.indigo, C.green));
-    mk('phfZoneAG', lineChartSPPV(D.phfZones, D.phfZoneAGSP, D.phfZoneAGPV, 'A/G Ratio', C.blue, C.orange));
+    mk('phfZoneTemp', lineChartSPPV(phfLabels, phfSP, phfPV, 'Temperature (°C)'));
+    
+    // Air Gas Ratio (Item 9: Same SP/PV line style as temp)
+    mk('phfZoneAG', lineChartSPPV(D.phfZones, D.phfZoneAGSP, D.phfZoneAGPV, 'Air / Gas Ratio'));
 
-    // 4. RTF Charts (in same lane with JCF)
-    const rtfLabels = [...D.rtfZones, 'RTF Exit'];
+    // 4. RTF Chart (Row 2, Left)
+    const rtfLabels = [...D.rtfZones, 'EXIT PV'];
     const rtfSP = [...D.rtfZoneSP, avg(D.rtfExitSP)];
     const rtfPV = [...D.rtfZonePV, avg(D.rtfExitPV)];
-    mk('rtfZoneTemp', lineChartSPPV(rtfLabels, rtfSP, rtfPV, 'Temperature (°C)', C.indigo, C.green));
+    mk('rtfZoneTemp', lineChartSPPV(rtfLabels, rtfSP, rtfPV, 'Temperature (°C)'));
 
-    // 5. JCF + HBR Charts (in same lane with RTF)
-    const jcfLabels = ['Zone 1', 'Zone 2', 'Zone 3', 'HBR Exit'];
-    const jcfSP = [...D.jcfZoneSP, avg(D.hbrExitSP)];
-    const jcfPV = [...D.jcfZonePV, avg(D.hbrExitPV)];
-    mk('jcfZoneTemp', lineChartSPPV(jcfLabels, jcfSP, jcfPV, 'Temperature (°C)', C.purple, C.cyan));
-
-    // 6. SF Charts
-    const sfLabels = ['Heater Zone', 'SF Exit'];
+    // 5. SF Chart (Row 2, Right - Production Flow: PHF → RTF → SF!)
+    const sfLabels = ['HEATER', 'EXIT PV'];
     const sfSP = [avg(D.sfHeaterSP), avg(D.sfExitSP)];
     const sfPV = [avg(D.sfHeaterPV), avg(D.sfExitPV)];
-    mk('sfZoneTemp', lineChartSPPV(sfLabels, sfSP, sfPV, 'Temperature (°C)', C.indigo, C.orange));
+    mk('sfZoneTemp', lineChartSPPV(sfLabels, sfSP, sfPV, 'Temperature (°C)'));
 
-    // 7. SINGLE UNIFIED GAS & ATMOSPHERE DONUT CHART
+    // 6. JCF + HBR Chart (Row 3, Left - Production Flow: JCF → HBR → Gas!)
+    const jcfLabels = ['Z1', 'Z2', 'Z3', 'EXIT PV'];
+    const jcfSP = [...D.jcfZoneSP, avg(D.hbrExitSP)];
+    const jcfPV = [...D.jcfZonePV, avg(D.hbrExitPV)];
+    mk('jcfZoneTemp', lineChartSPPV(jcfLabels, jcfSP, jcfPV, 'Temperature (°C)'));
+
+    // 7. Single Unified Gas & Atmosphere Donut Chart (Row 3, Right)
     const avgH2 = avg(D.h2Flow);
     const avgN2 = avg(D.n2Flow);
     const avgO2 = avg(D.o2);
@@ -185,10 +186,10 @@ function renderAll() {
 }
 
 // ════════════════════════════════════════════════════
-//  CONNECTED DOT LINE CHART FACTORY (Upper SP, Lower PV)
+//  CONNECTED LINE CHART FACTORY (Item 7 & 8: SP Blue Always Top, PV Green Always Bottom)
 // ════════════════════════════════════════════════════
 
-function lineChartSPPV(labels, spData, pvData, yTitle, cSP, cPV) {
+function lineChartSPPV(labels, spData, pvData, yTitle) {
     return {
         type: 'line',
         data: {
@@ -197,31 +198,31 @@ function lineChartSPPV(labels, spData, pvData, yTitle, cSP, cPV) {
                 {
                     label: 'SP (Set Point)',
                     data: spData,
-                    borderColor: cSP,
-                    backgroundColor: cSP,
+                    borderColor: C.spBlue,
+                    backgroundColor: C.spBlue,
                     borderWidth: 3,
                     pointStyle: 'circle',
                     pointRadius: 6,
-                    pointHoverRadius: 9,
+                    pointHoverRadius: 8,
                     pointBackgroundColor: '#ffffff',
-                    pointBorderColor: cSP,
+                    pointBorderColor: C.spBlue,
                     pointBorderWidth: 3,
-                    tension: 0.25,
+                    tension: 0.2,
                     fill: false
                 },
                 {
                     label: 'PV (Process Value)',
                     data: pvData,
-                    borderColor: cPV,
-                    backgroundColor: cPV,
+                    borderColor: C.pvGreen,
+                    backgroundColor: C.pvGreen,
                     borderWidth: 3,
                     pointStyle: 'circle',
                     pointRadius: 6,
-                    pointHoverRadius: 9,
+                    pointHoverRadius: 8,
                     pointBackgroundColor: '#ffffff',
-                    pointBorderColor: cPV,
+                    pointBorderColor: C.pvGreen,
                     pointBorderWidth: 3,
-                    tension: 0.25,
+                    tension: 0.2,
                     fill: false
                 }
             ]
@@ -234,16 +235,28 @@ function lineChartSPPV(labels, spData, pvData, yTitle, cSP, cPV) {
                     position: 'top',
                     labels: {
                         usePointStyle: true,
-                        boxWidth: 10,
+                        boxWidth: 8,
                         font: { size: 12, weight: '700' }
                     }
                 },
+                // Item 8: Custom Hover Value Labels (Zone 3 \n SP : 874°C \n PV : 868°C)
                 tooltip: {
-                    padding: 10,
+                    padding: 12,
                     cornerRadius: 8,
+                    titleFont: { size: 12, weight: '800' },
+                    bodyFont: { size: 12, weight: '600' },
                     callbacks: {
+                        title: function(items) {
+                            if (!items || !items.length) return '';
+                            const l = items[0].label;
+                            return l.startsWith('Z') ? `Zone ${l.replace('Z','')}` : l;
+                        },
                         label: function(ctx) {
-                            return `${ctx.dataset.label}: ${ctx.raw} ${yTitle.includes('°C') ? '°C' : ''}`;
+                            const isSP = ctx.dataset.label.startsWith('SP');
+                            const dsTag = isSP ? 'SP' : 'PV';
+                            const unit = yTitle.includes('°C') ? '°C' : (yTitle.includes('Ratio') ? '' : '');
+                            const valStr = typeof ctx.raw === 'number' ? (yTitle.includes('Ratio') ? ctx.raw.toFixed(2) : ctx.raw.toFixed(1)) : ctx.raw;
+                            return `  ${dsTag} : ${valStr}${unit}`;
                         }
                     }
                 }
@@ -251,7 +264,7 @@ function lineChartSPPV(labels, spData, pvData, yTitle, cSP, cPV) {
             scales: {
                 x: {
                     grid: { display: false },
-                    ticks: { font: { weight: '600' } }
+                    ticks: { font: { weight: '700', size: 11 } }
                 },
                 y: {
                     title: { display: true, text: yTitle, font: { weight: '700' } },
@@ -288,8 +301,8 @@ function singleUnifiedGasDonut(labels, data, colors) {
                     position: 'top',
                     labels: {
                         usePointStyle: true,
-                        padding: 16,
-                        font: { size: 12, weight: '700' }
+                        padding: 14,
+                        font: { size: 11, weight: '700' }
                     }
                 },
                 tooltip: {
@@ -297,8 +310,7 @@ function singleUnifiedGasDonut(labels, data, colors) {
                     cornerRadius: 8,
                     callbacks: {
                         label: function(ctx) {
-                            const val = ctx.raw;
-                            return `${ctx.label}: ${val}`;
+                            return `  ${ctx.label}: ${ctx.raw}`;
                         }
                     }
                 }
