@@ -65,16 +65,16 @@
                 </div>
                 <div class="chart-card">
                     <div class="chart-header">
-                        <h3 class="chart-title"><i class="fa-solid fa-chart-column" style="color:#10b981"></i> Air Gas Ratio</h3>
-                        <span class="chart-subtitle">Z1 • Z2 • Z3 • Z4 • Z5 · Clustered Column</span>
+                        <h3 class="chart-title"><i class="fa-solid fa-sliders" style="color:#10b981"></i> Air Gas Ratio</h3>
+                        <span class="chart-subtitle">Z1 • Z2 • Z3 • Z4 • Z5 · SP Line + PV Column</span>
                     </div>
                     <div class="chart-wrapper"><canvas id="phfZoneAG"></canvas></div>
                 </div>
             </div>
         </div>
 
-        <!-- ═══ PROCESS ROW 1: RTF & SF ═══ -->
-        <div class="stage-row cols-2">
+        <!-- ═══ PROCESS ROW 1: RTF (60%) & SF (40%) ═══ -->
+        <div class="stage-row cols-60-40">
             
             <!-- ═══ RTF ═══ -->
             <div class="stage-module accent-rtf">
@@ -104,8 +104,8 @@
                 <div class="stage-charts cols-1">
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3 class="chart-title"><i class="fa-solid fa-chart-area" style="color:#f59e0b"></i> Zone Temperature</h3>
-                            <span class="chart-subtitle">HEATER • EXIT PV · Line &amp; Column Combo</span>
+                            <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#f59e0b"></i> Zone Temperature</h3>
+                            <span class="chart-subtitle">HEATER • EXIT PV · Connected Line</span>
                         </div>
                         <div class="chart-wrapper"><canvas id="sfZoneTemp"></canvas></div>
                     </div>
@@ -117,7 +117,7 @@
         <!-- ═══ PROCESS ROW 2: JCF & GAS ═══ -->
         <div class="stage-row cols-2">
 
-            <!-- ═══ JCF + HBR ═══ -->
+            <!-- ═══ JCF + HBR (SAME AS PHF: CONNECTED LINE) ═══ -->
             <div class="stage-module accent-jcf">
                 <div class="stage-head">
                     <span class="stage-icon icon-jcf"><i class="fa-solid fa-snowflake"></i></span>
@@ -127,8 +127,8 @@
                 <div class="stage-charts cols-1">
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3 class="chart-title"><i class="fa-solid fa-chart-column" style="color:#8b5cf6"></i> Zone Temperature</h3>
-                            <span class="chart-subtitle">Z1 • Z2 • Z3 • EXIT PV · Clustered Column</span>
+                            <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#8b5cf6"></i> Zone Temperature</h3>
+                            <span class="chart-subtitle">Z1 • Z2 • Z3 • EXIT PV · Connected Line</span>
                         </div>
                         <div class="chart-wrapper"><canvas id="jcfZoneTemp"></canvas></div>
                     </div>

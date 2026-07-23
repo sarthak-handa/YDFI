@@ -1,5 +1,5 @@
-/* ACPPL GI Furnace Dashboard — script.js v8
-   Chart Diversity: Line, Clustered Column, Combo Line & Column, Pie Chart */
+/* ACPPL GI Furnace Dashboard — script.js v9
+   Refined Layout & Custom Chart Logic per User Feedback */
 
 Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
 Chart.defaults.font.size = 11;
@@ -120,32 +120,32 @@ function renderAll() {
     updateModeBadge('jcf-mode-badge', D.hbrMode);
 
     // 3. PHF Charts
-    // PHF Zone Temp: Line Chart with connected dots
+    // PHF Zone Temp: Connected Line Chart
     const phfLabels = [...D.phfZones, 'EXIT PV'];
     const phfSP = [...D.phfZoneSP, avg(D.phfExitSP)];
     const phfPV = [...D.phfZonePV, avg(D.phfExitPV)];
     mk('phfZoneTemp', lineChartSPPV(phfLabels, phfSP, phfPV, 'Temperature (°C)'));
     
-    // PHF Air Gas Ratio: Clustered Column Chart
-    mk('phfZoneAG', clusteredColumnChartSPPV(D.phfZones, D.phfZoneAGSP, D.phfZoneAGPV, 'Air / Gas Ratio'));
+    // PHF Air Gas Ratio: SP Line + PV Column Combo Chart (User Request 1)
+    mk('phfZoneAG', comboSpLinePvColumn(D.phfZones, D.phfZoneAGSP, D.phfZoneAGPV, 'Air / Gas Ratio'));
 
-    // 4. RTF Chart: Line Chart
+    // 4. RTF Chart: Connected Line Chart (60% Width Row 2)
     const rtfLabels = [...D.rtfZones, 'EXIT PV'];
     const rtfSP = [...D.rtfZoneSP, avg(D.rtfExitSP)];
     const rtfPV = [...D.rtfZonePV, avg(D.rtfExitPV)];
     mk('rtfZoneTemp', lineChartSPPV(rtfLabels, rtfSP, rtfPV, 'Temperature (°C)'));
 
-    // 5. SF Chart: Line & Clustered Column Combo Chart
+    // 5. SF Chart: Connected Line Chart (User Request 3 - Clean Connected Line)
     const sfLabels = ['HEATER', 'EXIT PV'];
     const sfSP = [avg(D.sfHeaterSP), avg(D.sfExitSP)];
     const sfPV = [avg(D.sfHeaterPV), avg(D.sfExitPV)];
-    mk('sfZoneTemp', comboLineColumnChartSPPV(sfLabels, sfSP, sfPV, 'Temperature (°C)'));
+    mk('sfZoneTemp', lineChartSPPV(sfLabels, sfSP, sfPV, 'Temperature (°C)'));
 
-    // 6. JCF + HBR Chart: Clustered Column Chart
+    // 6. JCF + HBR Chart: Connected Line Chart (User Request 4 - Exactly like PHF)
     const jcfLabels = ['Z1', 'Z2', 'Z3', 'EXIT PV'];
     const jcfSP = [...D.jcfZoneSP, avg(D.hbrExitSP)];
     const jcfPV = [...D.jcfZonePV, avg(D.hbrExitPV)];
-    mk('jcfZoneTemp', clusteredColumnChartSPPV(jcfLabels, jcfSP, jcfPV, 'Temperature (°C)'));
+    mk('jcfZoneTemp', lineChartSPPV(jcfLabels, jcfSP, jcfPV, 'Temperature (°C)'));
 
     // 7. SINGLE UNIFIED GAS & ATMOSPHERE PIE CHART
     const avgH2 = avg(D.h2Flow);
@@ -186,7 +186,7 @@ function renderAll() {
 }
 
 // ════════════════════════════════════════════════════
-//  1. CONNECTED LINE CHART FACTORY
+//  1. CONNECTED LINE CHART FACTORY (SP Blue, PV Green)
 // ════════════════════════════════════════════════════
 
 function lineChartSPPV(labels, spData, pvData, yTitle) {
@@ -232,69 +232,40 @@ function lineChartSPPV(labels, spData, pvData, yTitle) {
 }
 
 // ════════════════════════════════════════════════════
-//  2. CLUSTERED COLUMN CHART FACTORY
+//  2. SP LINE + PV COLUMN COMBO CHART (Air Gas Ratio)
 // ════════════════════════════════════════════════════
 
-function clusteredColumnChartSPPV(labels, spData, pvData, yTitle) {
+function comboSpLinePvColumn(labels, spData, pvData, yTitle) {
     return {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [
-                {
-                    label: 'SP (Set Point)',
-                    data: spData,
-                    backgroundColor: C.spBlue,
-                    borderRadius: 4,
-                    barPercentage: 0.65,
-                    categoryPercentage: 0.7
-                },
-                {
-                    label: 'PV (Process Value)',
-                    data: pvData,
-                    backgroundColor: C.pvGreen,
-                    borderRadius: 4,
-                    barPercentage: 0.65,
-                    categoryPercentage: 0.7
-                }
-            ]
-        },
-        options: commonOptions(yTitle)
-    };
-}
-
-// ════════════════════════════════════════════════════
-//  3. LINE & CLUSTERED COLUMN COMBO CHART FACTORY
-// ════════════════════════════════════════════════════
-
-function comboLineColumnChartSPPV(labels, spData, pvData, yTitle) {
-    return {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    type: 'bar',
-                    label: 'SP (Set Point)',
-                    data: spData,
-                    backgroundColor: C.spBlue,
-                    borderRadius: 4,
-                    barPercentage: 0.5
-                },
                 {
                     type: 'line',
-                    label: 'PV (Process Value)',
-                    data: pvData,
-                    borderColor: C.pvGreen,
-                    backgroundColor: C.pvGreen,
+                    label: 'SP (Set Point)',
+                    data: spData,
+                    borderColor: C.spBlue,
+                    backgroundColor: C.spBlue,
                     borderWidth: 3,
                     pointStyle: 'circle',
                     pointRadius: 6,
+                    pointHoverRadius: 8,
                     pointBackgroundColor: '#ffffff',
-                    pointBorderColor: C.pvGreen,
+                    pointBorderColor: C.spBlue,
                     pointBorderWidth: 3,
                     tension: 0.2,
-                    fill: false
+                    fill: false,
+                    order: 1
+                },
+                {
+                    type: 'bar',
+                    label: 'PV (Process Value)',
+                    data: pvData,
+                    backgroundColor: C.pvGreen,
+                    borderRadius: 5,
+                    barPercentage: 0.55,
+                    order: 2
                 }
             ]
         },
@@ -355,7 +326,7 @@ function commonOptions(yTitle) {
 }
 
 // ════════════════════════════════════════════════════
-//  4. SINGLE UNIFIED GAS PIE CHART FACTORY
+//  3. SINGLE UNIFIED GAS PIE CHART FACTORY
 // ════════════════════════════════════════════════════
 
 function singleUnifiedGasPie(labels, data, colors) {
