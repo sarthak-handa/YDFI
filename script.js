@@ -1,5 +1,5 @@
-/* ACPPL GI Furnace Dashboard — script.js v5
-   Line charts for Zone + Exit Temperatures · Mode Badges · Donut charts for Gas & Combustion */
+/* ACPPL GI Furnace Dashboard — script.js v6
+   Line charts for Zone + Exit Temperatures · Mode Badges · RTF & JCF in same lane · Single Unified Gas Donut Chart */
 
 Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
 Chart.defaults.font.size = 11;
@@ -122,69 +122,66 @@ function renderAll() {
     updateModeBadge('jcf-mode-badge', D.hbrMode);
 
     // 3. PHF Charts
-    // Merge PHF Exit into Zone line chart labels & datasets
     const phfLabels = [...D.phfZones, 'PHF Exit'];
     const phfSP = [...D.phfZoneSP, avg(D.phfExitSP)];
     const phfPV = [...D.phfZonePV, avg(D.phfExitPV)];
     mk('phfZoneTemp', lineChartSPPV(phfLabels, phfSP, phfPV, 'Temperature (°C)', C.indigo, C.green));
-
-    // PHF Zone A/G Ratio line chart
     mk('phfZoneAG', lineChartSPPV(D.phfZones, D.phfZoneAGSP, D.phfZoneAGPV, 'A/G Ratio', C.blue, C.orange));
 
-    // 4. RTF Charts
-    // Merge RTF Exit into Zone line chart labels & datasets
+    // 4. RTF Charts (in same lane with JCF)
     const rtfLabels = [...D.rtfZones, 'RTF Exit'];
     const rtfSP = [...D.rtfZoneSP, avg(D.rtfExitSP)];
     const rtfPV = [...D.rtfZonePV, avg(D.rtfExitPV)];
     mk('rtfZoneTemp', lineChartSPPV(rtfLabels, rtfSP, rtfPV, 'Temperature (°C)', C.indigo, C.green));
 
-    // 5. SF Charts
-    // Merge SF Exit into SF Heater line chart labels & datasets
-    const sfLabels = ['Heater Zone', 'SF Exit'];
-    const sfSP = [avg(D.sfHeaterSP), avg(D.sfExitSP)];
-    const sfPV = [avg(D.sfHeaterPV), avg(D.sfExitPV)];
-    mk('sfZoneTemp', lineChartSPPV(sfLabels, sfSP, sfPV, 'Temperature (°C)', C.indigo, C.orange));
-
-    // 6. JCF + HBR Charts
-    // Merge HBR Exit as final zone in JCF line chart
+    // 5. JCF + HBR Charts (in same lane with RTF)
     const jcfLabels = ['Zone 1', 'Zone 2', 'Zone 3', 'HBR Exit'];
     const jcfSP = [...D.jcfZoneSP, avg(D.hbrExitSP)];
     const jcfPV = [...D.jcfZonePV, avg(D.hbrExitPV)];
     mk('jcfZoneTemp', lineChartSPPV(jcfLabels, jcfSP, jcfPV, 'Temperature (°C)', C.purple, C.cyan));
 
-    // 7. Gas & Combustion Donut Charts
-    // Donut 1: H2 vs N2 Flow Proportion
+    // 6. SF Charts
+    const sfLabels = ['Heater Zone', 'SF Exit'];
+    const sfSP = [avg(D.sfHeaterSP), avg(D.sfExitSP)];
+    const sfPV = [avg(D.sfHeaterPV), avg(D.sfExitPV)];
+    mk('sfZoneTemp', lineChartSPPV(sfLabels, sfSP, sfPV, 'Temperature (°C)', C.indigo, C.orange));
+
+    // 7. SINGLE UNIFIED GAS & ATMOSPHERE DONUT CHART
     const avgH2 = avg(D.h2Flow);
     const avgN2 = avg(D.n2Flow);
-    mk('gasFlowDonut', donutChart(
-        ['H₂ Flow (Nm³/h)', 'N₂ Flow (Nm³/h)'],
-        [avgH2, avgN2],
-        [C.cyan, C.purple],
-        `${(avgH2 + avgN2).toFixed(1)} Nm³/h`,
-        'Total Flow'
-    ));
-
-    // Donut 2: O2 & Dew Point Indicator
     const avgO2 = avg(D.o2);
-    const avgDewPt = Math.abs(avg(D.dewPt));
-    mk('gasO2Donut', donutChart(
-        ['O₂ (ppm)', 'Dew Point (|°C|)'],
-        [avgO2, avgDewPt],
-        [C.red, C.slate],
-        `${avgO2.toFixed(1)} ppm`,
-        'Avg O₂'
-    ));
-
-    // Donut 3: Combustion Air Pressure (SP vs PV)
-    const avgCombSP = avg(D.combSP);
+    const avgDewPt = avg(D.dewPt);
     const avgCombPV = avg(D.combPV);
-    mk('gasCombDonut', donutChart(
-        ['Comb Air SP (mmwc)', 'Comb Air PV (mmwc)'],
-        [avgCombSP, avgCombPV],
-        [C.indigo, C.green],
-        `${avgCombPV.toFixed(0)} mmwc`,
-        'Comb PV'
-    ));
+
+    const gasLabels = [
+        'H₂ Flow (Nm³/h)',
+        'N₂ Flow (Nm³/h)',
+        'O₂ Level (ppm)',
+        'Dew Point (|°C|)',
+        'Comb Air Press (mmwc)'
+    ];
+    const gasData = [
+        avgH2,
+        avgN2,
+        avgO2,
+        Math.abs(avgDewPt),
+        avgCombPV
+    ];
+    const gasColors = [C.cyan, C.purple, C.red, C.slate, C.indigo];
+
+    mk('gasUnifiedDonut', singleUnifiedGasDonut(gasLabels, gasData, gasColors));
+
+    // Update Gas Summary Chips below chart
+    const chipsContainer = document.getElementById('gasSummaryChips');
+    if (chipsContainer) {
+        chipsContainer.innerHTML = `
+            <div class="gas-chip"><span class="chip-dot" style="background:${C.cyan}"></span><span class="chip-label">H₂ Flow</span><span class="chip-val">${avgH2.toFixed(1)} Nm³/h</span></div>
+            <div class="gas-chip"><span class="chip-dot" style="background:${C.purple}"></span><span class="chip-label">N₂ Flow</span><span class="chip-val">${avgN2.toFixed(1)} Nm³/h</span></div>
+            <div class="gas-chip"><span class="chip-dot" style="background:${C.red}"></span><span class="chip-label">O₂ Level</span><span class="chip-val">${avgO2.toFixed(1)} ppm</span></div>
+            <div class="gas-chip"><span class="chip-dot" style="background:${C.slate}"></span><span class="chip-label">Dew Point</span><span class="chip-val">${avgDewPt.toFixed(1)} °C</span></div>
+            <div class="gas-chip"><span class="chip-dot" style="background:${C.indigo}"></span><span class="chip-label">Comb Air Press</span><span class="chip-val">${avgCombPV.toFixed(0)} mmwc</span></div>
+        `;
+    }
 }
 
 // ════════════════════════════════════════════════════
@@ -267,10 +264,10 @@ function lineChartSPPV(labels, spData, pvData, yTitle, cSP, cPV) {
 }
 
 // ════════════════════════════════════════════════════
-//  DONUT CHART FACTORY (Gas & Combustion)
+//  SINGLE UNIFIED GAS DONUT CHART FACTORY
 // ════════════════════════════════════════════════════
 
-function donutChart(labels, data, colors, centerVal, centerSub) {
+function singleUnifiedGasDonut(labels, data, colors) {
     return {
         type: 'doughnut',
         data: {
@@ -280,28 +277,28 @@ function donutChart(labels, data, colors, centerVal, centerSub) {
                 backgroundColor: colors,
                 borderWidth: 2,
                 borderColor: '#ffffff',
-                hoverOffset: 6
+                hoverOffset: 8
             }]
         },
         options: {
             responsive: true,
-            cutout: '72%',
+            cutout: '68%',
             plugins: {
                 legend: {
-                    position: 'bottom',
+                    position: 'top',
                     labels: {
                         usePointStyle: true,
                         padding: 16,
-                        font: { size: 11, weight: '600' }
+                        font: { size: 12, weight: '700' }
                     }
                 },
                 tooltip: {
+                    padding: 10,
+                    cornerRadius: 8,
                     callbacks: {
                         label: function(ctx) {
                             const val = ctx.raw;
-                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                            const pct = ((val / total) * 100).toFixed(1);
-                            return `${ctx.label}: ${val} (${pct}%)`;
+                            return `${ctx.label}: ${val}`;
                         }
                     }
                 }

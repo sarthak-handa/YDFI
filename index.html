@@ -73,22 +73,45 @@
             </div>
         </div>
 
-        <!-- ═══ RTF ═══ -->
-        <div class="stage-module">
-            <div class="stage-head">
-                <span class="stage-icon icon-rtf"><i class="fa-solid fa-circle-radiation"></i></span>
-                <h2>Radiant Tube Furnace (RTF)</h2>
-                <span id="rtf-mode-badge" class="mode-badge mode-auto"><i class="fa-solid fa-robot"></i> AUTO MODE</span>
-            </div>
-            <div class="stage-charts cols-1">
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#10b981"></i> RTF Zone &amp; Exit Temperature</h3>
-                        <span class="chart-subtitle">Z1–Z3 + Exit · Connected Line</span>
+        <!-- ═══ SAME LANE ROW: RTF & JCF ═══ -->
+        <div class="stage-row cols-2">
+            
+            <!-- ═══ RTF ═══ -->
+            <div class="stage-module">
+                <div class="stage-head">
+                    <span class="stage-icon icon-rtf"><i class="fa-solid fa-circle-radiation"></i></span>
+                    <h2>Radiant Tube Furnace (RTF)</h2>
+                    <span id="rtf-mode-badge" class="mode-badge mode-auto"><i class="fa-solid fa-robot"></i> AUTO MODE</span>
+                </div>
+                <div class="stage-charts cols-1">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#10b981"></i> RTF Zone &amp; Exit Temperature</h3>
+                            <span class="chart-subtitle">Z1–Z3 + Exit · Connected Line</span>
+                        </div>
+                        <div class="chart-wrapper"><canvas id="rtfZoneTemp"></canvas></div>
                     </div>
-                    <div class="chart-wrapper"><canvas id="rtfZoneTemp"></canvas></div>
                 </div>
             </div>
+
+            <!-- ═══ JCF + HBR ═══ -->
+            <div class="stage-module">
+                <div class="stage-head">
+                    <span class="stage-icon icon-jcf"><i class="fa-solid fa-snowflake"></i></span>
+                    <h2>Jet Cooling (JCF) + Hot Bridle (HBR)</h2>
+                    <span id="jcf-mode-badge" class="mode-badge mode-manual"><i class="fa-solid fa-hand"></i> MANUAL MODE</span>
+                </div>
+                <div class="stage-charts cols-1">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#8b5cf6"></i> JCF &amp; HBR Exit Temperature</h3>
+                            <span class="chart-subtitle">Z1–Z3 + Exit · Connected Line</span>
+                        </div>
+                        <div class="chart-wrapper"><canvas id="jcfZoneTemp"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <!-- ═══ SF ═══ -->
@@ -109,57 +132,22 @@
             </div>
         </div>
 
-        <!-- ═══ JCF + HBR ═══ -->
-        <div class="stage-module">
-            <div class="stage-head">
-                <span class="stage-icon icon-jcf"><i class="fa-solid fa-snowflake"></i></span>
-                <h2>Jet Cooling (JCF) + Hot Bridle Roll (HBR)</h2>
-                <span id="jcf-mode-badge" class="mode-badge mode-manual"><i class="fa-solid fa-hand"></i> MANUAL MODE</span>
-            </div>
-            <div class="stage-charts cols-1">
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#8b5cf6"></i> JCF &amp; HBR Exit Temperature</h3>
-                        <span class="chart-subtitle">Z1–Z3 + Exit · Connected Line</span>
-                    </div>
-                    <div class="chart-wrapper"><canvas id="jcfZoneTemp"></canvas></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ═══ GAS & COMBUSTION ═══ -->
+        <!-- ═══ GAS & COMBUSTION (SINGLE UNIFIED CHART) ═══ -->
         <div class="stage-module">
             <div class="stage-head">
                 <span class="stage-icon icon-gas"><i class="fa-solid fa-wind"></i></span>
                 <h2>Gas &amp; Atmosphere Parameters</h2>
             </div>
-            <div class="stage-charts cols-3">
+            <div class="stage-charts cols-1">
                 <div class="chart-card">
                     <div class="chart-header">
-                        <h3 class="chart-title"><i class="fa-solid fa-pie-chart" style="color:#06b6d4"></i> H₂ &amp; N₂ Gas Mix</h3>
-                        <span class="chart-subtitle">Atmosphere Flow (Nm³/h)</span>
+                        <h3 class="chart-title"><i class="fa-solid fa-pie-chart" style="color:#06b6d4"></i> Unified Atmosphere &amp; Combustion Parameters</h3>
+                        <span class="chart-subtitle">Single Chart Overview</span>
                     </div>
                     <div class="chart-wrapper">
-                        <canvas id="gasFlowDonut"></canvas>
+                        <canvas id="gasUnifiedDonut"></canvas>
                     </div>
-                </div>
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fa-solid fa-pie-chart" style="color:#ef4444"></i> O₂ &amp; Dew Point</h3>
-                        <span class="chart-subtitle">Atmosphere Purity</span>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="gasO2Donut"></canvas>
-                    </div>
-                </div>
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fa-solid fa-pie-chart" style="color:#475569"></i> Combustion Air Pressure</h3>
-                        <span class="chart-subtitle">SP vs PV (mmwc)</span>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="gasCombDonut"></canvas>
-                    </div>
+                    <div class="gas-summary-chips" id="gasSummaryChips"></div>
                 </div>
             </div>
         </div>
