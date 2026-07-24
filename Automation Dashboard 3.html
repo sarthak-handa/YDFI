@@ -1,624 +1,662 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM Analytics Suite - v3.0</title>
+    <title>ACPPL GI Furnace Analytics | Real-Time Industrial Monitoring</title>
     
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js & Plugins -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Inter', system-ui, sans-serif; background-color: #f1f5f9; }
-        
-        /* Navigation Tabs */
-        .tab-btn { @apply text-slate-400 hover:text-white px-4 py-2 text-sm font-medium transition-colors border-b-2 border-transparent; }
-        .tab-btn.active { @apply text-white border-blue-500 bg-slate-800/50; }
-
-        /* Explorer Sidebar Controls */
-        .control-label { @apply text-xs font-bold text-slate-500 uppercase tracking-wide mb-1 block; }
-        .control-input { @apply w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none; }
-        .granularity-btn { @apply px-3 py-1.5 text-xs font-medium border border-slate-200 rounded hover:bg-slate-50 text-slate-600; }
-        .granularity-btn.active { @apply bg-blue-50 text-blue-700 border-blue-500; }
-
-        /* Dashboard Cards */
-        .chart-card {
-            background: white;
-            border-radius: 0.5rem;
-            border: 1px solid #e2e8f0;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        .chart-header {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;
-        }
-        .chart-title { font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
-        .chart-wrapper { flex-grow: 1; position: relative; width: 100%; min-height: 200px; }
-
-        /* Dashboard Grid Layout */
-        .dashboard-container {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            padding: 1.5rem;
-            height: calc(100vh - 64px);
-            overflow-y: auto;
-        }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     </style>
 </head>
-<body class="text-slate-900 h-screen flex flex-col overflow-hidden">
+<body class="bg-slate-50 text-slate-800 antialiased min-h-full flex flex-col selection:bg-blue-500 selection:text-white">
 
-    <header class="bg-slate-900 text-white h-16 flex-none z-50 shadow-md px-6 flex justify-between items-center">
-        <div class="flex items-center gap-6">
-            <div class="flex items-center gap-3">
-                <div class="bg-blue-600 p-1.5 rounded">
-                    <i class="fa-solid fa-industry text-white text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold tracking-tight leading-none">CRM Analytics</h1>
-                    <p class="text-[10px] text-slate-400 font-medium">COLD ROLLING MILL OPS</p>
-                </div>
+    <!-- HEADER -->
+    <header class="bg-white h-16 flex items-center justify-between px-6 border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+        <div class="flex items-center gap-[14px]">
+            <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-xl shadow-sm">
+                YD
             </div>
-            
-            <div class="flex bg-slate-800/50 rounded p-1 gap-1">
-                <button onclick="switchTab('explorer')" id="btn-explorer" class="tab-btn rounded">
-                    <i class="fa-solid fa-chart-line mr-2"></i>Explorer
-                </button>
-                <button onclick="switchTab('dashboard')" id="btn-dashboard" class="tab-btn active rounded">
-                    <i class="fa-solid fa-table-columns mr-2"></i>Dashboard
-                </button>
+            <div>
+                <h1 class="text-[16px] font-extrabold text-slate-900 tracking-[.04em] leading-tight">ACPPL GI FURNACE</h1>
+                <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-[.06em]">Industrial Furnace Analytics</p>
             </div>
         </div>
-
-        <div class="flex items-center gap-4">
-            <div class="text-right hidden md:block">
-                <p class="text-[10px] text-slate-400 uppercase">Current Dataset</p>
-                <p id="fileNameDisplay" class="text-sm font-bold text-white">Production_Data.csv</p>
-            </div>
-            <label class="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2">
+        <div class="flex items-center gap-2">
+            <button className="bg-transparent text-slate-600 hover:bg-slate-100 py-2 px-3 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+                <i class="fa-solid fa-chart-line text-blue-500"></i> Custom Trends
+            </button>
+            <button className="bg-transparent text-slate-600 hover:bg-slate-100 py-2 px-3 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+                <i class="fa-solid fa-file-lines text-emerald-500"></i> Reports
+            </button>
+            <button className="bg-transparent text-slate-600 hover:bg-slate-100 py-2 px-3 rounded-lg text-[13px] font-semibold flex items-center gap-2 transition-colors">
+                <i class="fa-solid fa-bolt text-amber-500"></i> Back to Live View
+            </button>
+            <label class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors shadow-xs" htmlFor="globalCsvInput">
                 <i class="fa-solid fa-upload"></i> Load CSV
-                <input type="file" id="globalFileInput" accept=".csv" class="hidden">
             </label>
+            <input type="file" id="globalCsvInput" accept=".csv" class="hidden" onchange="handleCSVUpload(event)">
+            <span id="fileNameDisplay" class="text-[10px] text-slate-500 max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap font-medium">Demo Data</span>
         </div>
     </header>
 
-    <main class="flex-grow relative bg-slate-100 overflow-hidden">
+    <!-- DATE & RANGE FILTER BAR -->
+    <div class="bg-slate-900 py-3 px-6 flex items-center gap-4 flex-wrap text-white">
+        <div class="flex items-center gap-2">
+            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-[.05em]">Start</span>
+            <input type="date" class="bg-white/10 border border-white/15 text-white font-sans text-[12px] py-[6px] px-3 rounded-md outline-none focus:ring-1 focus:ring-blue-400" value="2026-07-17" />
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-[.05em]">End</span>
+            <input type="date" class="bg-white/10 border border-white/15 text-white font-sans text-[12px] py-[6px] px-3 rounded-md outline-none focus:ring-1 focus:ring-blue-400" value="2026-07-20" />
+        </div>
+        <div class="flex gap-1 ml-auto">
+            <button class="bg-white/5 border border-white/10 text-slate-300 text-[12px] font-semibold py-1.5 px-3.5 rounded-md hover:bg-white/15 hover:text-white transition-colors">1D</button>
+            <button class="bg-blue-600 border border-blue-600 text-white text-[12px] font-semibold py-1.5 px-3.5 rounded-md shadow-xs">7D</button>
+            <button class="bg-white/5 border border-white/10 text-slate-300 text-[12px] font-semibold py-1.5 px-3.5 rounded-md hover:bg-white/15 hover:text-white transition-colors">30D</button>
+            <button class="bg-white/5 border border-white/10 text-slate-300 text-[12px] font-semibold py-1.5 px-3.5 rounded-md hover:bg-white/15 hover:text-white transition-colors">6M</button>
+            <button class="bg-white/5 border border-white/10 text-slate-300 text-[12px] font-semibold py-1.5 px-3.5 rounded-md hover:bg-white/15 hover:text-white transition-colors">1Y</button>
+        </div>
+    </div>
 
-        <div id="view-explorer" class="absolute inset-0 flex hidden bg-white">
-            <aside class="w-80 border-r border-slate-200 flex-none flex flex-col h-full bg-white z-10 shadow-xl">
-                <div class="p-5 flex-grow overflow-y-auto space-y-6">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-sliders text-blue-600"></i> Analysis Config
-                        </h2>
-                        <p class="text-xs text-slate-500">Slice and dice your production data.</p>
+    <!-- MAIN DASHBOARD CONTENT -->
+    <main class="p-6 flex flex-col gap-6 max-w-[1920px] mx-auto w-full flex-grow">
+        
+        <!-- 6 SYMMETRIC KPI CARDS -->
+        <section class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <!-- KPI 1 -->
+            <div class="bg-white rounded-xl py-4 px-[18px] border-l-4 border-l-slate-600 border-t border-r border-b border-slate-200 shadow-sm relative group">
+                <div class="flex justify-between items-start mb-1">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-[.06em]">Total Coils</div>
+                    <button onclick="showInfoModal('Total Coils', 'Total coil count currently processed in the furnace line.')" class="text-slate-300 hover:text-slate-500 text-[11px]"><i class="fa-solid fa-circle-info"></i></button>
+                </div>
+                <div class="text-[26px] font-extrabold leading-[1.1] text-slate-900" id="kpi-coils">109</div>
+            </div>
+            <!-- KPI 2 -->
+            <div class="bg-white rounded-xl py-4 px-[18px] border-l-4 border-l-blue-500 border-t border-r border-b border-slate-200 shadow-sm relative group">
+                <div class="flex justify-between items-start mb-1">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-[.06em]">PHF Exit Avg</div>
+                    <button onclick="showInfoModal('PHF Exit Avg', 'Pre-Heat Furnace exit temperature average in °C across all processed coils.')" class="text-slate-300 hover:text-slate-500 text-[11px]"><i class="fa-solid fa-circle-info"></i></button>
+                </div>
+                <div class="text-[26px] font-extrabold leading-[1.1] text-blue-600" id="kpi-phf">742.3 <span class="text-[13px] font-bold text-slate-500 ml-1">°C</span></div>
+            </div>
+            <!-- KPI 3 -->
+            <div class="bg-white rounded-xl py-4 px-[18px] border-l-4 border-l-emerald-500 border-t border-r border-b border-slate-200 shadow-sm relative group">
+                <div class="flex justify-between items-start mb-1">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-[.06em]">RTF Exit Avg</div>
+                    <button onclick="showInfoModal('RTF Exit Avg', 'Radiant Tube Furnace exit temperature average in °C across all processed coils.')" class="text-slate-300 hover:text-slate-500 text-[11px]"><i class="fa-solid fa-circle-info"></i></button>
+                </div>
+                <div class="text-[26px] font-extrabold leading-[1.1] text-emerald-600" id="kpi-rtf">742.3 <span class="text-[13px] font-bold text-slate-500 ml-1">°C</span></div>
+            </div>
+            <!-- KPI 4 -->
+            <div class="bg-white rounded-xl py-4 px-[18px] border-l-4 border-l-amber-500 border-t border-r border-b border-slate-200 shadow-sm relative group">
+                <div class="flex justify-between items-start mb-1">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-[.06em]">SF Exit Avg</div>
+                    <button onclick="showInfoModal('SF Exit Avg', 'Soaking Furnace exit temperature average in °C across all processed coils.')" class="text-slate-300 hover:text-slate-500 text-[11px]"><i class="fa-solid fa-circle-info"></i></button>
+                </div>
+                <div class="text-[26px] font-extrabold leading-[1.1] text-amber-600" id="kpi-sf">716.7 <span class="text-[13px] font-bold text-slate-500 ml-1">°C</span></div>
+            </div>
+            <!-- KPI 5 -->
+            <div class="bg-white rounded-xl py-4 px-[18px] border-l-4 border-l-violet-500 border-t border-r border-b border-slate-200 shadow-sm relative group">
+                <div class="flex justify-between items-start mb-1">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-[.06em]">HBR Exit Avg</div>
+                    <button onclick="showInfoModal('HBR Exit Avg', 'Hot Bridle exit temperature average in °C across all processed coils.')" class="text-slate-300 hover:text-slate-500 text-[11px]"><i class="fa-solid fa-circle-info"></i></button>
+                </div>
+                <div class="text-[26px] font-extrabold leading-[1.1] text-violet-600" id="kpi-hbr">481.8 <span class="text-[13px] font-bold text-slate-500 ml-1">°C</span></div>
+            </div>
+            <!-- KPI 6 -->
+            <div class="bg-white rounded-xl py-4 px-[18px] border-l-4 border-l-cyan-500 border-t border-r border-b border-slate-200 shadow-sm relative group">
+                <div class="flex justify-between items-start mb-1">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-[.06em]">Avg A/G Ratio</div>
+                    <button onclick="showInfoModal('Avg A/G Ratio', 'Average Air-to-Gas combustion ratio across PHF heating zones.')" class="text-slate-300 hover:text-slate-500 text-[11px]"><i class="fa-solid fa-circle-info"></i></button>
+                </div>
+                <div class="text-[26px] font-extrabold leading-[1.1] text-cyan-600" id="kpi-ag">11.51</div>
+            </div>
+        </section>
+
+        <!-- ROW 1: PRE HEAT FURNACE (PHF) - 2 SYMMETRIC CARDS -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+            <div class="p-[14px_20px] flex items-center gap-[10px] border-b border-slate-100 bg-slate-50/50">
+                <span class="w-8 h-8 rounded-lg flex items-center justify-center text-[14px] text-white shrink-0 bg-blue-500 shadow-xs">
+                    <i class="fa-solid fa-fire"></i>
+                </span>
+                <h2 class="text-[14px] font-extrabold text-slate-900 uppercase tracking-[.04em]">Pre Heat Furnace (PHF)</h2>
+                <span class="text-[11px] font-bold py-1 px-3 rounded-full ml-auto tracking-[.03em] inline-flex items-center gap-[6px] border bg-sky-50 text-sky-700 border-sky-200">
+                    <span class="w-[7px] h-[7px] rounded-full inline-block bg-sky-500"></span> SEMI-AUTO
+                </span>
+            </div>
+            <div class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <!-- CHART 1: PHF ZONE TEMP -->
+                <div class="bg-white rounded-xl border border-slate-200 p-[14px_16px] flex flex-col shadow-sm">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-[12px] font-extrabold text-slate-800 uppercase tracking-[.04em] flex items-center gap-1.5">
+                                <span class="text-blue-500"><i class="fa-solid fa-chart-line"></i></span> PHF Zone Temp (°C)
+                            </h3>
+                            <span class="text-[10px] text-slate-500 font-semibold bg-slate-100 py-[2px] px-2 rounded">Z1 • Z2 • Z3 • Z4 • Z5 • EXIT PV</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="showInfoModal('PHF Zone Temp (°C)', 'Monitors Set Points (SP) and Process Values (PV) in degree Celsius (°C) across PHF zones Z1 to Z5 and Exit temperature.')" class="w-7 h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center justify-center text-[11px] font-bold border border-slate-200/60"><i class="fa-solid fa-circle-info"></i></button>
+                            <button onclick="zoomChart('phfTempChart', 'PHF Zone Temp (°C)', 'Z1 • Z2 • Z3 • Z4 • Z5 • EXIT PV')" class="w-7 h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center justify-center text-[11px] font-bold border border-slate-200/60"><i class="fa-solid fa-expand"></i></button>
+                        </div>
                     </div>
-
-                    <div class="space-y-4">
-                        <div>
-                            <label class="control-label">Metric (Y-Axis)</label>
-                            <select id="exp-y-axis" class="control-input">
-                                <option value="coil_count">Coil Count</option>
-                                <option value="energy">Energy (Sum)</option>
-                                <option value="avg_mpm">Average MPM</option>
-                                <option value="calc_weight">Calculated Weight (Sum)</option>
-                                <option value="max_mill_power" selected>Max Mill Power</option>
-                                <option value="time_run">Run Time (Sum)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="control-label">Dimension (X-Axis)</label>
-                            <select id="exp-x-axis" class="control-input">
-                                <option value="date" selected>Date / Time</option>
-                                <option value="coil_id">Coil Sequence</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="control-label">Granularity</label>
-                            <div class="flex gap-2">
-                                <button onclick="setExpGranularity('day')" class="granularity-btn active w-full">Day</button>
-                                <button onclick="setExpGranularity('week')" class="granularity-btn w-full">Week</button>
-                                <button onclick="setExpGranularity('month')" class="granularity-btn w-full">Month</button>
-                            </div>
-                        </div>
-                        <div class="pt-4 border-t border-slate-100">
-                            <label class="control-label">Date Range</label>
-                            <div class="grid grid-cols-2 gap-2 mb-2">
-                                <input type="date" id="exp-start" class="control-input text-xs">
-                                <input type="date" id="exp-end" class="control-input text-xs">
-                            </div>
-                            <button onclick="updateExplorer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded shadow-md transition-colors">
-                                <i class="fa-solid fa-rotate mr-1"></i> Update Chart
-                            </button>
-                        </div>
+                    <div class="h-[320px] w-full relative">
+                        <canvas id="phfTempChart"></canvas>
                     </div>
                 </div>
-            </aside>
 
-            <div class="flex-grow p-8 bg-slate-50 overflow-hidden flex flex-col">
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex-grow p-6 flex flex-col">
-                    <h2 id="exp-chart-title" class="text-xl font-bold text-slate-800 mb-1">Analysis View</h2>
-                    <p id="exp-chart-subtitle" class="text-sm text-slate-500 mb-6">Generated Chart</p>
-                    <div class="flex-grow relative">
-                        <canvas id="explorerChart"></canvas>
+                <!-- CHART 2: PHF AIR GAS RATIO -->
+                <div class="bg-white rounded-xl border border-slate-200 p-[14px_16px] flex flex-col shadow-sm">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-[12px] font-extrabold text-slate-800 uppercase tracking-[.04em] flex items-center gap-1.5">
+                                <span class="text-emerald-500"><i class="fa-solid fa-sliders"></i></span> PHF Air Gas Ratio
+                            </h3>
+                            <span class="text-[10px] text-slate-500 font-semibold bg-slate-100 py-[2px] px-2 rounded">Z1 • Z2 • Z3 • Z4 • Z5 · SP Line + PV Column</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="showInfoModal('PHF Air Gas Ratio', 'Monitors combustion air-to-gas ratio setpoints (SP line) vs actual process values (PV columns) across PHF zones Z1-Z5.')" class="w-7 h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors flex items-center justify-center text-[11px] font-bold border border-slate-200/60"><i class="fa-solid fa-circle-info"></i></button>
+                            <button onclick="zoomChart('phfAgChart', 'PHF Air Gas Ratio', 'Z1 • Z2 • Z3 • Z4 • Z5 · SP Line + PV Column')" class="w-7 h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors flex items-center justify-center text-[11px] font-bold border border-slate-200/60"><i class="fa-solid fa-expand"></i></button>
+                        </div>
+                    </div>
+                    <div class="h-[320px] w-full relative">
+                        <canvas id="phfAgChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="view-dashboard" class="absolute inset-0 bg-slate-100 dashboard-container">
-            
-            <div class="grid grid-cols-4 gap-4 flex-none">
-                <div class="bg-white rounded p-4 border-l-4 border-slate-500 shadow-sm">
-                    <p class="text-[10px] uppercase font-bold text-slate-400">Coils Selected</p>
-                    <div class="flex items-baseline gap-2">
-                        <p id="kpi-coils" class="text-2xl font-bold text-slate-800">-</p>
-                        <p id="kpi-total" class="text-xs text-slate-400 font-medium">/ -</p>
+        <!-- ROW 2: RTF & SF (2 SYMMETRIC 50-50 CARDS) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <!-- RTF STAGE CARD -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                <div class="p-[14px_20px] flex items-center gap-[10px] border-b border-slate-100 bg-slate-50/50">
+                    <span class="w-8 h-8 rounded-lg flex items-center justify-center text-[14px] text-white shrink-0 bg-emerald-500 shadow-xs">
+                        <i class="fa-solid fa-circle-radiation"></i>
+                    </span>
+                    <h2 class="text-[14px] font-extrabold text-slate-900 uppercase tracking-[.04em]">Radiant Tube Furnace (RTF)</h2>
+                    <span class="text-[11px] font-bold py-1 px-3 rounded-full ml-auto tracking-[.03em] inline-flex items-center gap-[6px] border bg-emerald-50 text-emerald-700 border-emerald-200">
+                        <span class="w-[7px] h-[7px] rounded-full inline-block bg-emerald-500"></span> AUTO
+                    </span>
+                </div>
+                <div class="p-4 flex-grow">
+                    <div class="bg-white rounded-xl border border-slate-200 p-[14px_16px] flex flex-col shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-[12px] font-extrabold text-slate-800 uppercase tracking-[.04em] flex items-center gap-1.5">
+                                    <span class="text-emerald-500"><i class="fa-solid fa-chart-line"></i></span> RTF Zone Temp (°C)
+                                </h3>
+                                <span class="text-[10px] text-slate-500 font-semibold bg-slate-100 py-[2px] px-2 rounded">Z1 • Z2 • Z3 • EXIT PV</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button onclick="showInfoModal('RTF Zone Temp (°C)', 'Monitors radiant heating temperatures in °C across RTF zones Z1-Z3 and Exit point.')" class="w-7 h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors flex items-center justify-center text-[11px] font-bold border border-slate-200/60"><i class="fa-solid fa-circle-info"></i></button>
+                                <button onclick="zoomChart('rtfTempChart', 'RTF Zone Temp (°C)', 'Z1 • Z2 • Z3 • EXIT PV')" class="w-7 h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors flex items-center justify-center text-[11px] font-bold border border-slate-200/60"><i class="fa-solid fa-expand"></i></button>
+                            </div>
+                        </div>
+                        <div class="h-[320px] w-full relative">
+                            <canvas id="rtfTempChart"></canvas>
+                        </div>
                     </div>
-                </div>
-                <div class="bg-white rounded p-4 border-l-4 border-blue-500 shadow-sm">
-                    <p class="text-[10px] uppercase font-bold text-slate-400">Total Energy</p>
-                    <p id="kpi-energy" class="text-2xl font-bold text-blue-600">- <span class="text-xs text-slate-400">KWh</span></p>
-                </div>
-                <div class="bg-white rounded p-4 border-l-4 border-emerald-500 shadow-sm">
-                    <p class="text-[10px] uppercase font-bold text-slate-400">Avg Productivity</p>
-                    <p id="kpi-mpm" class="text-2xl font-bold text-emerald-600">- <span class="text-xs text-slate-400">MPM</span></p>
-                </div>
-                <div class="bg-white rounded p-4 border-l-4 border-purple-500 shadow-sm">
-                    <p class="text-[10px] uppercase font-bold text-slate-400">Calculated Weight</p>
-                    <p id="kpi-weight" class="text-2xl font-bold text-purple-600">- <span class="text-xs text-slate-400">MT</span></p>
                 </div>
             </div>
 
-            <div id="filter-bar" class="hidden flex items-center justify-between bg-blue-100 text-blue-800 px-4 py-2 rounded border border-blue-200 text-sm">
-                <span id="filter-text" class="font-bold"></span>
-                <button onclick="resetFilters()" class="hover:text-blue-950 font-medium"><i class="fa-solid fa-xmark mr-1"></i> Clear Filter</button>
-            </div>
-
-            <div class="grid grid-cols-3 gap-4 h-[280px] flex-none">
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fa-solid fa-bolt text-blue-500 mr-2"></i>Energy Consumption</h3>
-                    </div>
-                    <div class="chart-wrapper"><canvas id="dashEnergy"></canvas></div>
+            <!-- SF STAGE CARD -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                <div class="p-[14px_20px] flex items-center gap-[10px] border-b border-slate-100 bg-slate-50/50">
+                    <span class="w-8 h-8 rounded-lg flex items-center justify-center text-[14px] text-white shrink-0 bg-amber-500 shadow-xs">
+                        <i class="fa-solid fa-droplet"></i>
+                    </span>
+                    <h2 class="text-[14px] font-extrabold text-slate-900 uppercase tracking-[.04em]">Soaking Furnace (SF)</h2>
+                    <span class="text-[11px] font-bold py-1 px-3 rounded-full ml-auto tracking-[.03em] inline-flex items-center gap-[6px] border bg-sky-50 text-sky-700 border-sky-200">
+                        <span class="w-[7px] h-[7px] rounded-full inline-block bg-sky-500"></span> SEMI-AUTO
+                    </span>
                 </div>
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fa-solid fa-wave-square text-amber-500 mr-2"></i>Max Power Profile</h3>
+                <div class="p-4 flex-grow">
+                    <div class="bg-white rounded-xl border border-slate-200 p-[14px_16px] flex flex-col shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-[12px] font-extrabold text-slate-800 uppercase tracking-[.04em] flex items-center gap-1.5">
+                                    <span class="text-amber-500"><i class="fa-solid fa-chart-line"></i></span> SF Heater &amp; Exit Temp (°C)
+                                </h3>
+                                <span class="text-[10px] text-slate-500 font-semibold bg-slate-100 py-[2px] px-2 rounded">HEATER • EXIT PV</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button onclick="showInfoModal('SF Heater & Exit Temp (°C)', 'Monitors Soaking Furnace thermal equilibrium in °C across the primary heater unit and exit point.')" class="w-7 h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-amber-50 hover:text-amber-600 transition-colors flex items-center justify-center text-[11px] font-bold border border-slate-200/60"><i class="fa-solid fa-circle-info"></i></button>
+                                <button onclick="zoomChart('sfTempChart', 'SF Heater & Exit Temp (°C)', 'HEATER • EXIT PV')" class="w-7 h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-amber-50 hover:text-amber-600 transition-colors flex items-center justify-center text-[11px] font-bold border border-slate-200/60"><i class="fa-solid fa-expand"></i></button>
+                            </div>
+                        </div>
+                        <div class="h-[320px] w-full relative">
+                            <canvas id="sfTempChart"></canvas>
+                        </div>
                     </div>
-                    <div class="chart-wrapper"><canvas id="dashPower"></canvas></div>
-                </div>
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fa-solid fa-gauge-high text-emerald-500 mr-2"></i>Productivity (MPM)</h3>
-                    </div>
-                    <div class="chart-wrapper"><canvas id="dashProd"></canvas></div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4 h-[280px] flex-none">
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fa-solid fa-layer-group text-purple-500 mr-2"></i>Pass Distribution</h3>
-                    </div>
-                    <div class="chart-wrapper"><canvas id="dashPass"></canvas></div>
-                </div>
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fa-solid fa-clock text-rose-500 mr-2"></i>Time Utilization</h3>
-                    </div>
-                    <div class="chart-wrapper"><canvas id="dashTime"></canvas></div>
                 </div>
             </div>
+        </div>
 
-            <div class="h-[300px] flex-none">
-                <div class="chart-card h-full">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fa-solid fa-ruler-horizontal text-slate-500 mr-2"></i>Output Thickness Distribution</h3>
-                        <span class="text-[10px] text-slate-400">Input Thickness shown on top of bars</span>
+        <!-- ROW 3: JCF+HBR & GAS PARAMETERS (2 SYMMETRIC 50-50 CARDS) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <!-- JCF + HBR STAGE CARD -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                <div class="p-[14px_20px] flex items-center gap-[10px] border-b border-slate-100 bg-slate-50/50">
+                    <span class="w-8 h-8 rounded-lg flex items-center justify-center text-[14px] text-white shrink-0 bg-violet-500 shadow-xs">
+                        <i class="fa-solid fa-snowflake"></i>
+                    </span>
+                    <h2 class="text-[14px] font-extrabold text-slate-900 uppercase tracking-[.04em]">Jet Cooling (JCF) + Hot Bridle (HBR)</h2>
+                    <span class="text-[11px] font-bold py-1 px-3 rounded-full ml-auto tracking-[.03em] inline-flex items-center gap-[6px] border bg-amber-50 text-amber-700 border-amber-200">
+                        <span class="w-[7px] h-[7px] rounded-full inline-block bg-amber-500"></span> MANUAL
+                    </span>
+                </div>
+                <div class="p-4 flex-grow">
+                    <div class="bg-white rounded-xl border border-slate-200 p-[14px_16px] flex flex-col shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-[12px] font-extrabold text-slate-800 uppercase tracking-[.04em] flex items-center gap-1.5">
+                                    <span class="text-violet-500"><i class="fa-solid fa-chart-line"></i></span> JCF &amp; HBR Zone Temp (°C)
+                                </h3>
+                                <span class="text-[10px] text-slate-500 font-semibold bg-slate-100 py-[2px] px-2 rounded">JCF (Z1, Z2, Z3) • HBR (EXIT PV)</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button onclick="showInfoModal('JCF & HBR Zone Temp (°C)', 'Differentiates Jet Cooling (JCF Z1-Z3) cooling temperatures and Hot Bridle (HBR Exit) tensioning stage temperatures in °C.')" class="w-7 h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-violet-50 hover:text-violet-600 transition-colors flex items-center justify-center text-[11px] font-bold border border-slate-200/60"><i class="fa-solid fa-circle-info"></i></button>
+                                <button onclick="zoomChart('jcfTempChart', 'JCF & HBR Zone Temp (°C)', 'JCF (Z1, Z2, Z3) • HBR (EXIT PV)')" class="w-7 h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-violet-50 hover:text-violet-600 transition-colors flex items-center justify-center text-[11px] font-bold border border-slate-200/60"><i class="fa-solid fa-expand"></i></button>
+                            </div>
+                        </div>
+                        <div class="h-[320px] w-full relative">
+                            <canvas id="jcfTempChart"></canvas>
+                        </div>
                     </div>
-                    <div class="chart-wrapper"><canvas id="dashThick"></canvas></div>
                 </div>
             </div>
 
+            <!-- GAS & ATMOSPHERE STAGE CARD -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                <div class="p-[14px_20px] flex items-center gap-[10px] border-b border-slate-100 bg-slate-50/50">
+                    <span class="w-8 h-8 rounded-lg flex items-center justify-center text-[14px] text-white shrink-0 bg-cyan-500 shadow-xs">
+                        <i class="fa-solid fa-wind"></i>
+                    </span>
+                    <h2 class="text-[14px] font-extrabold text-slate-900 uppercase tracking-[.04em]">Gas &amp; Atmosphere Parameters</h2>
+                </div>
+                <div class="p-4 flex-grow">
+                    <div class="bg-white rounded-xl border border-slate-200 p-[14px_16px] flex flex-col shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-[12px] font-extrabold text-slate-800 uppercase tracking-[.04em] flex items-center gap-1.5">
+                                    <span class="text-cyan-500"><i class="fa-solid fa-chart-column"></i></span> Atmosphere &amp; Combustion
+                                </h3>
+                                <span class="text-[10px] text-slate-500 font-semibold bg-slate-100 py-[2px] px-2 rounded">Gas Parameter Bar Chart</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button onclick="showInfoModal('Gas & Atmosphere Parameters', 'Monitors protective gas composition (H2 & N2 in Nm³/h), O2 level (ppm), Dew Point in °C, and Combustion Air Pressure (mmwc).')" class="w-7 h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 transition-colors flex items-center justify-center text-[11px] font-bold border border-slate-200/60"><i class="fa-solid fa-circle-info"></i></button>
+                                <button onclick="zoomChart('gasBarChart', 'Gas & Atmosphere Parameters', 'Gas Parameter Bar Chart')" class="w-7 h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 transition-colors flex items-center justify-center text-[11px] font-bold border border-slate-200/60"><i class="fa-solid fa-expand"></i></button>
+                            </div>
+                        </div>
+                        <div class="h-[320px] w-full relative">
+                            <canvas id="gasBarChart"></canvas>
+                        </div>
+                        <div class="flex justify-center gap-2.5 flex-wrap pt-2.5 border-t border-slate-100 mt-2 text-[10px]">
+                            <div class="bg-slate-50 border border-slate-200 py-1.5 px-3 rounded-md flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
+                                <span class="font-bold text-slate-500 uppercase">H₂ Flow</span>
+                                <span class="font-extrabold text-slate-900 text-[12px]">28.8 Nm³/h</span>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-200 py-1.5 px-3 rounded-md flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                                <span class="font-bold text-slate-500 uppercase">N₂ Flow</span>
+                                <span class="font-extrabold text-slate-900 text-[12px]">243.3 Nm³/h</span>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-200 py-1.5 px-3 rounded-md flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                                <span class="font-bold text-slate-500 uppercase">O₂ Level</span>
+                                <span class="font-extrabold text-slate-900 text-[12px]">40.2 ppm</span>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-200 py-1.5 px-3 rounded-md flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+                                <span class="font-bold text-slate-500 uppercase">Dew Point</span>
+                                <span class="font-extrabold text-slate-900 text-[12px]">-21.0 °C</span>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-200 py-1.5 px-3 rounded-md flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                                <span class="font-bold text-slate-500 uppercase">Comb Air Press</span>
+                                <span class="font-extrabold text-slate-900 text-[12px]">900 mmwc</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </main>
 
+    <!-- INFO MODAL -->
+    <div id="infoModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-[14px]">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </span>
+                    <div>
+                        <h4 id="infoTitle" class="text-[14px] font-extrabold text-slate-900 uppercase">Stage Information</h4>
+                        <p class="text-[10px] text-slate-400 font-semibold uppercase">Documentation</p>
+                    </div>
+                </div>
+                <button onclick="closeInfoModal()" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-sm cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <p id="infoContent" class="text-[13px] text-slate-600 leading-relaxed mb-6"></p>
+            <button onclick="closeInfoModal()" class="w-full bg-slate-900 text-white font-bold text-[13px] py-2.5 rounded-xl hover:bg-slate-800 transition-colors cursor-pointer">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- FULLSCREEN ZOOM MODAL -->
+    <div id="zoomModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-4 sm:p-8">
+        <div class="bg-white rounded-2xl w-full max-w-6xl h-[88vh] p-6 shadow-2xl border border-slate-200 flex flex-col">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center text-[16px] shadow-sm">
+                        <i class="fa-solid fa-expand"></i>
+                    </span>
+                    <div>
+                        <h3 id="zoomTitle" class="text-[16px] font-extrabold text-slate-900 uppercase tracking-[.04em]">Chart Fullscreen View</h3>
+                        <p id="zoomSubtitle" class="text-[11px] text-slate-500 font-semibold">Detailed High-Resolution Analysis</p>
+                    </div>
+                </div>
+                <button onclick="closeZoomModal()" class="w-9 h-9 rounded-xl bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600 flex items-center justify-center text-lg cursor-pointer transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="flex-grow w-full relative min-h-0 bg-slate-50/50 rounded-xl p-4 border border-slate-100">
+                <canvas id="zoomedCanvas"></canvas>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-medium">
+                <span>High-Precision Real-Time Sensor Telemetry</span>
+                <span class="font-bold text-slate-700">ACPPL GI Furnace Analytics</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT & CHART INITIALIZATION -->
     <script>
-        // --- CONFIG ---
-        Chart.register(ChartDataLabels);
-        Chart.defaults.font.family = "'Inter', sans-serif";
-        Chart.defaults.font.size = 10;
-        Chart.defaults.maintainAspectRatio = false;
-        
-        const COLORS = {
-            blue: 'rgba(37, 99, 235, 1)', blueGhost: 'rgba(37, 99, 235, 0.15)',
-            emerald: 'rgba(16, 185, 129, 1)', emeraldGhost: 'rgba(16, 185, 129, 0.15)',
-            purple: 'rgba(139, 92, 246, 1)', purpleGhost: 'rgba(139, 92, 246, 0.15)',
-            amber: 'rgba(245, 158, 11, 1)', amberGhost: 'rgba(245, 158, 11, 0.15)',
-            slate: 'rgba(71, 85, 105, 1)', slateGhost: 'rgba(71, 85, 105, 0.15)',
-            rose: 'rgba(225, 29, 72, 1)', roseGhost: 'rgba(225, 29, 72, 0.15)'
-        };
+        const chartInstances = {};
+        let zoomedChartInstance = null;
 
-        let appState = {
-            fullData: [],
-            // Dashboard State
-            filteredData: [],
-            activeFilter: null,
-            dashCharts: {},
-            // Explorer State
-            expGranularity: 'day',
-            expChart: null
-        };
-
-        // --- DATA GENERATION (MOCK) ---
-        function generateData() {
-            const arr = [];
-            const dates = ['2025-11-17', '2025-11-18', '2025-11-19', '2025-11-20', '2025-11-21', '2025-11-22', '2025-11-23'];
-            for(let i=0; i<300; i++) {
-                const date = dates[Math.floor(Math.random()*dates.length)];
-                const pass = Math.floor(Math.random() * 5) + 3; // 3 to 7
-                const input = (Math.random() * 2 + 1.5).toFixed(2);
-                const output = (input * (Math.random() * 0.2 + 0.1)).toFixed(2); // Reduced
-                
-                arr.push({
-                    "Date": date,
-                    "Passes": pass,
-                    "Energy": Math.floor(Math.random() * 2000 + 800),
-                    "MaxPower": Math.floor(Math.random() * 2000 + 3000),
-                    "MPM": Math.floor(Math.random() * 400 + 400),
-                    "Weight": parseFloat((Math.random() * 15 + 10).toFixed(1)),
-                    "OutputThick": parseFloat(output),
-                    "InputThick": parseFloat(input),
-                    "RunTime": Math.random()*40 + 20,
-                    "IdleTime": Math.random()*10,
-                    "FeedTime": Math.random()*15
-                });
-            }
-            return arr.sort((a,b) => new Date(a.Date) - new Date(b.Date));
-        }
-
-        // --- NAVIGATION ---
-        function switchTab(view) {
-            document.getElementById('view-explorer').classList.toggle('hidden', view !== 'explorer');
-            document.getElementById('view-dashboard').classList.toggle('hidden', view !== 'dashboard');
-            
-            document.getElementById('btn-explorer').classList.toggle('active', view === 'explorer');
-            document.getElementById('btn-dashboard').classList.toggle('active', view === 'dashboard');
-
-            // Trigger updates to ensure resizing works
-            if(view === 'explorer') updateExplorer();
-            if(view === 'dashboard') updateDashboardCharts();
-        }
-
-        // --- EXPLORER LOGIC (Simplified from previous turn) ---
-        function setExpGranularity(g) {
-            appState.expGranularity = g;
-            document.querySelectorAll('.granularity-btn').forEach(b => {
-                b.classList.remove('active', 'bg-blue-50', 'text-blue-700', 'border-blue-500');
-            });
-            event.target.classList.add('active', 'bg-blue-50', 'text-blue-700', 'border-blue-500');
-            updateExplorer();
-        }
-
-        function updateExplorer() {
-            const ctx = document.getElementById('explorerChart').getContext('2d');
-            if(appState.expChart) appState.expChart.destroy();
-            
-            const metric = document.getElementById('exp-y-axis').value;
-            // Simple mapping logic for demo
-            const dataMap = {};
-            appState.fullData.forEach(d => {
-                const key = d.Date; // Simplification: always by date for demo
-                if(!dataMap[key]) dataMap[key] = 0;
-                
-                if(metric === 'coil_count') dataMap[key]++;
-                else if(metric === 'energy') dataMap[key] += d.Energy;
-                else if(metric === 'max_mill_power') dataMap[key] = Math.max(dataMap[key], d.MaxPower);
-                else dataMap[key] += (d.Weight || 0); // fallback
-            });
-
-            const labels = Object.keys(dataMap).sort();
-            const values = labels.map(l => dataMap[l]);
-
-            appState.expChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: metric.toUpperCase(),
-                        data: values,
-                        borderColor: COLORS.blue,
-                        backgroundColor: COLORS.blueGhost,
-                        fill: true, tension: 0.3
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-
-            document.getElementById('exp-chart-title').innerText = metric.replace(/_/g, ' ').toUpperCase() + " OVER TIME";
-        }
-
-        // --- DASHBOARD LOGIC (Cross-Highlighting Engine) ---
-        function applyDashFilter(key, value) {
-            // Toggle off if same
-            if (appState.activeFilter && appState.activeFilter.key === key && appState.activeFilter.value == value) {
-                resetFilters();
-                return;
-            }
-
-            appState.activeFilter = { key, value };
-            
-            // Filter Data for KPIs (Subset)
-            appState.filteredData = appState.fullData.filter(d => {
-                if(key === 'OutputThick') return Math.abs(d.OutputThick - value) < 0.05; // Fuzzy match for floats
-                return d[key] == value;
-            });
-
-            // Show Badge
-            document.getElementById('filter-bar').classList.remove('hidden');
-            document.getElementById('filter-text').innerText = `Filtering by ${key}: ${value}`;
-
-            updateDashboardCharts();
-        }
-
-        function resetFilters() {
-            appState.activeFilter = null;
-            appState.filteredData = [...appState.fullData];
-            document.getElementById('filter-bar').classList.add('hidden');
-            updateDashboardCharts();
-        }
-
-        function updateDashboardCharts() {
-            // Update KPIs
-            const fd = appState.filteredData;
-            const full = appState.fullData;
-            
-            document.getElementById('kpi-coils').innerText = fd.length;
-            document.getElementById('kpi-total').innerText = "/ " + full.length;
-            
-            const sum = (d, k) => d.reduce((a,b)=>a+(b[k]||0),0);
-            const avg = (d, k) => d.length ? sum(d,k)/d.length : 0;
-
-            document.getElementById('kpi-energy').innerText = Math.round(sum(fd, 'Energy')).toLocaleString();
-            document.getElementById('kpi-mpm').innerText = Math.round(avg(fd, 'MPM'));
-            document.getElementById('kpi-weight').innerText = Math.round(sum(fd, 'Weight')).toLocaleString();
-
-            const common = { full: appState.fullData, filtered: appState.filteredData, filter: appState.activeFilter };
-
-            // Render ALL Charts with Highlight Logic
-            renderBar('dashEnergy', 'Date', 'Energy', COLORS.blue, COLORS.blueGhost, common);
-            renderLine('dashPower', common);
-            renderBar('dashProd', 'Date', 'MPM', COLORS.emerald, COLORS.emeraldGhost, { ...common, avg: true });
-            renderBar('dashPass', 'Passes', 'Count', COLORS.purple, COLORS.purpleGhost, common);
-            renderPie('dashTime', common);
-            renderBar('dashThick', 'OutputThick', 'Count', COLORS.slate, COLORS.slateGhost, { ...common, round: 2, labelKey: 'InputThick' });
-        }
-
-        // --- CHART RENDERERS (Ghost Bar Logic) ---
-        function groupData(data, key, valKey, type='sum', round=null) {
-            const map = {};
-            const counts = {};
-            data.forEach(d => {
-                let k = d[key];
-                if(round) k = parseFloat(k).toFixed(round);
-                
-                if(valKey === 'Count') {
-                    map[k] = (map[k]||0) + 1;
-                } else {
-                    map[k] = (map[k]||0) + (d[valKey]||0);
-                    counts[k] = (counts[k]||0) + 1;
-                }
-            });
-            
-            if(type === 'avg') {
-                Object.keys(map).forEach(k => map[k] = map[k] / counts[k]);
-            }
-            return map;
-        }
-
-        function renderBar(id, groupKey, valKey, colorSolid, colorGhost, { full, filtered, filter, avg=false, round=null, labelKey=null }) {
-            const fullMap = groupData(full, groupKey, valKey, avg?'avg':'sum', round);
-            
-            // For secondary label (Input Thickness on top of Output Thickness bars)
-            const labelMap = labelKey ? groupData(full, groupKey, labelKey, 'avg', round) : null;
-
-            const labels = Object.keys(fullMap).sort((a,b) => (parseFloat(a) || a) > (parseFloat(b) || b) ? 1 : -1);
-            
-            // Determine Data & Colors based on Filter State
-            const isSource = filter && filter.key === groupKey;
-            
-            // 1. Context Data (Ghost)
-            const dataFull = labels.map(l => fullMap[l]);
-            
-            // 2. Focused Data (Solid)
-            let dataFocus = [];
-            let bgColors = [];
-
-            if (isSource) {
-                // If this chart IS the filter, we show full bars but dim the unselected ones
-                dataFocus = dataFull;
-                bgColors = labels.map(l => {
-                    let match = l == filter.value;
-                    if(groupKey === 'OutputThick') match = Math.abs(parseFloat(l) - parseFloat(filter.value)) < 0.05;
-                    return match ? colorSolid : colorGhost;
-                });
-            } else if (filter) {
-                // If this chart is a TARGET, we calculate the subset
-                const subMap = groupData(filtered, groupKey, valKey, avg?'avg':'sum', round);
-                dataFocus = labels.map(l => subMap[l] || 0);
-                bgColors = colorSolid;
-            } else {
-                // No filter active
-                dataFocus = dataFull;
-                bgColors = colorSolid;
-            }
-
-            const datasets = [];
-            // Add Ghost Layer if needed (Target mode)
-            if (filter && !isSource) {
-                datasets.push({
-                    data: dataFull,
-                    backgroundColor: colorGhost,
-                    barPercentage: 0.9,
-                    categoryPercentage: 0.8,
-                    order: 2,
-                    label: 'Total'
-                });
-            }
-            // Main Layer
-            datasets.push({
-                data: dataFocus,
-                backgroundColor: bgColors,
-                barPercentage: (filter && !isSource) ? 0.5 : 0.9, // Skinnier if overlaying
-                categoryPercentage: 0.8,
-                order: 1,
-                label: 'Selected'
-            });
-
-            const config = {
-                type: 'bar',
-                data: { labels, datasets },
-                options: {
-                    onClick: (e, els) => {
-                        if(els.length > 0) applyDashFilter(groupKey, labels[els[0].index]);
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { mode: 'index', intersect: false },
-                        datalabels: {
-                            display: (ctx) => ctx.datasetIndex === datasets.length - 1, // Only on top layer
-                            color: isSource ? '#334155' : colorSolid.replace('1)', '1)'),
-                            anchor: 'end', align: 'end',
-                            font: { weight: 'bold' },
-                            formatter: (val, ctx) => {
-                                if(labelKey && labelMap) return "In: " + labelMap[labels[ctx.dataIndex]].toFixed(2);
-                                return Math.round(val);
-                            }
-                        }
-                    },
-                    scales: { 
-                        x: { stacked: true, grid: { display: false }, ticks: { maxRotation: 90, autoSkip: false } }, 
-                        y: { display: false } 
+        const commonChartOptions = (yTitle) => ({
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        boxWidth: 8,
+                        padding: 16,
+                        font: { size: 12, weight: '700', family: "'Inter', sans-serif" }
                     }
-                }
-            };
-
-            if(appState.dashCharts[id]) appState.dashCharts[id].destroy();
-            appState.dashCharts[id] = new Chart(document.getElementById(id), config);
-        }
-
-        function renderLine(id, { full, filtered, filter }) {
-            // Helper to get max per pass
-            const getMap = (dset) => {
-                const m = {};
-                dset.forEach(d => { if(d.MaxPower > (m[d.Passes]||0)) m[d.Passes] = d.MaxPower; });
-                return m;
-            };
-            const fullMap = getMap(full);
-            const subMap = getMap(filtered);
-            const labels = Object.keys(fullMap).sort((a,b)=>a-b);
-
-            const datasets = [];
-            
-            // Ghost Line
-            if(filter) {
-                datasets.push({
-                    label: 'Total',
-                    data: labels.map(l => fullMap[l]),
-                    borderColor: 'rgba(203, 213, 225, 0.5)',
-                    borderDash: [5,5], borderWidth: 2, pointRadius: 0, tension: 0.4
-                });
-            }
-            // Main Line
-            datasets.push({
-                label: 'Selected',
-                data: labels.map(l => subMap[l]||0),
-                borderColor: COLORS.amber,
-                backgroundColor: COLORS.amber,
-                borderWidth: 2, pointRadius: 4, tension: 0.4
-            });
-
-            const config = {
-                type: 'line',
-                data: { labels, datasets },
-                options: {
-                    plugins: { legend: { display: false }, datalabels: { display: false } },
-                    scales: { x: { grid: {display:false} }, y: { display: false } }
-                }
-            };
-            if(appState.dashCharts[id]) appState.dashCharts[id].destroy();
-            appState.dashCharts[id] = new Chart(document.getElementById(id), config);
-        }
-
-        function renderPie(id, { filtered }) {
-            const sum = (k) => filtered.reduce((a,b)=>a+(b[k]||0),0);
-            const data = [sum('RunTime'), sum('FeedTime'), sum('IdleTime')];
-            const total = data.reduce((a,b)=>a+b,0);
-
-            const config = {
-                type: 'doughnut',
-                data: {
-                    labels: ['Run', 'Feed', 'Idle'],
-                    datasets: [{
-                        data: data,
-                        backgroundColor: [COLORS.blue, COLORS.amber, COLORS.slate],
-                        borderWidth: 0
-                    }]
                 },
-                options: {
-                    plugins: {
-                        legend: { position: 'right' },
-                        datalabels: {
-                            color: 'white',
-                            formatter: (val) => Math.round(val/total*100) + "%"
+                tooltip: {
+                    padding: 12,
+                    cornerRadius: 8,
+                    titleFont: { size: 12, weight: '800', family: "'Inter', sans-serif" },
+                    bodyFont: { size: 12, weight: '600', family: "'Inter', sans-serif" },
+                    callbacks: {
+                        label: function(ctx) {
+                            const label = ctx.dataset.label || '';
+                            const val = typeof ctx.raw === 'number' ? ctx.raw.toFixed(1) : ctx.raw;
+                            const unit = (yTitle.includes('°C') || label.includes('°C')) ? ' °C' : '';
+                            return `  ${label}: ${val}${unit}`;
                         }
                     }
                 }
-            };
-            if(appState.dashCharts[id]) appState.dashCharts[id].destroy();
-            appState.dashCharts[id] = new Chart(document.getElementById(id), config);
-        }
-
-        // --- CSV HANDLING ---
-        document.getElementById('globalFileInput').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if(file) {
-                document.getElementById('fileNameDisplay').innerText = file.name;
-                const r = new FileReader();
-                r.onload = (evt) => {
-                    // MOCK PARSE Logic replacement
-                    // In real app, you parse the CSV here. 
-                    // For demo, we just regenerate mock data to simulate "Loading"
-                    appState.fullData = generateData(); 
-                    resetFilters();
-                    if(!document.getElementById('view-explorer').classList.contains('hidden')) updateExplorer();
-                };
-                r.readAsText(file);
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { weight: '700', size: 11, family: "'Inter', sans-serif" } }
+                },
+                y: {
+                    title: { display: true, text: yTitle, font: { weight: '700', family: "'Inter', sans-serif" } },
+                    grid: { color: 'rgba(0, 0, 0, 0.04)' },
+                    beginAtZero: false,
+                    grace: '18%', // Taller Y-axis headroom so 1200°C data line stays nicely below ceiling
+                    ticks: { font: { family: "'Inter', sans-serif" } }
+                }
             }
         });
 
-        // --- INIT ---
-        window.onload = () => {
-            appState.fullData = generateData();
-            resetFilters(); // Init dashboard
-            // Default to Dashboard view
-            switchTab('dashboard');
-            
-            // Init date pickers
-            const d = new Date();
-            document.getElementById('exp-end').valueAsDate = d;
-            d.setDate(d.getDate()-7);
-            document.getElementById('exp-start').valueAsDate = d;
-        };
+        // INIT ALL CHARTS ON WINDOW LOAD
+        window.addEventListener('DOMContentLoaded', () => {
+            // 1. PHF TEMP CHART
+            chartInstances['phfTempChart'] = new Chart(document.getElementById('phfTempChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Z1', 'Z2', 'Z3', 'Z4', 'Z5', 'EXIT PV'],
+                    datasets: [
+                        {
+                            label: 'SP (Set Point)',
+                            data: [1200, 1200, 1150, 1150, 1100, 745],
+                            borderColor: '#3b82f6', backgroundColor: '#3b82f6', borderWidth: 3,
+                            pointStyle: 'circle', pointRadius: 6, pointBackgroundColor: '#fff', pointBorderWidth: 3, tension: 0.2
+                        },
+                        {
+                            label: 'PV (Process Value)',
+                            data: [1196, 1195, 1147, 1140, 1085, 742],
+                            borderColor: '#10b981', backgroundColor: '#10b981', borderWidth: 3,
+                            pointStyle: 'circle', pointRadius: 6, pointBackgroundColor: '#fff', pointBorderWidth: 3, tension: 0.2
+                        }
+                    ]
+                },
+                options: commonChartOptions('Temperature (°C)')
+            });
 
+            // 2. PHF AG RATIO CHART
+            chartInstances['phfAgChart'] = new Chart(document.getElementById('phfAgChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Z1', 'Z2', 'Z3', 'Z4', 'Z5'],
+                    datasets: [
+                        {
+                            type: 'line', label: 'SP (Set Point)',
+                            data: [12.0, 11.5, 11.0, 10.5, 12.0],
+                            borderColor: '#3b82f6', backgroundColor: '#3b82f6', borderWidth: 3,
+                            pointStyle: 'circle', pointRadius: 6, pointBackgroundColor: '#fff', pointBorderWidth: 3, tension: 0.2, order: 1
+                        },
+                        {
+                            type: 'bar', label: 'PV (Process Value)',
+                            data: [12.02, 11.51, 11.0, 10.51, 12.01],
+                            backgroundColor: '#10b981', borderRadius: 5, barPercentage: 0.55, order: 2
+                        }
+                    ]
+                },
+                options: commonChartOptions('Air / Gas Ratio')
+            });
+
+            // 3. RTF TEMP CHART
+            chartInstances['rtfTempChart'] = new Chart(document.getElementById('rtfTempChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Z1', 'Z2', 'Z3', 'EXIT PV'],
+                    datasets: [
+                        {
+                            label: 'SP (Set Point)',
+                            data: [770, 770, 770, 740],
+                            borderColor: '#3b82f6', backgroundColor: '#3b82f6', borderWidth: 3,
+                            pointStyle: 'circle', pointRadius: 6, pointBackgroundColor: '#fff', pointBorderWidth: 3, tension: 0.2
+                        },
+                        {
+                            label: 'PV (Process Value)',
+                            data: [752, 780, 771, 742],
+                            borderColor: '#10b981', backgroundColor: '#10b981', borderWidth: 3,
+                            pointStyle: 'circle', pointRadius: 6, pointBackgroundColor: '#fff', pointBorderWidth: 3, tension: 0.2
+                        }
+                    ]
+                },
+                options: commonChartOptions('Temperature (°C)')
+            });
+
+            // 4. SF TEMP CHART
+            chartInstances['sfTempChart'] = new Chart(document.getElementById('sfTempChart'), {
+                type: 'line',
+                data: {
+                    labels: ['HEATER', 'EXIT PV'],
+                    datasets: [
+                        {
+                            label: 'SP (Set Point)',
+                            data: [750, 715],
+                            borderColor: '#3b82f6', backgroundColor: '#3b82f6', borderWidth: 3,
+                            pointStyle: 'circle', pointRadius: 6, pointBackgroundColor: '#fff', pointBorderWidth: 3, tension: 0.2
+                        },
+                        {
+                            label: 'PV (Process Value)',
+                            data: [739, 716],
+                            borderColor: '#10b981', backgroundColor: '#10b981', borderWidth: 3,
+                            pointStyle: 'circle', pointRadius: 6, pointBackgroundColor: '#fff', pointBorderWidth: 3, tension: 0.2
+                        }
+                    ]
+                },
+                options: commonChartOptions('Temperature (°C)')
+            });
+
+            // 5. JCF & HBR DIFFERENTIATED TEMP CHART
+            chartInstances['jcfTempChart'] = new Chart(document.getElementById('jcfTempChart'), {
+                type: 'line',
+                data: {
+                    labels: ['JCF Z1', 'JCF Z2', 'JCF Z3', 'HBR EXIT'],
+                    datasets: [
+                        {
+                            label: 'JCF SP (Jet Cooling)',
+                            data: [195, 195, 205, null],
+                            borderColor: '#0284c7', backgroundColor: '#0284c7', borderWidth: 3,
+                            pointStyle: 'circle', pointRadius: 6, pointBackgroundColor: '#fff', pointBorderWidth: 3, tension: 0.2
+                        },
+                        {
+                            label: 'JCF PV (Jet Cooling)',
+                            data: [188, 193, 201, null],
+                            borderColor: '#10b981', backgroundColor: '#10b981', borderWidth: 3,
+                            pointStyle: 'circle', pointRadius: 6, pointBackgroundColor: '#fff', pointBorderWidth: 3, tension: 0.2
+                        },
+                        {
+                            label: 'HBR SP (Hot Bridle)',
+                            data: [null, null, null, 460],
+                            borderColor: '#8b5cf6', backgroundColor: '#8b5cf6', borderWidth: 3,
+                            pointStyle: 'rectRot', pointRadius: 8, pointBackgroundColor: '#fff', pointBorderWidth: 3
+                        },
+                        {
+                            label: 'HBR PV (Hot Bridle)',
+                            data: [null, null, null, 481],
+                            borderColor: '#f59e0b', backgroundColor: '#f59e0b', borderWidth: 3,
+                            pointStyle: 'rectRot', pointRadius: 8, pointBackgroundColor: '#fff', pointBorderWidth: 3
+                        }
+                    ]
+                },
+                options: commonChartOptions('Temperature (°C)')
+            });
+
+            // 6. GAS PARAMETERS BAR CHART (REPLACING DONUT)
+            chartInstances['gasBarChart'] = new Chart(document.getElementById('gasBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['H₂ Flow (Nm³/h)', 'N₂ Flow (Nm³/h)', 'O₂ Level (ppm)', 'Dew Point (°C)', 'Comb Air Press (mmwc)'],
+                    datasets: [
+                        {
+                            label: 'Measured Gas Parameter',
+                            data: [28.8, 243.3, 40.2, 21.0, 900],
+                            backgroundColor: ['#06b6d4', '#8b5cf6', '#ef4444', '#475569', '#6366f1'],
+                            borderRadius: 6, barPercentage: 0.55
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    const units = ['Nm³/h', 'Nm³/h', 'ppm', '°C', 'mmwc'];
+                                    return `  ${ctx.label}: ${ctx.raw} ${units[ctx.dataIndex] || ''}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { weight: '700', size: 10 } } },
+                        y: { title: { display: true, text: 'Gas Value' }, grace: '15%', beginAtZero: true }
+                    }
+                }
+            });
+        });
+
+        // MODAL FUNCTIONS
+        function showInfoModal(title, text) {
+            document.getElementById('infoTitle').innerText = title;
+            document.getElementById('infoContent').innerText = text;
+            const modal = document.getElementById('infoModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeInfoModal() {
+            const modal = document.getElementById('infoModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function zoomChart(chartId, title, subtitle) {
+            const origChart = chartInstances[chartId];
+            if (!origChart) return;
+
+            document.getElementById('zoomTitle').innerText = title + " — Fullscreen";
+            document.getElementById('zoomSubtitle').innerText = subtitle;
+
+            const modal = document.getElementById('zoomModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            const ctx = document.getElementById('zoomedCanvas').getContext('2d');
+            if (zoomedChartInstance) zoomedChartInstance.destroy();
+
+            zoomedChartInstance = new Chart(ctx, {
+                type: origChart.config.type,
+                data: JSON.parse(JSON.stringify(origChart.config.data)),
+                options: {
+                    ...origChart.config.options,
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        function closeZoomModal() {
+            const modal = document.getElementById('zoomModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            if (zoomedChartInstance) {
+                zoomedChartInstance.destroy();
+                zoomedChartInstance = null;
+            }
+        }
+
+        function handleCSVUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('fileNameDisplay').innerText = file.name;
+            }
+        }
     </script>
 </body>
 </html>
