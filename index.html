@@ -56,196 +56,195 @@
 
     <main class="dashboard">
 
-        <!-- KPI ROW -->
+        <!-- KPI ROW (Strict 6 Column, Identical Heights) -->
         <section class="kpi-row">
             <div class="kpi-card slate">
                 <div class="kpi-top">
                     <div class="kpi-label">Total Coils</div>
                     <button class="kpi-info-btn" data-info="Total coil count currently processed"><i class="fa-solid fa-circle-info"></i></button>
                 </div>
-                <div class="kpi-value" id="k-coils">—</div>
+                <div class="kpi-value-row">
+                    <div class="kpi-value" id="k-coils">—</div>
+                </div>
             </div>
             <div class="kpi-card blue">
                 <div class="kpi-top">
                     <div class="kpi-label">PHF Exit Avg</div>
                     <button class="kpi-info-btn" data-info="Pre-Heat Furnace exit temperature average in °C"><i class="fa-solid fa-circle-info"></i></button>
                 </div>
-                <div class="kpi-value" id="k-phf">—<span class="kpi-unit">°C</span></div>
+                <div class="kpi-value-row">
+                    <div class="kpi-value" id="k-phf">—</div><div class="kpi-unit">°C</div>
+                </div>
             </div>
             <div class="kpi-card green">
                 <div class="kpi-top">
                     <div class="kpi-label">RTF Exit Avg</div>
                     <button class="kpi-info-btn" data-info="Radiant Tube Furnace exit temperature average in °C"><i class="fa-solid fa-circle-info"></i></button>
                 </div>
-                <div class="kpi-value" id="k-rtf">—<span class="kpi-unit">°C</span></div>
+                <div class="kpi-value-row">
+                    <div class="kpi-value" id="k-rtf">—</div><div class="kpi-unit">°C</div>
+                </div>
             </div>
             <div class="kpi-card orange">
                 <div class="kpi-top">
                     <div class="kpi-label">SF Exit Avg</div>
                     <button class="kpi-info-btn" data-info="Soaking Furnace exit temperature average in °C"><i class="fa-solid fa-circle-info"></i></button>
                 </div>
-                <div class="kpi-value" id="k-sf">—<span class="kpi-unit">°C</span></div>
+                <div class="kpi-value-row">
+                    <div class="kpi-value" id="k-sf">—</div><div class="kpi-unit">°C</div>
+                </div>
             </div>
             <div class="kpi-card purple">
                 <div class="kpi-top">
                     <div class="kpi-label">HBR Exit Avg</div>
                     <button class="kpi-info-btn" data-info="Hot Bridle exit temperature average in °C"><i class="fa-solid fa-circle-info"></i></button>
                 </div>
-                <div class="kpi-value" id="k-hbr">—<span class="kpi-unit">°C</span></div>
+                <div class="kpi-value-row">
+                    <div class="kpi-value" id="k-hbr">—</div><div class="kpi-unit">°C</div>
+                </div>
             </div>
             <div class="kpi-card cyan">
                 <div class="kpi-top">
                     <div class="kpi-label">Avg A/G Ratio</div>
                     <button class="kpi-info-btn" data-info="Average Air-to-Gas combustion ratio across PHF zones"><i class="fa-solid fa-circle-info"></i></button>
                 </div>
-                <div class="kpi-value" id="k-ag">—</div>
+                <div class="kpi-value-row">
+                    <div class="kpi-value" id="k-ag">—</div>
+                </div>
             </div>
         </section>
 
-        <!-- ═══ PHF (FULL WIDTH) ═══ -->
-        <div class="stage-module accent-phf">
-            <div class="stage-head">
-                <span class="stage-icon icon-phf"><i class="fa-solid fa-fire"></i></span>
-                <h2>Pre Heat Furnace (PHF)</h2>
-                <span id="phf-mode-badge" class="mode-badge"><span class="mode-dot"></span> <span class="mode-text">SEMI-AUTO</span></span>
-            </div>
-            <div class="stage-charts cols-2">
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <div class="chart-title-box">
-                            <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#3b82f6"></i> PHF Zone Temp (°C)</h3>
-                            <span class="chart-subtitle hidden-sm">Z1 • Z2 • Z3 • Z4 • Z5 • EXIT PV</span>
-                        </div>
+        <!-- STRICT 3-COLUMN CRM GRID -->
+        <section class="chart-grid">
+            
+            <!-- 1. PHF Zone Temp -->
+            <div class="chart-card accent-phf">
+                <div class="chart-header">
+                    <div class="chart-title-box">
+                        <span class="chart-icon icon-phf"><i class="fa-solid fa-fire"></i></span>
+                        <h3 class="chart-title">PHF Zone Temp (°C)</h3>
+                        <span class="chart-subtitle hidden-sm">Z1-Z5</span>
+                    </div>
+                    <div class="chart-header-right">
+                        <span id="phf-mode-badge" class="mode-badge"><span class="mode-dot"></span> <span class="mode-text">SEMI-AUTO</span></span>
                         <div class="chart-actions">
-                            <button class="act-btn btn-info" data-chart="phfZoneTemp" data-title="PHF Zone Temp (°C)" data-icon="fa-chart-line" data-color="#3b82f6" data-unit="°C" data-desc="PHF Zone Temperature tracks set points (SP) and process values (PV) in °C across 5 heating zones and exit point."><i class="fa-solid fa-circle-info"></i></button>
-                            <button class="act-btn btn-zoom" data-chart="phfZoneTemp" data-title="PHF Zone Temp (°C)" data-icon="fa-chart-line" data-color="#3b82f6" data-sub="Detailed Parameter Analysis (°C)"><i class="fa-solid fa-expand"></i></button>
+                            <button class="act-btn btn-info" data-chart="phfZoneTemp" data-title="PHF Zone Temp (°C)" data-icon="fa-fire" data-color="#3b82f6" data-unit="°C" data-desc="PHF Zone Temperature tracks set points (SP) and process values (PV) in °C across 5 heating zones and exit point."><i class="fa-solid fa-circle-info"></i></button>
+                            <button class="act-btn btn-zoom" data-chart="phfZoneTemp" data-title="PHF Zone Temp (°C)" data-icon="fa-fire" data-color="#3b82f6" data-sub="Detailed Parameter Analysis (°C)"><i class="fa-solid fa-expand"></i></button>
                         </div>
                     </div>
+                </div>
+                <div class="chart-content-area">
                     <div class="chart-wrapper"><canvas id="phfZoneTemp"></canvas></div>
                 </div>
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <div class="chart-title-box">
-                            <h3 class="chart-title"><i class="fa-solid fa-sliders" style="color:#10b981"></i> PHF Air Gas Ratio</h3>
-                            <span class="chart-subtitle hidden-sm">Z1 • Z2 • Z3 • Z4 • Z5</span>
-                        </div>
+            </div>
+
+            <!-- 2. PHF Air Gas Ratio -->
+            <div class="chart-card accent-phf">
+                <div class="chart-header">
+                    <div class="chart-title-box">
+                        <span class="chart-icon icon-phf"><i class="fa-solid fa-sliders"></i></span>
+                        <h3 class="chart-title">PHF Air Gas Ratio</h3>
+                        <span class="chart-subtitle hidden-sm">Combustion</span>
+                    </div>
+                    <div class="chart-header-right">
                         <div class="chart-actions">
-                            <button class="act-btn btn-info" data-chart="phfZoneAG" data-title="PHF Air Gas Ratio" data-icon="fa-sliders" data-color="#10b981" data-unit="Ratio" data-desc="Monitors air-to-gas ratio set points vs process columns across PHF zones Z1 to Z5 for combustion efficiency."><i class="fa-solid fa-circle-info"></i></button>
-                            <button class="act-btn btn-zoom" data-chart="phfZoneAG" data-title="PHF Air Gas Ratio" data-icon="fa-sliders" data-color="#10b981" data-sub="Detailed Parameter Analysis (Ratio)"><i class="fa-solid fa-expand"></i></button>
+                            <button class="act-btn btn-info" data-chart="phfZoneAG" data-title="PHF Air Gas Ratio" data-icon="fa-sliders" data-color="#3b82f6" data-unit="Ratio" data-desc="Monitors air-to-gas ratio set points vs process columns across PHF zones Z1 to Z5 for combustion efficiency."><i class="fa-solid fa-circle-info"></i></button>
+                            <button class="act-btn btn-zoom" data-chart="phfZoneAG" data-title="PHF Air Gas Ratio" data-icon="fa-sliders" data-color="#3b82f6" data-sub="Detailed Parameter Analysis (Ratio)"><i class="fa-solid fa-expand"></i></button>
                         </div>
                     </div>
+                </div>
+                <div class="chart-content-area">
                     <div class="chart-wrapper"><canvas id="phfZoneAG"></canvas></div>
                 </div>
             </div>
-        </div>
 
-        <!-- ═══ PROCESS ROW 1: RTF & SF ═══ -->
-        <div class="stage-row cols-2">
-            
-            <!-- ═══ RTF ═══ -->
-            <div class="stage-module accent-rtf">
-                <div class="stage-head">
-                    <span class="stage-icon icon-rtf"><i class="fa-solid fa-circle-radiation"></i></span>
-                    <h2>Radiant Tube Furnace (RTF)</h2>
-                    <span id="rtf-mode-badge" class="mode-badge"><span class="mode-dot"></span> <span class="mode-text">AUTO</span></span>
-                </div>
-                <div class="stage-charts cols-1">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title-box">
-                                <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#10b981"></i> RTF Zone Temp (°C)</h3>
-                                <span class="chart-subtitle hidden-sm">Z1 • Z2 • Z3 • EXIT PV</span>
-                            </div>
-                            <div class="chart-actions">
-                                <button class="act-btn btn-info" data-chart="rtfZoneTemp" data-title="RTF Zone Temp (°C)" data-icon="fa-chart-line" data-color="#10b981" data-unit="°C" data-desc="RTF Zone Temperature displays radiant heating across Z1, Z2, Z3 and Exit in degree Celsius (°C)."><i class="fa-solid fa-circle-info"></i></button>
-                                <button class="act-btn btn-zoom" data-chart="rtfZoneTemp" data-title="RTF Zone Temp (°C)" data-icon="fa-chart-line" data-color="#10b981" data-sub="Detailed Parameter Analysis (°C)"><i class="fa-solid fa-expand"></i></button>
-                            </div>
-                        </div>
-                        <div class="chart-wrapper"><canvas id="rtfZoneTemp"></canvas></div>
+            <!-- 3. RTF Zone Temp -->
+            <div class="chart-card accent-rtf">
+                <div class="chart-header">
+                    <div class="chart-title-box">
+                        <span class="chart-icon icon-rtf"><i class="fa-solid fa-circle-radiation"></i></span>
+                        <h3 class="chart-title">RTF Zone Temp (°C)</h3>
+                        <span class="chart-subtitle hidden-sm">Z1-Z3</span>
                     </div>
+                    <div class="chart-header-right">
+                        <span id="rtf-mode-badge" class="mode-badge"><span class="mode-dot"></span> <span class="mode-text">AUTO</span></span>
+                        <div class="chart-actions">
+                            <button class="act-btn btn-info" data-chart="rtfZoneTemp" data-title="RTF Zone Temp (°C)" data-icon="fa-circle-radiation" data-color="#10b981" data-unit="°C" data-desc="RTF Zone Temperature displays radiant heating across Z1, Z2, Z3 and Exit in degree Celsius (°C)."><i class="fa-solid fa-circle-info"></i></button>
+                            <button class="act-btn btn-zoom" data-chart="rtfZoneTemp" data-title="RTF Zone Temp (°C)" data-icon="fa-circle-radiation" data-color="#10b981" data-sub="Detailed Parameter Analysis (°C)"><i class="fa-solid fa-expand"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-content-area">
+                    <div class="chart-wrapper"><canvas id="rtfZoneTemp"></canvas></div>
                 </div>
             </div>
 
-            <!-- ═══ SF ═══ -->
-            <div class="stage-module accent-sf">
-                <div class="stage-head">
-                    <span class="stage-icon icon-sf"><i class="fa-solid fa-droplet"></i></span>
-                    <h2>Soaking Furnace (SF)</h2>
-                    <span id="sf-mode-badge" class="mode-badge"><span class="mode-dot"></span> <span class="mode-text">SEMI-AUTO</span></span>
-                </div>
-                <div class="stage-charts cols-1">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title-box">
-                                <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#f59e0b"></i> SF Heater &amp; Exit Temp (°C)</h3>
-                                <span class="chart-subtitle hidden-sm">HEATER • EXIT PV</span>
-                            </div>
-                            <div class="chart-actions">
-                                <button class="act-btn btn-info" data-chart="sfZoneTemp" data-title="SF Heater & Exit Temp (°C)" data-icon="fa-chart-line" data-color="#f59e0b" data-unit="°C" data-desc="Soaking Furnace monitors strip temperature equilibrium across the main heater unit and exit point in °C."><i class="fa-solid fa-circle-info"></i></button>
-                                <button class="act-btn btn-zoom" data-chart="sfZoneTemp" data-title="SF Heater & Exit Temp (°C)" data-icon="fa-chart-line" data-color="#f59e0b" data-sub="Detailed Parameter Analysis (°C)"><i class="fa-solid fa-expand"></i></button>
-                            </div>
-                        </div>
-                        <div class="chart-wrapper"><canvas id="sfZoneTemp"></canvas></div>
+            <!-- 4. SF Heater & Exit -->
+            <div class="chart-card accent-sf">
+                <div class="chart-header">
+                    <div class="chart-title-box">
+                        <span class="chart-icon icon-sf"><i class="fa-solid fa-droplet"></i></span>
+                        <h3 class="chart-title">SF Heater Temp (°C)</h3>
+                        <span class="chart-subtitle hidden-sm">Soaking</span>
                     </div>
+                    <div class="chart-header-right">
+                        <span id="sf-mode-badge" class="mode-badge"><span class="mode-dot"></span> <span class="mode-text">SEMI-AUTO</span></span>
+                        <div class="chart-actions">
+                            <button class="act-btn btn-info" data-chart="sfZoneTemp" data-title="SF Heater & Exit Temp (°C)" data-icon="fa-droplet" data-color="#f59e0b" data-unit="°C" data-desc="Soaking Furnace monitors strip temperature equilibrium across the main heater unit and exit point in °C."><i class="fa-solid fa-circle-info"></i></button>
+                            <button class="act-btn btn-zoom" data-chart="sfZoneTemp" data-title="SF Heater & Exit Temp (°C)" data-icon="fa-droplet" data-color="#f59e0b" data-sub="Detailed Parameter Analysis (°C)"><i class="fa-solid fa-expand"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-content-area">
+                    <div class="chart-wrapper"><canvas id="sfZoneTemp"></canvas></div>
                 </div>
             </div>
 
-        </div>
-
-        <!-- ═══ PROCESS ROW 2: JCF & GAS ═══ -->
-        <div class="stage-row cols-2">
-
-            <!-- ═══ JCF + HBR ═══ -->
-            <div class="stage-module accent-jcf">
-                <div class="stage-head">
-                    <span class="stage-icon icon-jcf"><i class="fa-solid fa-snowflake"></i></span>
-                    <h2>Jet Cooling (JCF) + Hot Bridle (HBR)</h2>
-                    <span id="jcf-mode-badge" class="mode-badge"><span class="mode-dot"></span> <span class="mode-text">MANUAL</span></span>
-                </div>
-                <div class="stage-charts cols-1">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title-box">
-                                <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#8b5cf6"></i> JCF &amp; HBR Zone Temp (°C)</h3>
-                                <span class="chart-subtitle hidden-sm">JCF (Z1, Z2, Z3) • HBR (EXIT PV)</span>
-                            </div>
-                            <div class="chart-actions">
-                                <button class="act-btn btn-info" data-chart="jcfZoneTemp" data-title="JCF & HBR Zone Temp (°C)" data-icon="fa-chart-line" data-color="#8b5cf6" data-unit="°C" data-desc="Differentiates Jet Cooling Furnace (JCF Z1-Z3) cooling temperatures and Hot Bridle (HBR Exit) tensioning stage temperatures in °C."><i class="fa-solid fa-circle-info"></i></button>
-                                <button class="act-btn btn-zoom" data-chart="jcfZoneTemp" data-title="JCF & HBR Zone Temp (°C)" data-icon="fa-chart-line" data-color="#8b5cf6" data-sub="Detailed Parameter Analysis (°C)"><i class="fa-solid fa-expand"></i></button>
-                            </div>
-                        </div>
-                        <div class="chart-wrapper"><canvas id="jcfZoneTemp"></canvas></div>
+            <!-- 5. JCF & HBR -->
+            <div class="chart-card accent-jcf">
+                <div class="chart-header">
+                    <div class="chart-title-box">
+                        <span class="chart-icon icon-jcf"><i class="fa-solid fa-snowflake"></i></span>
+                        <h3 class="chart-title">JCF &amp; HBR Temp (°C)</h3>
+                        <span class="chart-subtitle hidden-sm">Cooling</span>
                     </div>
+                    <div class="chart-header-right">
+                        <span id="jcf-mode-badge" class="mode-badge"><span class="mode-dot"></span> <span class="mode-text">MANUAL</span></span>
+                        <div class="chart-actions">
+                            <button class="act-btn btn-info" data-chart="jcfZoneTemp" data-title="JCF & HBR Zone Temp (°C)" data-icon="fa-snowflake" data-color="#8b5cf6" data-unit="°C" data-desc="Differentiates Jet Cooling Furnace (JCF Z1-Z3) cooling temperatures and Hot Bridle (HBR Exit) tensioning stage temperatures in °C."><i class="fa-solid fa-circle-info"></i></button>
+                            <button class="act-btn btn-zoom" data-chart="jcfZoneTemp" data-title="JCF & HBR Zone Temp (°C)" data-icon="fa-snowflake" data-color="#8b5cf6" data-sub="Detailed Parameter Analysis (°C)"><i class="fa-solid fa-expand"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-content-area">
+                    <div class="chart-wrapper"><canvas id="jcfZoneTemp"></canvas></div>
                 </div>
             </div>
 
-            <!-- ═══ GAS & COMBUSTION (BAR CHART) ═══ -->
-            <div class="stage-module accent-gas">
-                <div class="stage-head">
-                    <span class="stage-icon icon-gas"><i class="fa-solid fa-wind"></i></span>
-                    <h2>Gas &amp; Atmosphere Parameters</h2>
-                </div>
-                <div class="stage-charts cols-1">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <div class="chart-title-box">
-                                <h3 class="chart-title"><i class="fa-solid fa-chart-column" style="color:#06b6d4"></i> Atmosphere &amp; Combustion</h3>
-                                <span class="chart-subtitle hidden-sm">Gas Parameter Bar Chart</span>
-                            </div>
-                            <div class="chart-actions">
-                                <button class="act-btn btn-info" data-chart="gasPieChart" data-title="Gas & Atmosphere Parameters" data-icon="fa-chart-column" data-color="#06b6d4" data-unit="Mixed" data-desc="Monitors critical protective gas composition, furnace atmosphere purity, and combustion air pressure levels to prevent oxidation and ensure surface quality during annealing."><i class="fa-solid fa-circle-info"></i></button>
-                                <button class="act-btn btn-zoom" data-chart="gasPieChart" data-title="Gas & Atmosphere Parameters — Bar Chart" data-icon="fa-chart-column" data-color="#06b6d4" data-sub="Comprehensive Atmospheric Composition Overview"><i class="fa-solid fa-expand"></i></button>
-                            </div>
-                        </div>
-                        <div class="chart-wrapper">
-                            <canvas id="gasPieChart"></canvas>
-                        </div>
-                        <div class="gas-summary-chips" id="gasSummaryChips"></div>
+            <!-- 6. GAS PARAMETERS -->
+            <div class="chart-card accent-gas">
+                <div class="chart-header">
+                    <div class="chart-title-box">
+                        <span class="chart-icon icon-gas"><i class="fa-solid fa-wind"></i></span>
+                        <h3 class="chart-title">Atmosphere Params</h3>
+                        <span class="chart-subtitle hidden-sm">Gas/Comb</span>
                     </div>
+                    <div class="chart-header-right">
+                        <div class="chart-actions">
+                            <button class="act-btn btn-info" data-chart="gasPieChart" data-title="Gas & Atmosphere Parameters" data-icon="fa-wind" data-color="#06b6d4" data-unit="Mixed" data-desc="Monitors critical protective gas composition, furnace atmosphere purity, and combustion air pressure levels to prevent oxidation and ensure surface quality during annealing."><i class="fa-solid fa-circle-info"></i></button>
+                            <button class="act-btn btn-zoom" data-chart="gasPieChart" data-title="Gas & Atmosphere Parameters — Bar Chart" data-icon="fa-wind" data-color="#06b6d4" data-sub="Comprehensive Atmospheric Composition Overview"><i class="fa-solid fa-expand"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-content-area">
+                    <div class="chart-wrapper">
+                        <canvas id="gasPieChart"></canvas>
+                    </div>
+                    <div class="gas-summary-chips" id="gasSummaryChips"></div>
                 </div>
             </div>
 
-        </div>
+        </section>
 
     </main>
 

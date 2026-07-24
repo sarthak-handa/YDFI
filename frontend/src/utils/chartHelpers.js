@@ -18,6 +18,9 @@ export function commonOptions(yTitle) {
     return {
         responsive: true,
         maintainAspectRatio: false,
+        layout: {
+            padding: 0
+        },
         interaction: { mode: 'index', intersect: false },
         plugins: {
             legend: {
@@ -26,14 +29,14 @@ export function commonOptions(yTitle) {
                     usePointStyle: true,
                     boxWidth: 8,
                     padding: 16,
-                    font: { size: 12, weight: '700', family: "'Inter', system-ui, sans-serif" }
+                    font: { size: 13, weight: '600', family: "'Inter', system-ui, sans-serif" }
                 }
             },
             tooltip: {
                 padding: 12,
                 cornerRadius: 8,
-                titleFont: { size: 12, weight: '800', family: "'Inter', system-ui, sans-serif" },
-                bodyFont: { size: 12, weight: '600', family: "'Inter', system-ui, sans-serif" },
+                titleFont: { size: 14, weight: '700', family: "'Inter', system-ui, sans-serif" },
+                bodyFont: { size: 14, weight: '500', family: "'Inter', system-ui, sans-serif" },
                 callbacks: {
                     title: function(items) {
                         if (!items || !items.length) return '';
@@ -55,15 +58,15 @@ export function commonOptions(yTitle) {
         },
         scales: {
             x: {
-                grid: { display: false },
-                ticks: { font: { weight: '700', size: 11, family: "'Inter', system-ui, sans-serif" } }
+                grid: { display: false, drawBorder: false },
+                ticks: { font: { weight: '600', size: 12, family: "'Inter', system-ui, sans-serif" } }
             },
             y: {
-                title: { display: true, text: yTitle, font: { weight: '700', family: "'Inter', system-ui, sans-serif" } },
-                grid: { color: 'rgba(0, 0, 0, 0.04)' },
+                title: { display: false },
+                grid: { color: 'rgba(0, 0, 0, 0.04)', drawBorder: false },
                 beginAtZero: false,
-                grace: '18%', // Extends Y-axis headroom taller than max data point (e.g. 1200 -> 1400+) so graph line isn't pegged at top
-                ticks: { font: { family: "'Inter', system-ui, sans-serif" } }
+                grace: '18%',
+                ticks: { font: { weight: '500', size: 12, family: "'Inter', system-ui, sans-serif" } }
             }
         }
     };
@@ -80,13 +83,13 @@ export function lineChartSPPV(labels, spData, pvData, yTitle) {
                     data: spData,
                     borderColor: C.spBlue,
                     backgroundColor: C.spBlue,
-                    borderWidth: 3,
+                    borderWidth: 2,
                     pointStyle: 'circle',
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.spBlue,
-                    pointBorderWidth: 3,
+                    pointBorderWidth: 2,
                     tension: 0.2,
                     fill: false
                 },
@@ -95,13 +98,13 @@ export function lineChartSPPV(labels, spData, pvData, yTitle) {
                     data: pvData,
                     borderColor: C.pvGreen,
                     backgroundColor: C.pvGreen,
-                    borderWidth: 3,
+                    borderWidth: 2,
                     pointStyle: 'circle',
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.pvGreen,
-                    pointBorderWidth: 3,
+                    pointBorderWidth: 2,
                     tension: 0.2,
                     fill: false
                 }
@@ -123,13 +126,13 @@ export function comboSpLinePvColumn(labels, spData, pvData, yTitle) {
                     data: spData,
                     borderColor: C.spBlue,
                     backgroundColor: C.spBlue,
-                    borderWidth: 3,
+                    borderWidth: 2,
                     pointStyle: 'circle',
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.spBlue,
-                    pointBorderWidth: 3,
+                    pointBorderWidth: 2,
                     tension: 0.2,
                     fill: false,
                     order: 1
@@ -139,8 +142,8 @@ export function comboSpLinePvColumn(labels, spData, pvData, yTitle) {
                     label: 'PV (Process Value)',
                     data: pvData,
                     backgroundColor: C.pvGreen,
-                    borderRadius: 5,
-                    barPercentage: 0.55,
+                    borderRadius: 4,
+                    barPercentage: 0.6,
                     order: 2
                 }
             ]
@@ -165,61 +168,61 @@ export function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrP
             labels: labels,
             datasets: [
                 {
-                    label: 'JCF SP (Jet Cooling)',
+                    label: 'JCF SP',
                     data: jcfSpAligned,
-                    borderColor: '#0284c7', // Sky blue
-                    backgroundColor: '#0284c7',
-                    borderWidth: 3,
+                    borderColor: C.cyan,
+                    backgroundColor: C.cyan,
+                    borderWidth: 2,
                     pointStyle: 'circle',
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
                     pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#0284c7',
-                    pointBorderWidth: 3,
+                    pointBorderColor: C.cyan,
+                    pointBorderWidth: 2,
                     tension: 0.2,
                     spanGaps: false
                 },
                 {
-                    label: 'JCF PV (Jet Cooling)',
+                    label: 'JCF PV',
                     data: jcfPvAligned,
-                    borderColor: '#10b981', // Emerald
-                    backgroundColor: '#10b981',
-                    borderWidth: 3,
+                    borderColor: C.teal,
+                    backgroundColor: C.teal,
+                    borderWidth: 2,
                     pointStyle: 'circle',
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
                     pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#10b981',
-                    pointBorderWidth: 3,
+                    pointBorderColor: C.teal,
+                    pointBorderWidth: 2,
                     tension: 0.2,
                     spanGaps: false
                 },
                 {
-                    label: 'HBR SP (Hot Bridle)',
+                    label: 'HBR SP',
                     data: hbrSpAligned,
-                    borderColor: '#8b5cf6', // Purple
-                    backgroundColor: '#8b5cf6',
-                    borderWidth: 3,
+                    borderColor: C.purple,
+                    backgroundColor: C.purple,
+                    borderWidth: 2,
                     pointStyle: 'rectRot',
-                    pointRadius: 8,
-                    pointHoverRadius: 10,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
                     pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#8b5cf6',
-                    pointBorderWidth: 3,
+                    pointBorderColor: C.purple,
+                    pointBorderWidth: 2,
                     spanGaps: false
                 },
                 {
-                    label: 'HBR PV (Hot Bridle)',
+                    label: 'HBR PV',
                     data: hbrPvAligned,
-                    borderColor: '#f59e0b', // Amber
-                    backgroundColor: '#f59e0b',
-                    borderWidth: 3,
+                    borderColor: C.orange,
+                    backgroundColor: C.orange,
+                    borderWidth: 2,
                     pointStyle: 'rectRot',
-                    pointRadius: 8,
-                    pointHoverRadius: 10,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
                     pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#f59e0b',
-                    pointBorderWidth: 3,
+                    pointBorderColor: C.orange,
+                    pointBorderWidth: 2,
                     spanGaps: false
                 }
             ]
@@ -228,8 +231,7 @@ export function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrP
     };
 }
 
-// Bar Chart configuration for Gas & Atmosphere Parameters (replacing donut/pie chart)
-export function gasBarChartConfig(labels, data, colors, yTitle = 'Gas Parameters') {
+export function gasBarChartConfig(labels, data, colors, yTitle) {
     const units = ['Nm³/h', 'Nm³/h', 'ppm', '°C', 'mmwc'];
 
     return {
@@ -241,23 +243,23 @@ export function gasBarChartConfig(labels, data, colors, yTitle = 'Gas Parameters
                     label: 'Gas Level / Value',
                     data: data,
                     backgroundColor: colors,
-                    borderRadius: 6,
-                    borderWidth: 1,
-                    borderColor: 'rgba(0,0,0,0.08)',
-                    barPercentage: 0.55
+                    borderRadius: 4,
+                    borderWidth: 0,
+                    barPercentage: 0.6
                 }
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: { padding: 0 },
             plugins: {
                 legend: { display: false },
                 tooltip: {
                     padding: 12,
                     cornerRadius: 8,
-                    titleFont: { size: 12, weight: '800', family: "'Inter', system-ui, sans-serif" },
-                    bodyFont: { size: 12, weight: '600', family: "'Inter', system-ui, sans-serif" },
+                    titleFont: { size: 14, weight: '700', family: "'Inter', system-ui, sans-serif" },
+                    bodyFont: { size: 14, weight: '500', family: "'Inter', system-ui, sans-serif" },
                     callbacks: {
                         label: function(ctx) {
                             const val = ctx.raw;
@@ -270,15 +272,15 @@ export function gasBarChartConfig(labels, data, colors, yTitle = 'Gas Parameters
             },
             scales: {
                 x: {
-                    grid: { display: false },
-                    ticks: { font: { weight: '700', size: 10, family: "'Inter', system-ui, sans-serif" } }
+                    grid: { display: false, drawBorder: false },
+                    ticks: { font: { weight: '600', size: 11, family: "'Inter', system-ui, sans-serif" } }
                 },
                 y: {
-                    title: { display: true, text: 'Measured Value', font: { weight: '700', family: "'Inter', system-ui, sans-serif" } },
-                    grid: { color: 'rgba(0, 0, 0, 0.04)' },
+                    title: { display: false },
+                    grid: { color: 'rgba(0, 0, 0, 0.04)', drawBorder: false },
                     grace: '15%',
                     beginAtZero: true,
-                    ticks: { font: { family: "'Inter', system-ui, sans-serif" } }
+                    ticks: { font: { size: 11, family: "'Inter', system-ui, sans-serif" } }
                 }
             }
         }

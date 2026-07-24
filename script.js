@@ -1,8 +1,8 @@
-/* ACPPL GI Furnace Dashboard — script.js v10
-   Aligned with React features: Modals, KPI Tooltips, Bar Charts, Semi-Auto */
+/* ACPPL GI Furnace Dashboard — script.js v11
+   Aligned with APL Apollo CRM Design System Specs */
 
 Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
-Chart.defaults.font.size = 11;
+Chart.defaults.font.size = 12; // CRM Axis labels 12px
 Chart.defaults.maintainAspectRatio = false;
 Chart.defaults.plugins.legend.labels.usePointStyle = true;
 Chart.defaults.plugins.legend.labels.boxWidth = 8;
@@ -114,10 +114,10 @@ function renderAll() {
     const avgAGRatio = avg(D.phfZoneAGPV);
 
     document.getElementById('k-coils').textContent = D.totalCoils;
-    document.getElementById('k-phf').innerHTML = `${phfExitAvg.toFixed(1)}<span class="kpi-unit">°C</span>`;
-    document.getElementById('k-rtf').innerHTML = `${rtfExitAvg.toFixed(1)}<span class="kpi-unit">°C</span>`;
-    document.getElementById('k-sf').innerHTML = `${sfExitAvg.toFixed(1)}<span class="kpi-unit">°C</span>`;
-    document.getElementById('k-hbr').innerHTML = `${hbrExitAvg.toFixed(1)}<span class="kpi-unit">°C</span>`;
+    document.getElementById('k-phf').innerHTML = `${phfExitAvg.toFixed(1)}`;
+    document.getElementById('k-rtf').innerHTML = `${rtfExitAvg.toFixed(1)}`;
+    document.getElementById('k-sf').innerHTML = `${sfExitAvg.toFixed(1)}`;
+    document.getElementById('k-hbr').innerHTML = `${hbrExitAvg.toFixed(1)}`;
     document.getElementById('k-ag').textContent = avgAGRatio.toFixed(2);
 
     updateModeBadge('phf-mode-badge', D.phfMode);
@@ -189,6 +189,9 @@ function commonOptions(yTitle) {
     return {
         responsive: true,
         maintainAspectRatio: false,
+        layout: {
+            padding: 0 // CRM: Minimize internal whitespace
+        },
         interaction: { mode: 'index', intersect: false },
         plugins: {
             legend: {
@@ -197,14 +200,14 @@ function commonOptions(yTitle) {
                     usePointStyle: true,
                     boxWidth: 8,
                     padding: 16,
-                    font: { size: 12, weight: '700' }
+                    font: { size: 13, weight: '600' } // CRM Legend 13px
                 }
             },
             tooltip: {
                 padding: 12,
                 cornerRadius: 8,
-                titleFont: { size: 12, weight: '800' },
-                bodyFont: { size: 12, weight: '600' },
+                titleFont: { size: 14, weight: '700' }, // CRM Tooltip 14px
+                bodyFont: { size: 14, weight: '500' },
                 callbacks: {
                     title: function(items) {
                         if (!items || !items.length) return '';
@@ -226,15 +229,15 @@ function commonOptions(yTitle) {
         },
         scales: {
             x: {
-                grid: { display: false },
-                ticks: { font: { weight: '700', size: 11 } }
+                grid: { display: false, drawBorder: false },
+                ticks: { font: { weight: '600', size: 12 } } // CRM Axis 12px
             },
             y: {
-                title: { display: true, text: yTitle, font: { weight: '700' } },
-                grid: { color: 'rgba(0, 0, 0, 0.04)' },
+                title: { display: false }, // Removed to save space, header implies it
+                grid: { color: 'rgba(0, 0, 0, 0.04)', drawBorder: false },
                 beginAtZero: false,
                 grace: '18%',
-                ticks: { font: { } }
+                ticks: { font: { weight: '500', size: 12 } }
             }
         }
     };
@@ -251,13 +254,13 @@ function lineChartSPPV(labels, spData, pvData, yTitle) {
                     data: spData,
                     borderColor: C.spBlue,
                     backgroundColor: C.spBlue,
-                    borderWidth: 3,
+                    borderWidth: 2,
                     pointStyle: 'circle',
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.spBlue,
-                    pointBorderWidth: 3,
+                    pointBorderWidth: 2,
                     tension: 0.2,
                     fill: false
                 },
@@ -266,13 +269,13 @@ function lineChartSPPV(labels, spData, pvData, yTitle) {
                     data: pvData,
                     borderColor: C.pvGreen,
                     backgroundColor: C.pvGreen,
-                    borderWidth: 3,
+                    borderWidth: 2,
                     pointStyle: 'circle',
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.pvGreen,
-                    pointBorderWidth: 3,
+                    pointBorderWidth: 2,
                     tension: 0.2,
                     fill: false
                 }
@@ -294,13 +297,13 @@ function comboSpLinePvColumn(labels, spData, pvData, yTitle) {
                     data: spData,
                     borderColor: C.spBlue,
                     backgroundColor: C.spBlue,
-                    borderWidth: 3,
+                    borderWidth: 2,
                     pointStyle: 'circle',
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.spBlue,
-                    pointBorderWidth: 3,
+                    pointBorderWidth: 2,
                     tension: 0.2,
                     fill: false,
                     order: 1
@@ -310,8 +313,8 @@ function comboSpLinePvColumn(labels, spData, pvData, yTitle) {
                     label: 'PV (Process Value)',
                     data: pvData,
                     backgroundColor: C.pvGreen,
-                    borderRadius: 5,
-                    barPercentage: 0.55,
+                    borderRadius: 4,
+                    barPercentage: 0.6,
                     order: 2
                 }
             ]
@@ -333,61 +336,61 @@ function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrPv, yTit
             labels: labels,
             datasets: [
                 {
-                    label: 'JCF SP (Jet Cooling)',
+                    label: 'JCF SP',
                     data: jcfSpAligned,
-                    borderColor: '#0284c7', 
-                    backgroundColor: '#0284c7',
-                    borderWidth: 3,
+                    borderColor: C.cyan, 
+                    backgroundColor: C.cyan,
+                    borderWidth: 2,
                     pointStyle: 'circle',
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
                     pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#0284c7',
-                    pointBorderWidth: 3,
+                    pointBorderColor: C.cyan,
+                    pointBorderWidth: 2,
                     tension: 0.2,
                     spanGaps: false
                 },
                 {
-                    label: 'JCF PV (Jet Cooling)',
+                    label: 'JCF PV',
                     data: jcfPvAligned,
-                    borderColor: '#10b981', 
-                    backgroundColor: '#10b981',
-                    borderWidth: 3,
+                    borderColor: C.teal, 
+                    backgroundColor: C.teal,
+                    borderWidth: 2,
                     pointStyle: 'circle',
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
                     pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#10b981',
-                    pointBorderWidth: 3,
+                    pointBorderColor: C.teal,
+                    pointBorderWidth: 2,
                     tension: 0.2,
                     spanGaps: false
                 },
                 {
-                    label: 'HBR SP (Hot Bridle)',
+                    label: 'HBR SP',
                     data: hbrSpAligned,
-                    borderColor: '#8b5cf6', 
-                    backgroundColor: '#8b5cf6',
-                    borderWidth: 3,
+                    borderColor: C.purple, 
+                    backgroundColor: C.purple,
+                    borderWidth: 2,
                     pointStyle: 'rectRot',
-                    pointRadius: 8,
-                    pointHoverRadius: 10,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
                     pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#8b5cf6',
-                    pointBorderWidth: 3,
+                    pointBorderColor: C.purple,
+                    pointBorderWidth: 2,
                     spanGaps: false
                 },
                 {
-                    label: 'HBR PV (Hot Bridle)',
+                    label: 'HBR PV',
                     data: hbrPvAligned,
-                    borderColor: '#f59e0b', 
-                    backgroundColor: '#f59e0b',
-                    borderWidth: 3,
+                    borderColor: C.orange, 
+                    backgroundColor: C.orange,
+                    borderWidth: 2,
                     pointStyle: 'rectRot',
-                    pointRadius: 8,
-                    pointHoverRadius: 10,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
                     pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#f59e0b',
-                    pointBorderWidth: 3,
+                    pointBorderColor: C.orange,
+                    pointBorderWidth: 2,
                     spanGaps: false
                 }
             ]
@@ -408,23 +411,23 @@ function gasBarChartConfig(labels, data, colors, yTitle) {
                     label: 'Gas Level / Value',
                     data: data,
                     backgroundColor: colors,
-                    borderRadius: 6,
-                    borderWidth: 1,
-                    borderColor: 'rgba(0,0,0,0.08)',
-                    barPercentage: 0.55
+                    borderRadius: 4,
+                    borderWidth: 0,
+                    barPercentage: 0.6
                 }
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: { padding: 0 },
             plugins: {
                 legend: { display: false },
                 tooltip: {
                     padding: 12,
                     cornerRadius: 8,
-                    titleFont: { size: 12, weight: '800' },
-                    bodyFont: { size: 12, weight: '600' },
+                    titleFont: { size: 14, weight: '700' },
+                    bodyFont: { size: 14, weight: '500' },
                     callbacks: {
                         label: function(ctx) {
                             const val = ctx.raw;
@@ -437,14 +440,15 @@ function gasBarChartConfig(labels, data, colors, yTitle) {
             },
             scales: {
                 x: {
-                    grid: { display: false },
-                    ticks: { font: { weight: '700', size: 10 } }
+                    grid: { display: false, drawBorder: false },
+                    ticks: { font: { weight: '600', size: 11 } }
                 },
                 y: {
-                    title: { display: true, text: 'Measured Value', font: { weight: '700' } },
-                    grid: { color: 'rgba(0, 0, 0, 0.04)' },
+                    title: { display: false },
+                    grid: { color: 'rgba(0, 0, 0, 0.04)', drawBorder: false },
                     grace: '15%',
-                    beginAtZero: true
+                    beginAtZero: true,
+                    ticks: { font: { size: 11 } }
                 }
             }
         }
@@ -455,7 +459,6 @@ function gasBarChartConfig(labels, data, colors, yTitle) {
 //  MODAL & INTERACTIVITY LOGIC
 // ════════════════════════════════════════════════════
 
-// State variables for currently active chart configuration inside the Zoom Modal
 let currentZoomChartId = null;
 
 function openInfoModal(title, icon, color, unit, desc) {
@@ -492,7 +495,6 @@ function openZoomModal(chartId, title, icon, color, sub) {
     document.getElementById('zoomIcon').innerHTML = `<i class="fa-solid ${icon}"></i>`;
     document.getElementById('zoomIcon').style.backgroundColor = color;
 
-    // Clone the configuration from the existing chart to render in the zoom canvas
     const existingChart = charts[chartId];
     if (existingChart) {
         currentZoomChartId = chartId;
@@ -537,8 +539,6 @@ window.addEventListener('click', (e) => {
     if (e.target.classList.contains('modal-overlay')) {
         closeModal(e.target.id);
     }
-    
-    // Close KPI Popover if clicking outside
     const popover = document.getElementById('kpiPopover');
     if (!popover.classList.contains('hidden')) {
         if (!e.target.closest('.kpi-card') && !e.target.closest('#kpiPopover')) {
@@ -554,7 +554,6 @@ window.addEventListener('click', (e) => {
 window.addEventListener('DOMContentLoaded', () => {
     renderAll();
 
-    // Chart Action Buttons
     document.querySelectorAll('.btn-info').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const el = e.currentTarget;
@@ -569,7 +568,6 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // KPI Info Buttons
     const kpiPopover = document.getElementById('kpiPopover');
     const kpiText = document.getElementById('kpiPopoverText');
     document.querySelectorAll('.kpi-info-btn').forEach(btn => {
@@ -590,7 +588,6 @@ window.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', (e) => {
             granBtns.forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
-
             const rangeText = e.target.textContent.trim();
             applyPresetRange(rangeText);
         });
@@ -600,7 +597,6 @@ window.addEventListener('DOMContentLoaded', () => {
         let endDate = endDateInput.value ? new Date(endDateInput.value) : new Date();
         if (isNaN(endDate.getTime())) endDate = new Date();
         let startDate = new Date(endDate);
-
         switch (range) {
             case '1D': startDate.setDate(endDate.getDate() - 1); break;
             case '7D': startDate.setDate(endDate.getDate() - 7); break;
@@ -608,7 +604,6 @@ window.addEventListener('DOMContentLoaded', () => {
             case '6M': startDate.setMonth(endDate.getMonth() - 6); break;
             case '1Y': startDate.setFullYear(endDate.getFullYear() - 1); break;
         }
-
         startDateInput.value = startDate.toISOString().split('T')[0];
         endDateInput.value = endDate.toISOString().split('T')[0];
         renderAll();
@@ -633,10 +628,8 @@ window.addEventListener('DOMContentLoaded', () => {
 function parseCSV(text) {
     const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
     if (lines.length < 2) return;
-
     const headers = lines[0].split(',').map(h => h.trim());
     const dataRows = lines.slice(1).map(r => r.split(',').map(c => c.trim()));
-
     const colIdx = (part) => headers.findIndex(h => h.toLowerCase().includes(part.toLowerCase()));
     const rows = dataRows.slice(0, Math.min(dataRows.length, 12));
     
