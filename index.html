@@ -2,12 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACPPL GI Furnace — Industrial Analytics</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#0f172a">
+    
+    <!-- Primary Meta Tags -->
+    <title>ACPPL GI Furnace Analytics | Real-Time Industrial Monitoring</title>
+    <meta name="title" content="ACPPL GI Furnace Analytics | Real-Time Industrial Monitoring">
+    <meta name="description" content="Industrial furnace analytics dashboard for ACPPL GI Furnace. Features real-time zone temperature monitoring in °C, atmosphere gas parameters, air-gas ratios, stage mode tracking, and high-precision trend visualization.">
+    <meta name="keywords" content="ACPPL GI Furnace, Industrial Analytics, Zone Temperature °C, PHF, RTF, SF, JCF, HBR, Air Gas Ratio, Gas Parameters, Cold Rolling Mill, Real-Time Monitoring">
+    <meta name="author" content="Yogiji Digi Limited">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="ACPPL GI Furnace Analytics | Real-Time Industrial Monitoring">
+    <meta property="og:description" content="High-precision industrial furnace monitoring dashboard with real-time zone temperature tracking (°C) and atmospheric gas analytics.">
+    <meta property="og:image" content="YDLOGO.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="YDLOGO.png">
+    <link rel="apple-touch-icon" href="YDLOGO.png">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -40,12 +58,48 @@
 
         <!-- KPI ROW -->
         <section class="kpi-row">
-            <div class="kpi-card slate"><div class="kpi-label">Total Coils</div><div class="kpi-value" id="k-coils">—</div></div>
-            <div class="kpi-card blue"><div class="kpi-label">PHF Exit Avg</div><div class="kpi-value" id="k-phf">—<span class="kpi-unit">°C</span></div></div>
-            <div class="kpi-card green"><div class="kpi-label">RTF Exit Avg</div><div class="kpi-value" id="k-rtf">—<span class="kpi-unit">°C</span></div></div>
-            <div class="kpi-card orange"><div class="kpi-label">SF Exit Avg</div><div class="kpi-value" id="k-sf">—<span class="kpi-unit">°C</span></div></div>
-            <div class="kpi-card purple"><div class="kpi-label">HBR Exit Avg</div><div class="kpi-value" id="k-hbr">—<span class="kpi-unit">°C</span></div></div>
-            <div class="kpi-card cyan"><div class="kpi-label">Avg A/G Ratio</div><div class="kpi-value" id="k-ag">—</div></div>
+            <div class="kpi-card slate">
+                <div class="kpi-top">
+                    <div class="kpi-label">Total Coils</div>
+                    <button class="kpi-info-btn" data-info="Total coil count currently processed"><i class="fa-solid fa-circle-info"></i></button>
+                </div>
+                <div class="kpi-value" id="k-coils">—</div>
+            </div>
+            <div class="kpi-card blue">
+                <div class="kpi-top">
+                    <div class="kpi-label">PHF Exit Avg</div>
+                    <button class="kpi-info-btn" data-info="Pre-Heat Furnace exit temperature average in °C"><i class="fa-solid fa-circle-info"></i></button>
+                </div>
+                <div class="kpi-value" id="k-phf">—<span class="kpi-unit">°C</span></div>
+            </div>
+            <div class="kpi-card green">
+                <div class="kpi-top">
+                    <div class="kpi-label">RTF Exit Avg</div>
+                    <button class="kpi-info-btn" data-info="Radiant Tube Furnace exit temperature average in °C"><i class="fa-solid fa-circle-info"></i></button>
+                </div>
+                <div class="kpi-value" id="k-rtf">—<span class="kpi-unit">°C</span></div>
+            </div>
+            <div class="kpi-card orange">
+                <div class="kpi-top">
+                    <div class="kpi-label">SF Exit Avg</div>
+                    <button class="kpi-info-btn" data-info="Soaking Furnace exit temperature average in °C"><i class="fa-solid fa-circle-info"></i></button>
+                </div>
+                <div class="kpi-value" id="k-sf">—<span class="kpi-unit">°C</span></div>
+            </div>
+            <div class="kpi-card purple">
+                <div class="kpi-top">
+                    <div class="kpi-label">HBR Exit Avg</div>
+                    <button class="kpi-info-btn" data-info="Hot Bridle exit temperature average in °C"><i class="fa-solid fa-circle-info"></i></button>
+                </div>
+                <div class="kpi-value" id="k-hbr">—<span class="kpi-unit">°C</span></div>
+            </div>
+            <div class="kpi-card cyan">
+                <div class="kpi-top">
+                    <div class="kpi-label">Avg A/G Ratio</div>
+                    <button class="kpi-info-btn" data-info="Average Air-to-Gas combustion ratio across PHF zones"><i class="fa-solid fa-circle-info"></i></button>
+                </div>
+                <div class="kpi-value" id="k-ag">—</div>
+            </div>
         </section>
 
         <!-- ═══ PHF (FULL WIDTH) ═══ -->
@@ -53,41 +107,59 @@
             <div class="stage-head">
                 <span class="stage-icon icon-phf"><i class="fa-solid fa-fire"></i></span>
                 <h2>Pre Heat Furnace (PHF)</h2>
-                <span id="phf-mode-badge" class="mode-badge mode-manual"><span class="mode-dot"></span> MANUAL</span>
+                <span id="phf-mode-badge" class="mode-badge"><span class="mode-dot"></span> <span class="mode-text">SEMI-AUTO</span></span>
             </div>
             <div class="stage-charts cols-2">
                 <div class="chart-card">
                     <div class="chart-header">
-                        <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#3b82f6"></i> Zone Temperature</h3>
-                        <span class="chart-subtitle">Z1 • Z2 • Z3 • Z4 • Z5 • EXIT PV · Connected Line</span>
+                        <div class="chart-title-box">
+                            <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#3b82f6"></i> PHF Zone Temp (°C)</h3>
+                            <span class="chart-subtitle hidden-sm">Z1 • Z2 • Z3 • Z4 • Z5 • EXIT PV</span>
+                        </div>
+                        <div class="chart-actions">
+                            <button class="act-btn btn-info" data-chart="phfZoneTemp" data-title="PHF Zone Temp (°C)" data-icon="fa-chart-line" data-color="#3b82f6" data-unit="°C" data-desc="PHF Zone Temperature tracks set points (SP) and process values (PV) in °C across 5 heating zones and exit point."><i class="fa-solid fa-circle-info"></i></button>
+                            <button class="act-btn btn-zoom" data-chart="phfZoneTemp" data-title="PHF Zone Temp (°C)" data-icon="fa-chart-line" data-color="#3b82f6" data-sub="Detailed Parameter Analysis (°C)"><i class="fa-solid fa-expand"></i></button>
+                        </div>
                     </div>
                     <div class="chart-wrapper"><canvas id="phfZoneTemp"></canvas></div>
                 </div>
                 <div class="chart-card">
                     <div class="chart-header">
-                        <h3 class="chart-title"><i class="fa-solid fa-sliders" style="color:#10b981"></i> Air Gas Ratio</h3>
-                        <span class="chart-subtitle">Z1 • Z2 • Z3 • Z4 • Z5 · SP Line + PV Column</span>
+                        <div class="chart-title-box">
+                            <h3 class="chart-title"><i class="fa-solid fa-sliders" style="color:#10b981"></i> PHF Air Gas Ratio</h3>
+                            <span class="chart-subtitle hidden-sm">Z1 • Z2 • Z3 • Z4 • Z5</span>
+                        </div>
+                        <div class="chart-actions">
+                            <button class="act-btn btn-info" data-chart="phfZoneAG" data-title="PHF Air Gas Ratio" data-icon="fa-sliders" data-color="#10b981" data-unit="Ratio" data-desc="Monitors air-to-gas ratio set points vs process columns across PHF zones Z1 to Z5 for combustion efficiency."><i class="fa-solid fa-circle-info"></i></button>
+                            <button class="act-btn btn-zoom" data-chart="phfZoneAG" data-title="PHF Air Gas Ratio" data-icon="fa-sliders" data-color="#10b981" data-sub="Detailed Parameter Analysis (Ratio)"><i class="fa-solid fa-expand"></i></button>
+                        </div>
                     </div>
                     <div class="chart-wrapper"><canvas id="phfZoneAG"></canvas></div>
                 </div>
             </div>
         </div>
 
-        <!-- ═══ PROCESS ROW 1: RTF (60%) & SF (40%) ═══ -->
-        <div class="stage-row cols-60-40">
+        <!-- ═══ PROCESS ROW 1: RTF & SF ═══ -->
+        <div class="stage-row cols-2">
             
             <!-- ═══ RTF ═══ -->
             <div class="stage-module accent-rtf">
                 <div class="stage-head">
                     <span class="stage-icon icon-rtf"><i class="fa-solid fa-circle-radiation"></i></span>
                     <h2>Radiant Tube Furnace (RTF)</h2>
-                    <span id="rtf-mode-badge" class="mode-badge mode-auto"><span class="mode-dot"></span> AUTO</span>
+                    <span id="rtf-mode-badge" class="mode-badge"><span class="mode-dot"></span> <span class="mode-text">AUTO</span></span>
                 </div>
                 <div class="stage-charts cols-1">
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#10b981"></i> Zone Temperature</h3>
-                            <span class="chart-subtitle">Z1 • Z2 • Z3 • EXIT PV · Connected Line</span>
+                            <div class="chart-title-box">
+                                <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#10b981"></i> RTF Zone Temp (°C)</h3>
+                                <span class="chart-subtitle hidden-sm">Z1 • Z2 • Z3 • EXIT PV</span>
+                            </div>
+                            <div class="chart-actions">
+                                <button class="act-btn btn-info" data-chart="rtfZoneTemp" data-title="RTF Zone Temp (°C)" data-icon="fa-chart-line" data-color="#10b981" data-unit="°C" data-desc="RTF Zone Temperature displays radiant heating across Z1, Z2, Z3 and Exit in degree Celsius (°C)."><i class="fa-solid fa-circle-info"></i></button>
+                                <button class="act-btn btn-zoom" data-chart="rtfZoneTemp" data-title="RTF Zone Temp (°C)" data-icon="fa-chart-line" data-color="#10b981" data-sub="Detailed Parameter Analysis (°C)"><i class="fa-solid fa-expand"></i></button>
+                            </div>
                         </div>
                         <div class="chart-wrapper"><canvas id="rtfZoneTemp"></canvas></div>
                     </div>
@@ -99,13 +171,19 @@
                 <div class="stage-head">
                     <span class="stage-icon icon-sf"><i class="fa-solid fa-droplet"></i></span>
                     <h2>Soaking Furnace (SF)</h2>
-                    <span id="sf-mode-badge" class="mode-badge mode-auto"><span class="mode-dot"></span> AUTO</span>
+                    <span id="sf-mode-badge" class="mode-badge"><span class="mode-dot"></span> <span class="mode-text">SEMI-AUTO</span></span>
                 </div>
                 <div class="stage-charts cols-1">
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#f59e0b"></i> Zone Temperature</h3>
-                            <span class="chart-subtitle">HEATER • EXIT PV · Connected Line</span>
+                            <div class="chart-title-box">
+                                <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#f59e0b"></i> SF Heater &amp; Exit Temp (°C)</h3>
+                                <span class="chart-subtitle hidden-sm">HEATER • EXIT PV</span>
+                            </div>
+                            <div class="chart-actions">
+                                <button class="act-btn btn-info" data-chart="sfZoneTemp" data-title="SF Heater & Exit Temp (°C)" data-icon="fa-chart-line" data-color="#f59e0b" data-unit="°C" data-desc="Soaking Furnace monitors strip temperature equilibrium across the main heater unit and exit point in °C."><i class="fa-solid fa-circle-info"></i></button>
+                                <button class="act-btn btn-zoom" data-chart="sfZoneTemp" data-title="SF Heater & Exit Temp (°C)" data-icon="fa-chart-line" data-color="#f59e0b" data-sub="Detailed Parameter Analysis (°C)"><i class="fa-solid fa-expand"></i></button>
+                            </div>
                         </div>
                         <div class="chart-wrapper"><canvas id="sfZoneTemp"></canvas></div>
                     </div>
@@ -117,25 +195,31 @@
         <!-- ═══ PROCESS ROW 2: JCF & GAS ═══ -->
         <div class="stage-row cols-2">
 
-            <!-- ═══ JCF + HBR (SAME AS PHF: CONNECTED LINE) ═══ -->
+            <!-- ═══ JCF + HBR ═══ -->
             <div class="stage-module accent-jcf">
                 <div class="stage-head">
                     <span class="stage-icon icon-jcf"><i class="fa-solid fa-snowflake"></i></span>
                     <h2>Jet Cooling (JCF) + Hot Bridle (HBR)</h2>
-                    <span id="jcf-mode-badge" class="mode-badge mode-manual"><span class="mode-dot"></span> MANUAL</span>
+                    <span id="jcf-mode-badge" class="mode-badge"><span class="mode-dot"></span> <span class="mode-text">MANUAL</span></span>
                 </div>
                 <div class="stage-charts cols-1">
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#8b5cf6"></i> Zone Temperature</h3>
-                            <span class="chart-subtitle">Z1 • Z2 • Z3 • EXIT PV · Connected Line</span>
+                            <div class="chart-title-box">
+                                <h3 class="chart-title"><i class="fa-solid fa-chart-line" style="color:#8b5cf6"></i> JCF &amp; HBR Zone Temp (°C)</h3>
+                                <span class="chart-subtitle hidden-sm">JCF (Z1, Z2, Z3) • HBR (EXIT PV)</span>
+                            </div>
+                            <div class="chart-actions">
+                                <button class="act-btn btn-info" data-chart="jcfZoneTemp" data-title="JCF & HBR Zone Temp (°C)" data-icon="fa-chart-line" data-color="#8b5cf6" data-unit="°C" data-desc="Differentiates Jet Cooling Furnace (JCF Z1-Z3) cooling temperatures and Hot Bridle (HBR Exit) tensioning stage temperatures in °C."><i class="fa-solid fa-circle-info"></i></button>
+                                <button class="act-btn btn-zoom" data-chart="jcfZoneTemp" data-title="JCF & HBR Zone Temp (°C)" data-icon="fa-chart-line" data-color="#8b5cf6" data-sub="Detailed Parameter Analysis (°C)"><i class="fa-solid fa-expand"></i></button>
+                            </div>
                         </div>
                         <div class="chart-wrapper"><canvas id="jcfZoneTemp"></canvas></div>
                     </div>
                 </div>
             </div>
 
-            <!-- ═══ GAS & COMBUSTION (PIE CHART) ═══ -->
+            <!-- ═══ GAS & COMBUSTION (BAR CHART) ═══ -->
             <div class="stage-module accent-gas">
                 <div class="stage-head">
                     <span class="stage-icon icon-gas"><i class="fa-solid fa-wind"></i></span>
@@ -144,8 +228,14 @@
                 <div class="stage-charts cols-1">
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h3 class="chart-title"><i class="fa-solid fa-pie-chart" style="color:#06b6d4"></i> Atmosphere &amp; Combustion</h3>
-                            <span class="chart-subtitle">Single Pie Chart Overview</span>
+                            <div class="chart-title-box">
+                                <h3 class="chart-title"><i class="fa-solid fa-chart-column" style="color:#06b6d4"></i> Atmosphere &amp; Combustion</h3>
+                                <span class="chart-subtitle hidden-sm">Gas Parameter Bar Chart</span>
+                            </div>
+                            <div class="chart-actions">
+                                <button class="act-btn btn-info" data-chart="gasPieChart" data-title="Gas & Atmosphere Parameters" data-icon="fa-chart-column" data-color="#06b6d4" data-unit="Mixed" data-desc="Monitors critical protective gas composition, furnace atmosphere purity, and combustion air pressure levels to prevent oxidation and ensure surface quality during annealing."><i class="fa-solid fa-circle-info"></i></button>
+                                <button class="act-btn btn-zoom" data-chart="gasPieChart" data-title="Gas & Atmosphere Parameters — Bar Chart" data-icon="fa-chart-column" data-color="#06b6d4" data-sub="Comprehensive Atmospheric Composition Overview"><i class="fa-solid fa-expand"></i></button>
+                            </div>
                         </div>
                         <div class="chart-wrapper">
                             <canvas id="gasPieChart"></canvas>
@@ -158,6 +248,65 @@
         </div>
 
     </main>
+
+    <!-- GLOBAL INFO MODAL -->
+    <div id="infoModal" class="modal-overlay hidden">
+        <div class="modal-content info-modal">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <span id="infoIcon" class="modal-icon"><i class="fa-solid fa-circle-info"></i></span>
+                    <div>
+                        <h4 id="infoTitle">Stage Title</h4>
+                        <p>Stage Documentation</p>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeModal('infoModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p id="infoDesc">Description goes here.</p>
+                <div class="modal-specs">
+                    <div class="specs-title">Key Specifications:</div>
+                    <ul id="infoSpecsList">
+                        <!-- Populated dynamically -->
+                    </ul>
+                </div>
+            </div>
+            <button class="modal-btn-full" onclick="closeModal('infoModal')">Close Info</button>
+        </div>
+    </div>
+
+    <!-- GLOBAL ZOOM MODAL -->
+    <div id="zoomModal" class="modal-overlay zoom-overlay hidden">
+        <div class="modal-content zoom-modal">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <span id="zoomIcon" class="modal-icon-lg"><i class="fa-solid fa-expand"></i></span>
+                    <div>
+                        <h3 id="zoomTitle">Title — Full Screen View</h3>
+                        <p id="zoomSub">Detailed Parameter Analysis</p>
+                    </div>
+                </div>
+                <div class="modal-header-right">
+                    <button class="modal-btn-small" onclick="openInfoFromZoom()"><i class="fa-solid fa-circle-info"></i> Info</button>
+                    <button class="modal-close-lg" onclick="closeModal('zoomModal')" title="Close Fullscreen"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+            <div class="zoom-chart-area">
+                <canvas id="zoomCanvas"></canvas>
+            </div>
+            <div class="zoom-footer">
+                <span>Press <kbd>ESC</kbd> or click Close to return</span>
+                <span>ACPPL GI Furnace High-Precision Analytics</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI POPOVER TEMPLATE -->
+    <div id="kpiPopover" class="kpi-popover hidden">
+        <span id="kpiPopoverText">Info</span>
+        <button onclick="closeKpiPopover()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

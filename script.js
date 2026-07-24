@@ -1,5 +1,5 @@
-/* ACPPL GI Furnace Dashboard — script.js v9
-   Refined Layout & Custom Chart Logic per User Feedback */
+/* ACPPL GI Furnace Dashboard — script.js v10
+   Aligned with React features: Modals, KPI Tooltips, Bar Charts, Semi-Auto */
 
 Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
 Chart.defaults.font.size = 11;
@@ -9,14 +9,16 @@ Chart.defaults.plugins.legend.labels.boxWidth = 8;
 Chart.defaults.plugins.legend.labels.padding = 16;
 
 const C = {
-    spBlue: '#3b82f6',      // SP (Set Point) Always Blue
-    pvGreen: '#10b981',     // PV (Process Value) Always Green
+    spBlue: '#3b82f6',
+    pvGreen: '#10b981',
     cyan: '#06b6d4',
     purple: '#8b5cf6',
     red: '#ef4444',
     slate: '#475569',
     indigo: '#6366f1',
-    orange: '#f59e0b'
+    orange: '#f59e0b',
+    teal: '#14b8a6',
+    amber: '#d97706'
 };
 
 const charts = {};
@@ -33,7 +35,6 @@ function mk(id, cfg) {
 let D = {
     coils: ['C07G0864','C07G0628','C07G0629','C07G0627','C07G0949','C07G0625','C07G0948','C07G0952','C07G0767','C07G0621'],
 
-    // PHF Zones
     phfZones: ['Z1','Z2','Z3','Z4','Z5'],
     phfZoneSP: [1200, 1200, 1150, 1150, 1100],
     phfZonePV: [1196, 1195, 1147, 1140, 1085],
@@ -42,26 +43,22 @@ let D = {
     phfExitSP: [750, 750, 750, 750, 740, 740, 740, 740, 740, 740],
     phfExitPV: [728, 748, 750, 740, 738, 745, 732, 747, 741, 751],
 
-    // RTF Zones
     rtfZones: ['Z1','Z2','Z3'],
     rtfZoneSP: [770, 770, 770],
     rtfZonePV: [752, 780, 771],
     rtfExitSP: [750, 750, 750, 750, 740, 740, 740, 740, 740, 740],
     rtfExitPV: [723, 748, 748, 740, 738, 745, 732, 747, 741, 751],
 
-    // SF
     sfHeaterSP: [750, 750, 750, 750, 750, 750, 750, 750, 750, 750],
     sfHeaterPV: [739, 739, 739, 740, 738, 745, 732, 747, 741, 751],
     sfExitSP:   [720, 720, 720, 720, 720, 720, 720, 715, 715, 715],
     sfExitPV:   [727, 716, 718, 719, 715, 721, 710, 714, 712, 719],
 
-    // JCF & HBR
     jcfZoneSP: [195, 195, 205],
     jcfZonePV: [188, 193, 201],
-    hbrExitSP: [460, 460, 460, 460, 460, 460, 460, 460, 460, 460],
-    hbrExitPV: [469, 483, 489, 488, 482, 483, 478, 482, 478, 481],
+    hbrExitSP: 460,
+    hbrExitPV: 481,
 
-    // Gas & Combustion
     h2Flow: [28.7, 28.8, 28.5, 29.4, 28.5, 28.7, 30.9, 29.7, 29.1, 27.6],
     n2Flow: [244.5, 243.0, 243.3, 243.2, 243.4, 243.3, 242.1, 243.1, 245.9, 240.6],
     o2:     [41.0, 39.0, 40.0, 42.0, 40.0, 39.0, 44.0, 40.0, 39.0, 38.0],
@@ -69,15 +66,15 @@ let D = {
     combSP: [900, 900, 900, 900, 900, 900, 900, 900, 900, 900],
     combPV: [899, 900, 900, 900, 900, 900, 900, 900, 900, 900],
 
-    // Modes & Counts
     totalCoils: 109,
-    phfMode: 'MANUAL',
+    phfMode: 'SEMI-AUTO',
     rtfMode: 'AUTO',
-    sfMode: 'AUTO',
+    sfMode: 'SEMI-AUTO',
     hbrMode: 'MANUAL'
 };
 
 function avg(arr) {
+    if (typeof arr === 'number') return arr;
     if (!arr || !arr.length) return 0;
     return arr.reduce((a, b) => a + b, 0) / arr.length;
 }
@@ -89,9 +86,20 @@ function avg(arr) {
 function updateModeBadge(elId, modeStr) {
     const el = document.getElementById(elId);
     if (!el) return;
-    const isAuto = modeStr.toUpperCase() === 'AUTO';
-    el.className = `mode-badge ${isAuto ? 'mode-auto' : 'mode-manual'}`;
-    el.innerHTML = `<span class="mode-dot"></span> ${isAuto ? 'AUTO' : 'MANUAL'}`;
+    const m = modeStr.toUpperCase().trim();
+    let modeClass = 'mode-manual';
+    let modeText = 'MANUAL';
+    
+    if (m === 'AUTO') {
+        modeClass = 'mode-auto';
+        modeText = 'AUTO';
+    } else if (m === 'SEMI-AUTO' || m === 'SEMI_AUTO' || m === 'SEMI AUTO') {
+        modeClass = 'mode-semi-auto';
+        modeText = 'SEMI-AUTO';
+    }
+    
+    el.className = `mode-badge ${modeClass}`;
+    el.innerHTML = `<span class="mode-dot"></span> <span class="mode-text">${modeText}</span>`;
 }
 
 // ════════════════════════════════════════════════════
@@ -99,7 +107,6 @@ function updateModeBadge(elId, modeStr) {
 // ════════════════════════════════════════════════════
 
 function renderAll() {
-    // 1. KPI Row
     const phfExitAvg = avg(D.phfExitPV);
     const rtfExitAvg = avg(D.rtfExitPV);
     const sfExitAvg = avg(D.sfExitPV);
@@ -107,72 +114,58 @@ function renderAll() {
     const avgAGRatio = avg(D.phfZoneAGPV);
 
     document.getElementById('k-coils').textContent = D.totalCoils;
-    document.getElementById('k-phf').textContent = phfExitAvg.toFixed(1);
-    document.getElementById('k-rtf').textContent = rtfExitAvg.toFixed(1);
-    document.getElementById('k-sf').textContent = sfExitAvg.toFixed(1);
-    document.getElementById('k-hbr').textContent = hbrExitAvg.toFixed(1);
+    document.getElementById('k-phf').innerHTML = `${phfExitAvg.toFixed(1)}<span class="kpi-unit">°C</span>`;
+    document.getElementById('k-rtf').innerHTML = `${rtfExitAvg.toFixed(1)}<span class="kpi-unit">°C</span>`;
+    document.getElementById('k-sf').innerHTML = `${sfExitAvg.toFixed(1)}<span class="kpi-unit">°C</span>`;
+    document.getElementById('k-hbr').innerHTML = `${hbrExitAvg.toFixed(1)}<span class="kpi-unit">°C</span>`;
     document.getElementById('k-ag').textContent = avgAGRatio.toFixed(2);
 
-    // 2. Mode Badges
     updateModeBadge('phf-mode-badge', D.phfMode);
     updateModeBadge('rtf-mode-badge', D.rtfMode);
     updateModeBadge('sf-mode-badge', D.sfMode);
     updateModeBadge('jcf-mode-badge', D.hbrMode);
 
-    // 3. PHF Charts
-    // PHF Zone Temp: Connected Line Chart
+    // PHF
     const phfLabels = [...D.phfZones, 'EXIT PV'];
     const phfSP = [...D.phfZoneSP, avg(D.phfExitSP)];
     const phfPV = [...D.phfZonePV, avg(D.phfExitPV)];
     mk('phfZoneTemp', lineChartSPPV(phfLabels, phfSP, phfPV, 'Temperature (°C)'));
-    
-    // PHF Air Gas Ratio: SP Line + PV Column Combo Chart (User Request 1)
     mk('phfZoneAG', comboSpLinePvColumn(D.phfZones, D.phfZoneAGSP, D.phfZoneAGPV, 'Air / Gas Ratio'));
 
-    // 4. RTF Chart: Connected Line Chart (60% Width Row 2)
+    // RTF
     const rtfLabels = [...D.rtfZones, 'EXIT PV'];
     const rtfSP = [...D.rtfZoneSP, avg(D.rtfExitSP)];
     const rtfPV = [...D.rtfZonePV, avg(D.rtfExitPV)];
     mk('rtfZoneTemp', lineChartSPPV(rtfLabels, rtfSP, rtfPV, 'Temperature (°C)'));
 
-    // 5. SF Chart: Connected Line Chart (User Request 3 - Clean Connected Line)
+    // SF
     const sfLabels = ['HEATER', 'EXIT PV'];
     const sfSP = [avg(D.sfHeaterSP), avg(D.sfExitSP)];
     const sfPV = [avg(D.sfHeaterPV), avg(D.sfExitPV)];
     mk('sfZoneTemp', lineChartSPPV(sfLabels, sfSP, sfPV, 'Temperature (°C)'));
 
-    // 6. JCF + HBR Chart: Connected Line Chart (User Request 4 - Exactly like PHF)
-    const jcfLabels = ['Z1', 'Z2', 'Z3', 'EXIT PV'];
-    const jcfSP = [...D.jcfZoneSP, avg(D.hbrExitSP)];
-    const jcfPV = [...D.jcfZonePV, avg(D.hbrExitPV)];
-    mk('jcfZoneTemp', lineChartSPPV(jcfLabels, jcfSP, jcfPV, 'Temperature (°C)'));
+    // JCF + HBR
+    const jcfLabels = ['JCF Z1', 'JCF Z2', 'JCF Z3'];
+    const jcfSP = D.jcfZoneSP;
+    const jcfPV = D.jcfZonePV;
+    const hbrLabel = 'HBR EXIT';
+    const hbrSP = avg(D.hbrExitSP);
+    const hbrPV = avg(D.hbrExitPV);
+    mk('jcfZoneTemp', jcfHbrChartConfig(jcfLabels, jcfSP, jcfPV, hbrLabel, hbrSP, hbrPV, 'Temperature (°C)'));
 
-    // 7. SINGLE UNIFIED GAS & ATMOSPHERE PIE CHART
+    // GAS BAR CHART
     const avgH2 = avg(D.h2Flow);
     const avgN2 = avg(D.n2Flow);
     const avgO2 = avg(D.o2);
     const avgDewPt = avg(D.dewPt);
     const avgCombPV = avg(D.combPV);
 
-    const gasLabels = [
-        'H₂ Flow (Nm³/h)',
-        'N₂ Flow (Nm³/h)',
-        'O₂ Level (ppm)',
-        'Dew Point (|°C|)',
-        'Comb Air Press (mmwc)'
-    ];
-    const gasData = [
-        avgH2,
-        avgN2,
-        avgO2,
-        Math.abs(avgDewPt),
-        avgCombPV
-    ];
+    const gasLabels = ['H₂ Flow (Nm³/h)', 'N₂ Flow (Nm³/h)', 'O₂ Level (ppm)', 'Dew Point (°C)', 'Comb Air Press (mmwc)'];
+    const gasData = [avgH2, avgN2, avgO2, Math.abs(avgDewPt), avgCombPV];
     const gasColors = [C.cyan, C.purple, C.red, C.slate, C.indigo];
 
-    mk('gasPieChart', singleUnifiedGasPie(gasLabels, gasData, gasColors));
+    mk('gasPieChart', gasBarChartConfig(gasLabels, gasData, gasColors, 'Gas Parameters'));
 
-    // Update Gas Summary Chips
     const chipsContainer = document.getElementById('gasSummaryChips');
     if (chipsContainer) {
         chipsContainer.innerHTML = `
@@ -186,8 +179,66 @@ function renderAll() {
 }
 
 // ════════════════════════════════════════════════════
-//  1. CONNECTED LINE CHART FACTORY (SP Blue, PV Green)
+//  CHART FACTORIES & COMMON OPTIONS
 // ════════════════════════════════════════════════════
+
+function commonOptions(yTitle) {
+    const isTemp = yTitle && yTitle.includes('°C');
+    const isRatio = yTitle && yTitle.includes('Ratio');
+    
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    usePointStyle: true,
+                    boxWidth: 8,
+                    padding: 16,
+                    font: { size: 12, weight: '700' }
+                }
+            },
+            tooltip: {
+                padding: 12,
+                cornerRadius: 8,
+                titleFont: { size: 12, weight: '800' },
+                bodyFont: { size: 12, weight: '600' },
+                callbacks: {
+                    title: function(items) {
+                        if (!items || !items.length) return '';
+                        const l = items[0].label;
+                        if (l.startsWith('Z')) return `Zone ${l.replace('Z','')}`;
+                        return l;
+                    },
+                    label: function(ctx) {
+                        const label = ctx.dataset.label || '';
+                        let unit = '';
+                        if (isTemp || label.includes('°C') || label.toLowerCase().includes('temp')) {
+                            unit = ' °C';
+                        }
+                        const valStr = typeof ctx.raw === 'number' ? (isRatio ? ctx.raw.toFixed(2) : ctx.raw.toFixed(1)) : ctx.raw;
+                        return `  ${label}: ${valStr}${unit}`;
+                    }
+                }
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { font: { weight: '700', size: 11 } }
+            },
+            y: {
+                title: { display: true, text: yTitle, font: { weight: '700' } },
+                grid: { color: 'rgba(0, 0, 0, 0.04)' },
+                beginAtZero: false,
+                grace: '18%',
+                ticks: { font: { } }
+            }
+        }
+    };
+}
 
 function lineChartSPPV(labels, spData, pvData, yTitle) {
     return {
@@ -231,10 +282,6 @@ function lineChartSPPV(labels, spData, pvData, yTitle) {
     };
 }
 
-// ════════════════════════════════════════════════════
-//  2. SP LINE + PV COLUMN COMBO CHART (Air Gas Ratio)
-// ════════════════════════════════════════════════════
-
 function comboSpLinePvColumn(labels, spData, pvData, yTitle) {
     return {
         type: 'bar',
@@ -273,99 +320,232 @@ function comboSpLinePvColumn(labels, spData, pvData, yTitle) {
     };
 }
 
-// ════════════════════════════════════════════════════
-//  COMMON CHART OPTIONS (Custom Tooltips & Formatting)
-// ════════════════════════════════════════════════════
+function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrPv, yTitle) {
+    const labels = [...jcfLabels, hbrLabel];
+    const jcfSpAligned = [...jcfSp, null];
+    const jcfPvAligned = [...jcfPv, null];
+    const hbrSpAligned = [null, null, null, hbrSp];
+    const hbrPvAligned = [null, null, null, hbrPv];
 
-function commonOptions(yTitle) {
     return {
-        responsive: true,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-            legend: {
-                position: 'top',
-                labels: {
-                    usePointStyle: true,
-                    boxWidth: 8,
-                    font: { size: 12, weight: '700' }
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'JCF SP (Jet Cooling)',
+                    data: jcfSpAligned,
+                    borderColor: '#0284c7', 
+                    backgroundColor: '#0284c7',
+                    borderWidth: 3,
+                    pointStyle: 'circle',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#0284c7',
+                    pointBorderWidth: 3,
+                    tension: 0.2,
+                    spanGaps: false
+                },
+                {
+                    label: 'JCF PV (Jet Cooling)',
+                    data: jcfPvAligned,
+                    borderColor: '#10b981', 
+                    backgroundColor: '#10b981',
+                    borderWidth: 3,
+                    pointStyle: 'circle',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#10b981',
+                    pointBorderWidth: 3,
+                    tension: 0.2,
+                    spanGaps: false
+                },
+                {
+                    label: 'HBR SP (Hot Bridle)',
+                    data: hbrSpAligned,
+                    borderColor: '#8b5cf6', 
+                    backgroundColor: '#8b5cf6',
+                    borderWidth: 3,
+                    pointStyle: 'rectRot',
+                    pointRadius: 8,
+                    pointHoverRadius: 10,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#8b5cf6',
+                    pointBorderWidth: 3,
+                    spanGaps: false
+                },
+                {
+                    label: 'HBR PV (Hot Bridle)',
+                    data: hbrPvAligned,
+                    borderColor: '#f59e0b', 
+                    backgroundColor: '#f59e0b',
+                    borderWidth: 3,
+                    pointStyle: 'rectRot',
+                    pointRadius: 8,
+                    pointHoverRadius: 10,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#f59e0b',
+                    pointBorderWidth: 3,
+                    spanGaps: false
                 }
-            },
-            tooltip: {
-                padding: 12,
-                cornerRadius: 8,
-                titleFont: { size: 12, weight: '800' },
-                bodyFont: { size: 12, weight: '600' },
-                callbacks: {
-                    title: function(items) {
-                        if (!items || !items.length) return '';
-                        const l = items[0].label;
-                        return l.startsWith('Z') ? `Zone ${l.replace('Z','')}` : l;
-                    },
-                    label: function(ctx) {
-                        const isSP = ctx.dataset.label.startsWith('SP');
-                        const dsTag = isSP ? 'SP' : 'PV';
-                        const unit = yTitle.includes('°C') ? '°C' : '';
-                        const valStr = typeof ctx.raw === 'number' ? (yTitle.includes('Ratio') ? ctx.raw.toFixed(2) : ctx.raw.toFixed(1)) : ctx.raw;
-                        return `  ${dsTag} : ${valStr}${unit}`;
-                    }
-                }
-            }
+            ]
         },
-        scales: {
-            x: {
-                grid: { display: false },
-                ticks: { font: { weight: '700', size: 11 } }
-            },
-            y: {
-                title: { display: true, text: yTitle, font: { weight: '700' } },
-                grid: { color: 'rgba(0, 0, 0, 0.04)' },
-                beginAtZero: false
-            }
-        }
+        options: commonOptions(yTitle)
     };
 }
 
-// ════════════════════════════════════════════════════
-//  3. SINGLE UNIFIED GAS PIE CHART FACTORY
-// ════════════════════════════════════════════════════
+function gasBarChartConfig(labels, data, colors, yTitle) {
+    const units = ['Nm³/h', 'Nm³/h', 'ppm', '°C', 'mmwc'];
 
-function singleUnifiedGasPie(labels, data, colors) {
     return {
-        type: 'pie',
+        type: 'bar',
         data: {
             labels: labels,
-            datasets: [{
-                data: data,
-                backgroundColor: colors,
-                borderWidth: 2,
-                borderColor: '#ffffff',
-                hoverOffset: 8
-            }]
+            datasets: [
+                {
+                    label: 'Gas Level / Value',
+                    data: data,
+                    backgroundColor: colors,
+                    borderRadius: 6,
+                    borderWidth: 1,
+                    borderColor: 'rgba(0,0,0,0.08)',
+                    barPercentage: 0.55
+                }
+            ]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 14,
-                        font: { size: 11, weight: '700' }
-                    }
-                },
+                legend: { display: false },
                 tooltip: {
-                    padding: 10,
+                    padding: 12,
                     cornerRadius: 8,
+                    titleFont: { size: 12, weight: '800' },
+                    bodyFont: { size: 12, weight: '600' },
                     callbacks: {
                         label: function(ctx) {
-                            return `  ${ctx.label}: ${ctx.raw}`;
+                            const val = ctx.raw;
+                            const idx = ctx.dataIndex;
+                            const u = units[idx] || '';
+                            return `  ${ctx.label}: ${val} ${u}`;
                         }
                     }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { weight: '700', size: 10 } }
+                },
+                y: {
+                    title: { display: true, text: 'Measured Value', font: { weight: '700' } },
+                    grid: { color: 'rgba(0, 0, 0, 0.04)' },
+                    grace: '15%',
+                    beginAtZero: true
                 }
             }
         }
     };
 }
+
+// ════════════════════════════════════════════════════
+//  MODAL & INTERACTIVITY LOGIC
+// ════════════════════════════════════════════════════
+
+// State variables for currently active chart configuration inside the Zoom Modal
+let currentZoomChartId = null;
+
+function openInfoModal(title, icon, color, unit, desc) {
+    document.getElementById('infoTitle').textContent = title;
+    document.getElementById('infoDesc').textContent = desc;
+    document.getElementById('infoIcon').innerHTML = `<i class="fa-solid ${icon}"></i>`;
+    document.getElementById('infoIcon').style.color = color;
+    document.getElementById('infoIcon').style.backgroundColor = color + '1a'; // 10% opacity
+    
+    let specsHtml = '';
+    if (unit === 'Mixed') {
+        specsHtml = `
+            <li><strong>H₂ / N₂ Flow:</strong> Measured in Nm³/h</li>
+            <li><strong>O₂ Purity:</strong> Parts per million (ppm)</li>
+            <li><strong>Dew Point:</strong> Temperature in degree Celsius (°C)</li>
+            <li><strong>Combustion Air:</strong> Pressure in mmwc</li>
+        `;
+    } else {
+        specsHtml = `
+            <li><strong>Unit of Measure:</strong> ${unit === '°C' ? 'Degree Celsius (°C)' : unit}</li>
+            <li><strong>Control Mode:</strong> Real-time SP (Set Point) vs PV (Process Value) tracking</li>
+            <li><strong>headroom / Scale:</strong> Dynamic height optimization for clean signal visibility</li>
+        `;
+    }
+    document.getElementById('infoSpecsList').innerHTML = specsHtml;
+    
+    const m = document.getElementById('infoModal');
+    m.classList.remove('hidden');
+}
+
+function openZoomModal(chartId, title, icon, color, sub) {
+    document.getElementById('zoomTitle').textContent = title;
+    document.getElementById('zoomSub').textContent = sub;
+    document.getElementById('zoomIcon').innerHTML = `<i class="fa-solid ${icon}"></i>`;
+    document.getElementById('zoomIcon').style.backgroundColor = color;
+
+    // Clone the configuration from the existing chart to render in the zoom canvas
+    const existingChart = charts[chartId];
+    if (existingChart) {
+        currentZoomChartId = chartId;
+        mk('zoomCanvas', existingChart.config);
+    }
+
+    const m = document.getElementById('zoomModal');
+    m.classList.remove('hidden');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+    if (modalId === 'zoomModal') {
+        if(charts['zoomCanvas']) {
+            charts['zoomCanvas'].destroy();
+            delete charts['zoomCanvas'];
+        }
+        currentZoomChartId = null;
+    }
+}
+
+function openInfoFromZoom() {
+    if (currentZoomChartId) {
+        const btn = document.querySelector(`.btn-info[data-chart="${currentZoomChartId}"]`);
+        if (btn) btn.click();
+    }
+}
+
+function closeKpiPopover() {
+    document.getElementById('kpiPopover').classList.add('hidden');
+}
+
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeModal('infoModal');
+        closeModal('zoomModal');
+        closeKpiPopover();
+    }
+});
+
+window.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal-overlay')) {
+        closeModal(e.target.id);
+    }
+    
+    // Close KPI Popover if clicking outside
+    const popover = document.getElementById('kpiPopover');
+    if (!popover.classList.contains('hidden')) {
+        if (!e.target.closest('.kpi-card') && !e.target.closest('#kpiPopover')) {
+            closeKpiPopover();
+        }
+    }
+});
 
 // ════════════════════════════════════════════════════
 //  EVENT LISTENERS & CSV PARSER
@@ -373,6 +553,34 @@ function singleUnifiedGasPie(labels, data, colors) {
 
 window.addEventListener('DOMContentLoaded', () => {
     renderAll();
+
+    // Chart Action Buttons
+    document.querySelectorAll('.btn-info').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const el = e.currentTarget;
+            openInfoModal(el.dataset.title, el.dataset.icon, el.dataset.color, el.dataset.unit, el.dataset.desc);
+        });
+    });
+
+    document.querySelectorAll('.btn-zoom').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const el = e.currentTarget;
+            openZoomModal(el.dataset.chart, el.dataset.title, el.dataset.icon, el.dataset.color, el.dataset.sub);
+        });
+    });
+
+    // KPI Info Buttons
+    const kpiPopover = document.getElementById('kpiPopover');
+    const kpiText = document.getElementById('kpiPopoverText');
+    document.querySelectorAll('.kpi-info-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const card = e.currentTarget.closest('.kpi-card');
+            const info = e.currentTarget.dataset.info;
+            kpiText.textContent = info;
+            card.appendChild(kpiPopover);
+            kpiPopover.classList.remove('hidden');
+        });
+    });
 
     const startDateInput = document.getElementById('startDate');
     const endDateInput = document.getElementById('endDate');
