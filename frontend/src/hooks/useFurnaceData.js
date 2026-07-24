@@ -28,8 +28,8 @@ const initialDemoData = {
     // JCF & HBR
     jcfZoneSP: [195, 195, 205],
     jcfZonePV: [188, 193, 201],
-    hbrExitSP: [460, 460, 460, 460, 460, 460, 460, 460, 460, 460],
-    hbrExitPV: [469, 483, 489, 488, 482, 483, 478, 482, 478, 481],
+    hbrExitSP: 460,
+    hbrExitPV: 481,
 
     // Gas & Combustion
     h2Flow: [28.7, 28.8, 28.5, 29.4, 28.5, 28.7, 30.9, 29.7, 29.1, 27.6],
@@ -41,13 +41,14 @@ const initialDemoData = {
 
     // Modes & Counts
     totalCoils: 109,
-    phfMode: 'MANUAL',
+    phfMode: 'SEMI-AUTO',
     rtfMode: 'AUTO',
-    sfMode: 'AUTO',
+    sfMode: 'SEMI-AUTO',
     hbrMode: 'MANUAL'
 };
 
 export function avg(arr) {
+    if (typeof arr === 'number') return arr;
     if (!arr || !arr.length) return 0;
     return arr.reduce((a, b) => a + b, 0) / arr.length;
 }
