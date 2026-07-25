@@ -1,79 +1,93 @@
 import React, { useState } from 'react';
-import { Bar } from 'react-chartjs-2';
+import { Chart } from 'react-chartjs-2';
 import 'chart.js/auto';
-import { C } from '../utils/chartHelpers';
+import { C, gasLollipopChartConfig, gasClusteredColumnLineConfig } from '../utils/chartHelpers';
 
-export default function GasPanel({ configFactory, labels, data, colors, rawData }) {
+export default function GasPanel({ rawData }) {
     const [isZoomed, setIsZoomed] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
+    const [isFlipped, setIsFlipped] = useState(false);
 
-    const config = configFactory(labels, data, colors);
+    // 7 Executive Gas & Blower Parameters
+    const paramsData = [
+        { name: 'Fume Exh Blower', shortName: 'Fume Blower', rawVal: 1089, unit: 'rpm', target: 1100, limit: 1200, normalized: 90.8, targetNorm: 91.7, limitNorm: 100, color: C.cyan },
+        { name: 'Comb Blower 1', shortName: 'Comb Blower', rawVal: 2387, unit: 'rpm', target: 2400, limit: 2500, normalized: 95.5, targetNorm: 96.0, limitNorm: 100, color: C.purple },
+        { name: 'O2', shortName: 'O2', rawVal: 37.0, unit: 'ppm', target: 40.0, limit: 50.0, normalized: 74.0, targetNorm: 80.0, limitNorm: 100, color: C.red },
+        { name: 'Dew Point', shortName: 'Dew Point', rawVal: -25.1, unit: '°C', target: -25.0, limit: -20.0, normalized: 80.3, targetNorm: 80.0, limitNorm: 100, color: C.slate },
+        { name: 'H2', shortName: 'H2', rawVal: 20.1, unit: '%', target: 20.0, limit: 25.0, normalized: 80.4, targetNorm: 80.0, limitNorm: 100, color: C.indigo },
+        { name: 'H2 Flow', shortName: 'H2 Flow', rawVal: rawData?.avgH2 ? rawData.avgH2.toFixed(1) : 28.8, unit: 'Nm³/h', target: 30.0, limit: 35.0, normalized: 82.3, targetNorm: 85.7, limitNorm: 100, color: C.teal },
+        { name: 'N2 Flow', shortName: 'N2 Flow', rawVal: rawData?.avgN2 ? rawData.avgN2.toFixed(1) : 243.8, unit: 'Nm³/h', target: 250.0, limit: 300.0, normalized: 81.3, targetNorm: 83.3, limitNorm: 100, color: C.orange }
+    ];
+
+    const config = isFlipped 
+        ? gasClusteredColumnLineConfig(paramsData)
+        : gasLollipopChartConfig(paramsData);
 
     return (
         <>
             <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-[14px_16px] flex flex-col shadow-sm transition-all duration-150 hover:border-slate-300 hover:shadow-md w-full min-w-0">
                 
-                {/* 1 SINGLE HEADER BAR */}
+                {/* SINGLE HEADER BAR WITH FLIP BUTTON */}
                 <div className="flex justify-between items-center mb-3 pb-2.5 border-b border-slate-100 flex-wrap gap-2">
                     <div className="flex items-center gap-2 flex-wrap">
                         <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[13px] sm:text-[14px] text-white shrink-0 shadow-xs bg-cyan-500">
                             <i className="fa-solid fa-wind"></i>
                         </span>
-                        <h3 className="text-[12px] sm:text-[13px] font-extrabold text-slate-900 uppercase tracking-[.04em] break-words">
-                            Gas &amp; Atmosphere Parameters
-                        </h3>
+                        <div>
+                            <h3 className="text-[12px] sm:text-[13px] font-extrabold text-slate-900 uppercase tracking-[.04em] break-words">
+                                Gas &amp; Atmosphere Parameters
+                            </h3>
+                            <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase">
+                                {isFlipped ? 'Clustered Column + Line View' : 'Multi-Series Horizontal Lollipop View'}
+                            </p>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0 ml-auto">
-                        {/* INFO BUTTON */}
+                    
+                    <div className="flex items-center gap-2 shrink-0 ml-auto flex-wrap">
+                        {/* FLIP VIEW BUTTON */}
                         <button 
-                            onClick={() => setShowInfo(true)}
-                            title="Gas Panel Info"
-                            className="w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 transition-colors flex items-center justify-center text-[10px] sm:text-[11px] font-bold cursor-pointer border border-slate-200/60 shrink-0"
+                            onClick={() => setIsFlipped(!isFlipped)}
+                            title="Flip Chart View"
+                            className="bg-slate-900 hover:bg-blue-600 text-white font-bold py-1.5 px-3 rounded-lg text-[10px] sm:text-[11px] flex items-center gap-1.5 transition-all shadow-xs cursor-pointer whitespace-nowrap"
                         >
-                            <i className="fa-solid fa-circle-info"></i>
+                            <i className="fa-solid fa-arrows-rotate"></i> Flip View
                         </button>
-                        {/* ZOOM / FULLSCREEN BUTTON */}
-                        <button 
-                            onClick={() => setIsZoomed(true)}
-                            title="Full Screen View"
-                            className="w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 transition-colors flex items-center justify-center text-[10px] sm:text-[11px] font-bold cursor-pointer border border-slate-200/60 shrink-0"
-                        >
-                            <i className="fa-solid fa-expand"></i>
-                        </button>
+
+                        <div className="flex items-center gap-1">
+                            {/* INFO BUTTON */}
+                            <button 
+                                onClick={() => setShowInfo(true)}
+                                title="Gas Panel Info"
+                                className="w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 transition-colors flex items-center justify-center text-[10px] sm:text-[11px] font-bold cursor-pointer border border-slate-200/60 shrink-0"
+                            >
+                                <i className="fa-solid fa-circle-info"></i>
+                            </button>
+                            {/* ZOOM / FULLSCREEN BUTTON */}
+                            <button 
+                                onClick={() => setIsZoomed(true)}
+                                title="Full Screen View"
+                                className="w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 transition-colors flex items-center justify-center text-[10px] sm:text-[11px] font-bold cursor-pointer border border-slate-200/60 shrink-0"
+                            >
+                                <i className="fa-solid fa-expand"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                {/* BAR GRAPH INSTEAD OF DONUT/PIE */}
-                <div className="h-[220px] sm:h-[250px] md:h-[280px] xl:h-[320px] w-full relative flex-grow min-w-0">
-                    <Bar data={config.data} options={config.options} />
+                {/* CHART CONTAINER */}
+                <div className="h-[240px] sm:h-[270px] md:h-[300px] xl:h-[340px] w-full relative flex-grow min-w-0">
+                    <Chart type={config.type} data={config.data} options={config.options} />
                 </div>
 
+                {/* SUMMARY CHIPS */}
                 <div className="flex justify-center gap-1.5 sm:gap-[10px] flex-wrap pt-2 sm:pt-[10px] border-t border-slate-100 mt-2">
-                    <div className="bg-slate-50 border border-slate-200 py-1 px-2 sm:py-[6px] sm:px-3 rounded-md flex items-center gap-1 sm:gap-[6px]">
-                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: C.cyan }}></span>
-                        <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">H₂ Flow</span>
-                        <span className="text-[11px] sm:text-[12px] font-extrabold text-slate-900 whitespace-nowrap">{rawData.avgH2.toFixed(1)} Nm³/h</span>
-                    </div>
-                    <div className="bg-slate-50 border border-slate-200 py-1 px-2 sm:py-[6px] sm:px-3 rounded-md flex items-center gap-1 sm:gap-[6px]">
-                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: C.purple }}></span>
-                        <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">N₂ Flow</span>
-                        <span className="text-[11px] sm:text-[12px] font-extrabold text-slate-900 whitespace-nowrap">{rawData.avgN2.toFixed(1)} Nm³/h</span>
-                    </div>
-                    <div className="bg-slate-50 border border-slate-200 py-1 px-2 sm:py-[6px] sm:px-3 rounded-md flex items-center gap-1 sm:gap-[6px]">
-                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: C.red }}></span>
-                        <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">O₂ Level</span>
-                        <span className="text-[11px] sm:text-[12px] font-extrabold text-slate-900 whitespace-nowrap">{rawData.avgO2.toFixed(1)} ppm</span>
-                    </div>
-                    <div className="bg-slate-50 border border-slate-200 py-1 px-2 sm:py-[6px] sm:px-3 rounded-md flex items-center gap-1 sm:gap-[6px]">
-                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: C.slate }}></span>
-                        <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">Dew Point</span>
-                        <span className="text-[11px] sm:text-[12px] font-extrabold text-slate-900 whitespace-nowrap">{rawData.avgDewPt.toFixed(1)} °C</span>
-                    </div>
-                    <div className="bg-slate-50 border border-slate-200 py-1 px-2 sm:py-[6px] sm:px-3 rounded-md flex items-center gap-1 sm:gap-[6px]">
-                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: C.indigo }}></span>
-                        <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">Comb Air Press</span>
-                        <span className="text-[11px] sm:text-[12px] font-extrabold text-slate-900 whitespace-nowrap">{rawData.avgCombPV.toFixed(0)} mmwc</span>
-                    </div>
+                    {paramsData.map((p, i) => (
+                        <div key={i} className="bg-slate-50 border border-slate-200 py-1 px-2 sm:py-[5px] sm:px-2.5 rounded-md flex items-center gap-1 sm:gap-[6px]">
+                            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.color }}></span>
+                            <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">{p.shortName}</span>
+                            <span className="text-[11px] sm:text-[12px] font-extrabold text-slate-900 whitespace-nowrap">{p.rawVal} {p.unit}</span>
+                        </div>
+                    ))}
                 </div>
             </div>
 
@@ -88,7 +102,7 @@ export default function GasPanel({ configFactory, labels, data, colors, rawData 
                                 </span>
                                 <div>
                                     <h4 className="text-[13px] sm:text-[14px] font-extrabold text-slate-900 uppercase">Gas &amp; Atmosphere Parameters</h4>
-                                    <p className="text-[9px] sm:text-[10px] text-slate-400 font-semibold uppercase">Stage Documentation</p>
+                                    <p className="text-[9px] sm:text-[10px] text-slate-400 font-semibold uppercase">Executive View Documentation</p>
                                 </div>
                             </div>
                             <button 
@@ -99,13 +113,16 @@ export default function GasPanel({ configFactory, labels, data, colors, rawData 
                             </button>
                         </div>
                         <div className="text-[12px] sm:text-[13px] text-slate-600 leading-relaxed mb-6 space-y-3">
-                            <p>Monitors critical protective gas composition, furnace atmosphere purity, and combustion air pressure levels to prevent oxidation and ensure surface quality during annealing.</p>
+                            <p>Provides dual executive views for total visibility: Multi-Series Horizontal Lollipop view for immediate row-by-row parameter tracking and Clustered Column + Line view for target limit comparison.</p>
                             <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/80 text-[11px] sm:text-[12px]">
-                                <div className="font-bold text-slate-700 mb-1">Key Specifications:</div>
+                                <div className="font-bold text-slate-700 mb-1">Tracked Parameters (7):</div>
                                 <ul className="list-disc pl-4 space-y-1 text-slate-600">
-                                    <li><strong>H₂ / N₂ Flow:</strong> Measured in normal cubic meters per hour (Nm³/h)</li>
-                                    <li><strong>O₂ Purity:</strong> Parts per million (ppm) trace tracking</li>
-                                    <li><strong>Dew Point:</strong> Moisture saturation temperature in °C</li>
+                                    <li>Fume Exh Blower (rpm)</li>
+                                    <li>Comb Blower 1 (rpm)</li>
+                                    <li>O2 Purity (ppm)</li>
+                                    <li>Dew Point (°C)</li>
+                                    <li>H2 Conc (%) &amp; Flow (Nm³/h)</li>
+                                    <li>N2 Flow (Nm³/h)</li>
                                 </ul>
                             </div>
                         </div>
@@ -129,16 +146,16 @@ export default function GasPanel({ configFactory, labels, data, colors, rawData 
                                     <i className="fa-solid fa-wind"></i>
                                 </span>
                                 <div>
-                                    <h3 className="text-[14px] sm:text-[16px] font-extrabold text-slate-900 uppercase tracking-[.04em]">Gas &amp; Atmosphere Parameters — Full Screen View</h3>
-                                    <p className="text-[10px] sm:text-[11px] text-slate-500 font-semibold">Comprehensive Atmospheric Composition Overview</p>
+                                    <h3 className="text-[14px] sm:text-[16px] font-extrabold text-slate-900 uppercase tracking-[.04em]">Gas &amp; Atmosphere Parameters — Full Screen</h3>
+                                    <p className="text-[10px] sm:text-[11px] text-slate-500 font-semibold">{isFlipped ? 'Clustered Column + Line Analysis' : 'Horizontal Lollipop Executive Overview'}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 ml-auto">
                                 <button 
-                                    onClick={() => setShowInfo(true)}
-                                    className="py-1.5 px-3 sm:py-2 sm:px-3.5 rounded-lg bg-slate-100 hover:bg-cyan-50 hover:text-cyan-600 text-slate-700 font-bold text-[11px] sm:text-[12px] flex items-center gap-1.5 transition-colors"
+                                    onClick={() => setIsFlipped(!isFlipped)}
+                                    className="py-1.5 px-3 rounded-lg bg-slate-900 hover:bg-blue-600 text-white font-bold text-[11px] sm:text-[12px] flex items-center gap-1.5 transition-colors cursor-pointer"
                                 >
-                                    <i className="fa-solid fa-circle-info"></i> Info
+                                    <i className="fa-solid fa-arrows-rotate"></i> Flip View
                                 </button>
                                 <button 
                                     onClick={() => setIsZoomed(false)}
@@ -151,7 +168,7 @@ export default function GasPanel({ configFactory, labels, data, colors, rawData 
                         </div>
 
                         <div className="flex-grow w-full relative bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-100 min-h-[200px]">
-                            <Bar data={config.data} options={config.options} />
+                            <Chart type={config.type} data={config.data} options={config.options} />
                         </div>
 
                         <div className="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500 shrink-0 flex-wrap gap-1">

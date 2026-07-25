@@ -141,13 +141,7 @@ export default function FurnaceDashboard() {
                 </div>
 
                 {/* ROW 4: GAS & ATMOSPHERE PARAMETERS (SPACIOUS FULL WIDTH AT BOTTOM) */}
-                <GasPanel 
-                    configFactory={gasBarChartConfig}
-                    labels={gasLabels}
-                    data={gasData}
-                    colors={gasColors}
-                    rawData={rawGasData}
-                />
+                <GasPanel rawData={rawGasData} />
 
             </main>
         </>

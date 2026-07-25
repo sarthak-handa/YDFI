@@ -99,6 +99,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#f8fafc;color:#1e293b;l
 .chart-actions{display:flex;align-items:center;gap:4px;flex-shrink:0}
 .act-btn{width:28px;height:28px;border-radius:6px;background:#f1f5f9;color:#475569;border:1px solid rgba(226,232,240,.6);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .15s;flex-shrink:0}
 .act-btn:hover{background:#eff6ff;color:#2563eb}
+.flip-btn{background:#0f172a;color:#fff;border:none;font-family:inherit;font-size:11px;font-weight:700;padding:6px 12px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s;white-space:nowrap}
+.flip-btn:hover{background:#3b82f6;color:#fff}
 
 /* Fluid Responsive Chart Wrapper */
 .chart-wrapper{height:320px;width:100%;position:relative;flex-grow:1;min-width:0}
