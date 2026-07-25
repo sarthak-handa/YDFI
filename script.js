@@ -229,29 +229,22 @@ function commonOptions(yTitle) {
         },
         scales: {
             x: {
-                title: { 
-                    display: true, 
-                    text: '▶', 
-                    align: 'end', 
-                    color: '#0f172a', 
-                    font: { size: 12, weight: '900' },
-                    padding: { top: -14, left: 0 } 
-                },
+                title: { display: false },
                 grid: { display: false },
-                border: { display: true, color: '#0f172a', width: 2 },
+                border: { display: true, color: '#1e293b', width: 2 },
                 ticks: { font: { weight: '700', size: 11, family: "'Inter', system-ui, sans-serif" }, color: '#334155' }
             },
             y: {
                 title: { 
                     display: true, 
-                    text: yTitle ? `▲  ${yTitle}` : '▲', 
-                    color: '#0f172a', 
-                    font: { weight: '800', size: 12, family: "'Inter', system-ui, sans-serif" } 
+                    text: yTitle || 'Value', 
+                    color: '#334155', 
+                    font: { weight: '700', size: 11, family: "'Inter', system-ui, sans-serif" } 
                 },
                 grid: { display: false },
-                border: { display: true, color: '#0f172a', width: 2 },
+                border: { display: true, color: '#1e293b', width: 2 },
                 beginAtZero: false,
-                grace: '35%',
+                grace: '65%',
                 ticks: { font: { weight: '700', size: 11, family: "'Inter', system-ui, sans-serif" }, color: '#334155' }
             }
         }
