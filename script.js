@@ -234,7 +234,12 @@ function commonOptions(yTitle) {
                 ticks: { font: { weight: '600', size: 11, family: "'Inter', system-ui, sans-serif" }, color: '#475569' }
             },
             y: {
-                title: { display: false },
+                title: { 
+                    display: true, 
+                    text: yTitle || 'Value', 
+                    color: '#334155', 
+                    font: { weight: '700', size: 11, family: "'Inter', system-ui, sans-serif" } 
+                },
                 grid: { color: 'rgba(226, 232, 240, 0.6)', drawOnChartArea: true },
                 border: { display: true, color: '#475569', width: 2 },
                 beginAtZero: false,
@@ -442,15 +447,22 @@ function gasBarChartConfig(labels, data, colors, yTitle) {
             },
             scales: {
                 x: {
-                    grid: { display: false, drawBorder: false },
-                    ticks: { font: { weight: '600', size: 11 } }
+                    grid: { display: false },
+                    border: { display: true, color: '#475569', width: 2 },
+                    ticks: { font: { weight: '600', size: 11, family: "'Inter', system-ui, sans-serif" }, color: '#475569' }
                 },
                 y: {
-                    title: { display: false },
-                    grid: { color: 'rgba(0, 0, 0, 0.04)', drawBorder: false },
-                    grace: '15%',
+                    title: { 
+                        display: true, 
+                        text: yTitle || 'Parameter Level / Value', 
+                        color: '#334155', 
+                        font: { weight: '700', size: 11, family: "'Inter', system-ui, sans-serif" } 
+                    },
+                    grid: { color: 'rgba(226, 232, 240, 0.6)', drawOnChartArea: true },
+                    border: { display: true, color: '#475569', width: 2 },
+                    grace: '20%',
                     beginAtZero: true,
-                    ticks: { font: { size: 11 } }
+                    ticks: { font: { weight: '600', size: 11, family: "'Inter', system-ui, sans-serif" }, color: '#475569' }
                 }
             }
         }

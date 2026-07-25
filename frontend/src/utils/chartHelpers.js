@@ -63,7 +63,12 @@ export function commonOptions(yTitle) {
                 ticks: { font: { weight: '600', size: 11, family: "'Inter', system-ui, sans-serif" }, color: '#475569' }
             },
             y: {
-                title: { display: false },
+                title: { 
+                    display: true, 
+                    text: yTitle || 'Value', 
+                    color: '#334155', 
+                    font: { weight: '700', size: 11, family: "'Inter', system-ui, sans-serif" } 
+                },
                 grid: { color: 'rgba(226, 232, 240, 0.6)', drawOnChartArea: true },
                 border: { display: true, color: '#475569', width: 2 },
                 beginAtZero: false,
@@ -279,7 +284,12 @@ export function gasBarChartConfig(labels, data, colors, yTitle) {
                     ticks: { font: { weight: '600', size: 11, family: "'Inter', system-ui, sans-serif" }, color: '#475569' }
                 },
                 y: {
-                    title: { display: false },
+                    title: { 
+                        display: true, 
+                        text: yTitle || 'Parameter Level / Value', 
+                        color: '#334155', 
+                        font: { weight: '700', size: 11, family: "'Inter', system-ui, sans-serif" } 
+                    },
                     grid: { color: 'rgba(226, 232, 240, 0.6)', drawOnChartArea: true },
                     border: { display: true, color: '#475569', width: 2 },
                     grace: '20%',
