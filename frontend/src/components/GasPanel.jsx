@@ -12,14 +12,16 @@ export default function GasPanel({ configFactory, labels, data, colors, rawData 
     return (
         <>
             <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-[14px_16px] flex flex-col shadow-sm transition-all duration-150 hover:border-slate-300 hover:shadow-md w-full min-w-0">
-                <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
+                
+                {/* 1 SINGLE HEADER BAR */}
+                <div className="flex justify-between items-center mb-3 pb-2.5 border-b border-slate-100 flex-wrap gap-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-[11px] sm:text-[12px] font-extrabold text-slate-800 uppercase tracking-[.04em] flex items-center gap-1 sm:gap-[6px] break-words">
-                            <i className="fa-solid fa-chart-column" style={{ color: C.cyan }}></i> Atmosphere &amp; Combustion
-                        </h3>
-                        <span className="text-[9px] sm:text-[10px] text-slate-500 font-semibold bg-slate-100 py-[2px] px-2 rounded hidden md:inline-block whitespace-nowrap">
-                            Gas Parameter Bar Chart
+                        <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[13px] sm:text-[14px] text-white shrink-0 shadow-xs bg-cyan-500">
+                            <i className="fa-solid fa-wind"></i>
                         </span>
+                        <h3 className="text-[12px] sm:text-[13px] font-extrabold text-slate-900 uppercase tracking-[.04em] break-words">
+                            Gas &amp; Atmosphere Parameters
+                        </h3>
                     </div>
                     <div className="flex items-center gap-1 shrink-0 ml-auto">
                         {/* INFO BUTTON */}
@@ -123,11 +125,11 @@ export default function GasPanel({ configFactory, labels, data, colors, rawData 
                     <div className="bg-white rounded-2xl w-full max-w-6xl h-[94vh] md:h-[88vh] p-3 sm:p-6 flex flex-col shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
                         <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3 sm:mb-4 flex-wrap gap-2 shrink-0">
                             <div className="flex items-center gap-2 sm:gap-3">
-                                <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl shadow-xs text-white flex items-center justify-center text-[14px] sm:text-[16px] shrink-0" style={{ backgroundColor: C.cyan }}>
-                                    <i className="fa-solid fa-chart-column"></i>
+                                <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl shadow-xs text-white flex items-center justify-center text-[14px] sm:text-[16px] shrink-0 bg-cyan-500">
+                                    <i className="fa-solid fa-wind"></i>
                                 </span>
                                 <div>
-                                    <h3 className="text-[14px] sm:text-[16px] font-extrabold text-slate-900 uppercase tracking-[.04em]">Atmosphere &amp; Combustion — Full Screen View</h3>
+                                    <h3 className="text-[14px] sm:text-[16px] font-extrabold text-slate-900 uppercase tracking-[.04em]">Gas &amp; Atmosphere Parameters — Full Screen View</h3>
                                     <p className="text-[10px] sm:text-[11px] text-slate-500 font-semibold">Comprehensive Atmospheric Composition Overview</p>
                                 </div>
                             </div>

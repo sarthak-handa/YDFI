@@ -4,9 +4,10 @@ import 'chart.js/auto';
 
 export default function ZoneTemperatureChart({ 
     title, 
-    subtitle, 
     iconNode, 
     iconColor = '#3b82f6', 
+    iconBg = 'bg-blue-500',
+    mode,
     configFactory, 
     labels, 
     spData, 
@@ -24,45 +25,72 @@ export default function ZoneTemperatureChart({
         ? configFactory(jcfHbrArgs.jcfLabels, jcfHbrArgs.jcfSp, jcfHbrArgs.jcfPv, jcfHbrArgs.hbrLabel, jcfHbrArgs.hbrSp, jcfHbrArgs.hbrPv, yTitle)
         : configFactory(labels, spData, pvData, yTitle);
 
-    const defaultInfo = infoText || `${title || 'Temperature Chart'}: Monitors real-time process set points (SP) and actual process values (PV) in ${yTitle.includes('°C') ? '°C' : yTitle}.`;
+    const defaultInfo = infoText || `${title}: Monitors real-time process set points (SP) and actual process values (PV) in ${yTitle.includes('°C') ? '°C' : yTitle}.`;
+
+    // Normalize mode text (AUTO, MANUAL, SEMI-AUTO)
+    let modeText = '';
+    let modeBadgeStyle = '';
+    let modeDotStyle = '';
+    
+    if (mode) {
+        const m = mode.toUpperCase().trim();
+        if (m === 'AUTO') {
+            modeText = 'AUTO';
+            modeBadgeStyle = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+            modeDotStyle = 'bg-emerald-500';
+        } else if (m === 'SEMI-AUTO' || m === 'SEMI_AUTO' || m === 'SEMI AUTO') {
+            modeText = 'SEMI-AUTO';
+            modeBadgeStyle = 'bg-sky-50 text-sky-700 border-sky-200';
+            modeDotStyle = 'bg-sky-500';
+        } else {
+            modeText = 'MANUAL';
+            modeBadgeStyle = 'bg-amber-50 text-amber-700 border-amber-200';
+            modeDotStyle = 'bg-amber-500';
+        }
+    }
 
     return (
         <>
-            {/* STANDARD CARD VIEW */}
+            {/* STANDALONE SINGLE-HEADER CARD VIEW */}
             <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-[14px_16px] flex flex-col shadow-sm transition-all duration-150 hover:border-slate-300 hover:shadow-md w-full min-w-0">
                 
-                {/* Clean Header Bar: Only render title/icon if explicit title is passed */}
-                <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
-                    {title ? (
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-[11px] sm:text-[12px] font-extrabold text-slate-800 uppercase tracking-[.04em] flex items-center gap-1 sm:gap-[6px] break-words">
-                                {iconNode && <span style={{ color: iconColor }}>{iconNode}</span>} {title}
-                            </h3>
-                            {subtitle && (
-                                <span className="text-[9px] sm:text-[10px] text-slate-500 font-semibold bg-slate-100 py-[2px] px-2 rounded hidden md:inline-block whitespace-nowrap">
-                                    {subtitle}
-                                </span>
-                            )}
-                        </div>
-                    ) : <div />}
+                {/* 1 SINGLE HEADER BAR */}
+                <div className="flex justify-between items-center mb-3 pb-2.5 border-b border-slate-100 flex-wrap gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                        {iconNode && (
+                            <span className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[13px] sm:text-[14px] text-white shrink-0 shadow-xs ${iconBg}`}>
+                                {iconNode}
+                            </span>
+                        )}
+                        <h3 className="text-[12px] sm:text-[13px] font-extrabold text-slate-900 uppercase tracking-[.04em] break-words">
+                            {title}
+                        </h3>
+                    </div>
                     
-                    <div className="flex items-center gap-1 shrink-0 ml-auto">
-                        {/* INFO BUTTON */}
-                        <button 
-                            onClick={() => setShowInfo(true)}
-                            title="Stage Information"
-                            className="w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center justify-center text-[10px] sm:text-[11px] font-bold cursor-pointer border border-slate-200/60 shrink-0"
-                        >
-                            <i className="fa-solid fa-circle-info"></i>
-                        </button>
-                        {/* ZOOM / FULLSCREEN BUTTON */}
-                        <button 
-                            onClick={() => setIsZoomed(true)}
-                            title="Full Screen View"
-                            className="w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center justify-center text-[10px] sm:text-[11px] font-bold cursor-pointer border border-slate-200/60 shrink-0"
-                        >
-                            <i className="fa-solid fa-expand"></i>
-                        </button>
+                    <div className="flex items-center gap-2 shrink-0 ml-auto">
+                        {modeText && (
+                            <span className={`text-[10px] sm:text-[11px] font-bold py-0.5 px-2.5 rounded-full tracking-[.03em] inline-flex items-center gap-1.5 border whitespace-nowrap ${modeBadgeStyle}`}>
+                                <span className={`w-[6px] h-[6px] rounded-full inline-block shrink-0 ${modeDotStyle}`}></span> {modeText}
+                            </span>
+                        )}
+                        <div className="flex items-center gap-1">
+                            {/* INFO BUTTON */}
+                            <button 
+                                onClick={() => setShowInfo(true)}
+                                title="Stage Information"
+                                className="w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center justify-center text-[10px] sm:text-[11px] font-bold cursor-pointer border border-slate-200/60 shrink-0"
+                            >
+                                <i className="fa-solid fa-circle-info"></i>
+                            </button>
+                            {/* ZOOM / FULLSCREEN BUTTON */}
+                            <button 
+                                onClick={() => setIsZoomed(true)}
+                                title="Full Screen View"
+                                className="w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center justify-center text-[10px] sm:text-[11px] font-bold cursor-pointer border border-slate-200/60 shrink-0"
+                            >
+                                <i className="fa-solid fa-expand"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -81,7 +109,7 @@ export default function ZoneTemperatureChart({
                                     <i className="fa-solid fa-circle-info"></i>
                                 </span>
                                 <div>
-                                    <h4 className="text-[13px] sm:text-[14px] font-extrabold text-slate-900 uppercase">{title || 'Stage Info'}</h4>
+                                    <h4 className="text-[13px] sm:text-[14px] font-extrabold text-slate-900 uppercase">{title}</h4>
                                     <p className="text-[9px] sm:text-[10px] text-slate-400 font-semibold uppercase">Stage Documentation</p>
                                 </div>
                             </div>
@@ -119,11 +147,11 @@ export default function ZoneTemperatureChart({
                     <div className="bg-white rounded-2xl w-full max-w-6xl h-[94vh] md:h-[88vh] p-3 sm:p-6 flex flex-col shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
                         <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3 sm:mb-4 flex-wrap gap-2 shrink-0">
                             <div className="flex items-center gap-2 sm:gap-3">
-                                <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl shadow-xs text-white flex items-center justify-center text-[14px] sm:text-[16px] shrink-0" style={{ backgroundColor: iconColor }}>
+                                <span className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl shadow-xs text-white flex items-center justify-center text-[14px] sm:text-[16px] shrink-0 ${iconBg}`}>
                                     {iconNode || <i className="fa-solid fa-chart-line"></i>}
                                 </span>
                                 <div>
-                                    <h3 className="text-[14px] sm:text-[16px] font-extrabold text-slate-900 uppercase tracking-[.04em]">{title || 'Detailed Analysis'}</h3>
+                                    <h3 className="text-[14px] sm:text-[16px] font-extrabold text-slate-900 uppercase tracking-[.04em]">{title}</h3>
                                     <p className="text-[10px] sm:text-[11px] text-slate-500 font-semibold">Detailed Parameter Analysis ({yTitle})</p>
                                 </div>
                             </div>
