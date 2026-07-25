@@ -3,7 +3,7 @@ import { Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
 import { C } from '../utils/chartHelpers';
 
-export default function GasPanel({ configFactory, labels, data, colors, rawData, accentClass = 'border-t-cyan-500' }) {
+export default function GasPanel({ configFactory, labels, data, colors, rawData }) {
     const [isZoomed, setIsZoomed] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
 
@@ -11,29 +11,22 @@ export default function GasPanel({ configFactory, labels, data, colors, rawData,
 
     return (
         <>
-            {/* STANDARD CRM CARD VIEW */}
-            <div className={`bg-white rounded-[10px] border-t-2 border-l border-r border-b border-l-slate-100 border-r-slate-100 border-b-slate-100 shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex flex-col ${accentClass}`}>
-                
-                {/* CHART HEADER (52px height) */}
-                <div className="h-[52px] px-[16px] flex justify-between items-center border-b border-slate-100">
-                    <div className="flex items-center gap-2">
-                        <span className="w-[24px] h-[24px] rounded-[6px] text-[12px] flex items-center justify-center text-white shadow-sm" style={{ backgroundColor: C.cyan }}>
-                            <i className="fa-solid fa-wind"></i>
-                        </span>
-                        <h3 className="text-[13px] font-semibold text-slate-800 uppercase tracking-[.02em] m-0">
-                            Atmosphere Params
+            <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-[14px_16px] flex flex-col shadow-sm transition-all duration-150 hover:border-slate-300 hover:shadow-md w-full min-w-0">
+                <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-[11px] sm:text-[12px] font-extrabold text-slate-800 uppercase tracking-[.04em] flex items-center gap-1 sm:gap-[6px] break-words">
+                            <i className="fa-solid fa-chart-column" style={{ color: C.cyan }}></i> Atmosphere &amp; Combustion
                         </h3>
-                        <span className="text-[12px] text-slate-500 font-normal ml-1 hidden sm:inline-block">
-                            Gas/Comb
+                        <span className="text-[9px] sm:text-[10px] text-slate-500 font-semibold bg-slate-100 py-[2px] px-2 rounded hidden md:inline-block whitespace-nowrap">
+                            Gas Parameter Bar Chart
                         </span>
                     </div>
-                    
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 shrink-0 ml-auto">
                         {/* INFO BUTTON */}
                         <button 
                             onClick={() => setShowInfo(true)}
                             title="Gas Panel Info"
-                            className="w-[28px] h-[28px] rounded-[6px] bg-transparent text-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-colors flex items-center justify-center text-[12px] cursor-pointer"
+                            className="w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 transition-colors flex items-center justify-center text-[10px] sm:text-[11px] font-bold cursor-pointer border border-slate-200/60 shrink-0"
                         >
                             <i className="fa-solid fa-circle-info"></i>
                         </button>
@@ -41,61 +34,59 @@ export default function GasPanel({ configFactory, labels, data, colors, rawData,
                         <button 
                             onClick={() => setIsZoomed(true)}
                             title="Full Screen View"
-                            className="w-[28px] h-[28px] rounded-[6px] bg-transparent text-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-colors flex items-center justify-center text-[12px] cursor-pointer"
+                            className="w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-slate-100 text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 transition-colors flex items-center justify-center text-[10px] sm:text-[11px] font-bold cursor-pointer border border-slate-200/60 shrink-0"
                         >
                             <i className="fa-solid fa-expand"></i>
                         </button>
                     </div>
                 </div>
 
-                {/* CHART CONTENT AREA */}
-                <div className="p-[20px] flex flex-col flex-grow">
-                    <div className="h-[320px] w-full relative">
-                        <Bar data={config.data} options={config.options} />
+                {/* BAR GRAPH INSTEAD OF DONUT/PIE */}
+                <div className="h-[220px] sm:h-[250px] md:h-[280px] xl:h-[320px] w-full relative flex-grow min-w-0">
+                    <Bar data={config.data} options={config.options} />
+                </div>
+
+                <div className="flex justify-center gap-1.5 sm:gap-[10px] flex-wrap pt-2 sm:pt-[10px] border-t border-slate-100 mt-2">
+                    <div className="bg-slate-50 border border-slate-200 py-1 px-2 sm:py-[6px] sm:px-3 rounded-md flex items-center gap-1 sm:gap-[6px]">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: C.cyan }}></span>
+                        <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">H₂ Flow</span>
+                        <span className="text-[11px] sm:text-[12px] font-extrabold text-slate-900 whitespace-nowrap">{rawData.avgH2.toFixed(1)} Nm³/h</span>
                     </div>
-                    
-                    <div className="flex justify-center gap-[10px] flex-wrap pt-[12px] border-t border-slate-100 mt-[12px]">
-                        <div className="bg-slate-50 border border-slate-200 py-[6px] px-3 rounded-[6px] flex items-center gap-[6px]">
-                            <span className="w-2 h-2 rounded-full" style={{ background: C.cyan }}></span>
-                            <span className="text-[11px] font-semibold text-slate-500 uppercase">H₂ Flow</span>
-                            <span className="text-[13px] font-bold text-slate-900">{rawData.avgH2.toFixed(1)} Nm³/h</span>
-                        </div>
-                        <div className="bg-slate-50 border border-slate-200 py-[6px] px-3 rounded-[6px] flex items-center gap-[6px]">
-                            <span className="w-2 h-2 rounded-full" style={{ background: C.purple }}></span>
-                            <span className="text-[11px] font-semibold text-slate-500 uppercase">N₂ Flow</span>
-                            <span className="text-[13px] font-bold text-slate-900">{rawData.avgN2.toFixed(1)} Nm³/h</span>
-                        </div>
-                        <div className="bg-slate-50 border border-slate-200 py-[6px] px-3 rounded-[6px] flex items-center gap-[6px]">
-                            <span className="w-2 h-2 rounded-full" style={{ background: C.red }}></span>
-                            <span className="text-[11px] font-semibold text-slate-500 uppercase">O₂ Level</span>
-                            <span className="text-[13px] font-bold text-slate-900">{rawData.avgO2.toFixed(1)} ppm</span>
-                        </div>
-                        <div className="bg-slate-50 border border-slate-200 py-[6px] px-3 rounded-[6px] flex items-center gap-[6px]">
-                            <span className="w-2 h-2 rounded-full" style={{ background: C.slate }}></span>
-                            <span className="text-[11px] font-semibold text-slate-500 uppercase">Dew Point</span>
-                            <span className="text-[13px] font-bold text-slate-900">{rawData.avgDewPt.toFixed(1)} °C</span>
-                        </div>
-                        <div className="bg-slate-50 border border-slate-200 py-[6px] px-3 rounded-[6px] flex items-center gap-[6px]">
-                            <span className="w-2 h-2 rounded-full" style={{ background: C.indigo }}></span>
-                            <span className="text-[11px] font-semibold text-slate-500 uppercase">Comb Air Press</span>
-                            <span className="text-[13px] font-bold text-slate-900">{rawData.avgCombPV.toFixed(0)} mmwc</span>
-                        </div>
+                    <div className="bg-slate-50 border border-slate-200 py-1 px-2 sm:py-[6px] sm:px-3 rounded-md flex items-center gap-1 sm:gap-[6px]">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: C.purple }}></span>
+                        <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">N₂ Flow</span>
+                        <span className="text-[11px] sm:text-[12px] font-extrabold text-slate-900 whitespace-nowrap">{rawData.avgN2.toFixed(1)} Nm³/h</span>
+                    </div>
+                    <div className="bg-slate-50 border border-slate-200 py-1 px-2 sm:py-[6px] sm:px-3 rounded-md flex items-center gap-1 sm:gap-[6px]">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: C.red }}></span>
+                        <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">O₂ Level</span>
+                        <span className="text-[11px] sm:text-[12px] font-extrabold text-slate-900 whitespace-nowrap">{rawData.avgO2.toFixed(1)} ppm</span>
+                    </div>
+                    <div className="bg-slate-50 border border-slate-200 py-1 px-2 sm:py-[6px] sm:px-3 rounded-md flex items-center gap-1 sm:gap-[6px]">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: C.slate }}></span>
+                        <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">Dew Point</span>
+                        <span className="text-[11px] sm:text-[12px] font-extrabold text-slate-900 whitespace-nowrap">{rawData.avgDewPt.toFixed(1)} °C</span>
+                    </div>
+                    <div className="bg-slate-50 border border-slate-200 py-1 px-2 sm:py-[6px] sm:px-3 rounded-md flex items-center gap-1 sm:gap-[6px]">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: C.indigo }}></span>
+                        <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">Comb Air Press</span>
+                        <span className="text-[11px] sm:text-[12px] font-extrabold text-slate-900 whitespace-nowrap">{rawData.avgCombPV.toFixed(0)} mmwc</span>
                     </div>
                 </div>
             </div>
 
             {/* INFO MODAL */}
             {showInfo && (
-                <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-white rounded-[10px] max-w-md w-full p-6 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-150">
+                <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+                    <div className="bg-white rounded-2xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150 max-h-[92vh] overflow-y-auto">
                         <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                            <div className="flex items-center gap-3">
-                                <span className="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center text-[14px]">
+                            <div className="flex items-center gap-2">
+                                <span className="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-600 flex items-center justify-center text-[14px]">
                                     <i className="fa-solid fa-circle-info"></i>
                                 </span>
                                 <div>
-                                    <h4 className="text-[14px] font-bold text-slate-900 uppercase tracking-wide">Gas &amp; Atmosphere Parameters</h4>
-                                    <p className="text-[11px] text-slate-500 font-medium">Stage Documentation</p>
+                                    <h4 className="text-[13px] sm:text-[14px] font-extrabold text-slate-900 uppercase">Gas &amp; Atmosphere Parameters</h4>
+                                    <p className="text-[9px] sm:text-[10px] text-slate-400 font-semibold uppercase">Stage Documentation</p>
                                 </div>
                             </div>
                             <button 
@@ -105,23 +96,22 @@ export default function GasPanel({ configFactory, labels, data, colors, rawData,
                                 <i className="fa-solid fa-xmark"></i>
                             </button>
                         </div>
-                        <div className="text-[13px] text-slate-600 leading-relaxed mb-6 space-y-3">
+                        <div className="text-[12px] sm:text-[13px] text-slate-600 leading-relaxed mb-6 space-y-3">
                             <p>Monitors critical protective gas composition, furnace atmosphere purity, and combustion air pressure levels to prevent oxidation and ensure surface quality during annealing.</p>
-                            <div className="bg-slate-50 rounded-[10px] p-4 border border-slate-200/80 text-[12px]">
-                                <div className="font-semibold text-slate-700 mb-2">Key Specifications:</div>
-                                <ul className="list-none space-y-1 text-slate-600">
-                                    <li><strong>H₂ / N₂ Flow:</strong> Measured in Nm³/h</li>
-                                    <li><strong>O₂ Purity:</strong> Parts per million (ppm)</li>
-                                    <li><strong>Dew Point:</strong> Temperature in degree Celsius (°C)</li>
-                                    <li><strong>Combustion Air:</strong> Pressure in mmwc</li>
+                            <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/80 text-[11px] sm:text-[12px]">
+                                <div className="font-bold text-slate-700 mb-1">Key Specifications:</div>
+                                <ul className="list-disc pl-4 space-y-1 text-slate-600">
+                                    <li><strong>H₂ / N₂ Flow:</strong> Measured in normal cubic meters per hour (Nm³/h)</li>
+                                    <li><strong>O₂ Purity:</strong> Parts per million (ppm) trace tracking</li>
+                                    <li><strong>Dew Point:</strong> Moisture saturation temperature in °C</li>
                                 </ul>
                             </div>
                         </div>
                         <button 
                             onClick={() => setShowInfo(false)}
-                            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-[10px] text-[13px] transition-colors"
+                            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-[12px] sm:text-[13px] transition-colors"
                         >
-                            Close Info
+                            Close Documentation
                         </button>
                     </div>
                 </div>
@@ -129,43 +119,42 @@ export default function GasPanel({ configFactory, labels, data, colors, rawData,
 
             {/* ZOOM MODAL (FULLSCREEN) */}
             {isZoomed && (
-                <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-white rounded-[10px] w-full max-w-6xl h-[88vh] p-6 flex flex-col shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-150 relative">
-                        
-                        <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 shrink-0">
-                            <div className="flex items-center gap-3">
-                                <span className="w-9 h-9 rounded-[10px] shadow-sm text-white flex items-center justify-center text-[16px]" style={{ backgroundColor: C.cyan }}>
-                                    <i className="fa-solid fa-expand"></i>
+                <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-6xl h-[94vh] md:h-[88vh] p-3 sm:p-6 flex flex-col shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3 sm:mb-4 flex-wrap gap-2 shrink-0">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl shadow-xs text-white flex items-center justify-center text-[14px] sm:text-[16px] shrink-0" style={{ backgroundColor: C.cyan }}>
+                                    <i className="fa-solid fa-chart-column"></i>
                                 </span>
                                 <div>
-                                    <h3 className="text-[16px] font-bold text-slate-900 uppercase tracking-wide">Gas &amp; Atmosphere Parameters — Full Screen View</h3>
-                                    <p className="text-[11px] text-slate-500 font-medium">Comprehensive Atmospheric Composition Overview</p>
+                                    <h3 className="text-[14px] sm:text-[16px] font-extrabold text-slate-900 uppercase tracking-[.04em]">Atmosphere &amp; Combustion — Full Screen View</h3>
+                                    <p className="text-[10px] sm:text-[11px] text-slate-500 font-semibold">Comprehensive Atmospheric Composition Overview</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 ml-auto">
                                 <button 
                                     onClick={() => setShowInfo(true)}
-                                    className="px-4 h-[36px] rounded-[8px] bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[12px] flex items-center gap-2 transition-colors"
+                                    className="py-1.5 px-3 sm:py-2 sm:px-3.5 rounded-lg bg-slate-100 hover:bg-cyan-50 hover:text-cyan-600 text-slate-700 font-bold text-[11px] sm:text-[12px] flex items-center gap-1.5 transition-colors"
                                 >
                                     <i className="fa-solid fa-circle-info"></i> Info
                                 </button>
                                 <button 
                                     onClick={() => setIsZoomed(false)}
+                                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600 flex items-center justify-center text-base sm:text-lg transition-colors cursor-pointer"
                                     title="Close Fullscreen"
-                                    className="w-9 h-9 rounded-[10px] bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600 flex items-center justify-center text-lg transition-colors cursor-pointer"
                                 >
                                     <i className="fa-solid fa-xmark"></i>
                                 </button>
                             </div>
                         </div>
 
-                        <div className="flex-grow w-full relative bg-slate-50/50 rounded-[10px] p-5 border border-slate-100 min-h-0">
+                        <div className="flex-grow w-full relative bg-slate-50/50 rounded-xl p-2 sm:p-4 border border-slate-100 min-h-[200px]">
                             <Bar data={config.data} options={config.options} />
                         </div>
-                        
-                        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[12px] text-slate-500 shrink-0 font-medium">
-                            <span>Press <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded-[6px] font-mono text-[11px]">ESC</kbd> or click Close to return</span>
-                            <span className="font-semibold text-slate-700">ACPPL GI Furnace High-Precision Analytics</span>
+
+                        <div className="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500 shrink-0 flex-wrap gap-1">
+                            <span>Press <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-[9px] sm:text-[10px] font-mono text-slate-700">ESC</kbd> or click Close to return</span>
+                            <span className="font-bold text-slate-700">ACPPL GI Furnace Analytics</span>
                         </div>
                     </div>
                 </div>
