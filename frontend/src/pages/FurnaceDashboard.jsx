@@ -47,7 +47,8 @@ export default function FurnaceDashboard() {
             <Header fileName={fileName} onCSVUpload={handleCSVUpload} />
 
             <main className="p-3 sm:p-4 md:p-[20px_24px] flex flex-col gap-4 sm:gap-5 max-w-[1920px] w-full mx-auto bg-slate-50/50 min-h-screen overflow-x-hidden">
-                {/* KPI ROW - Universal Responsive Grid (1 col on Folded Cover screens, 2 col on Smartphones, 3 col on Tablets/Laptops, 6 col on PCs/Large monitors) */}
+                
+                {/* TIER 1: KPI ROW (6 CARDS) */}
                 <section className="grid grid-cols-2 max-[360px]:grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-2.5 sm:gap-3 md:gap-4">
                     <KPICard label="Total Coils" value={D.totalCoils} colorClass="slate" info="Total coil count currently processed" />
                     <KPICard label="PHF Exit Avg" value={phfExitAvg.toFixed(1)} unit="°C" colorClass="blue" info="Pre-Heat Furnace exit temperature average in °C" />
@@ -57,7 +58,7 @@ export default function FurnaceDashboard() {
                     <KPICard label="Avg A/G Ratio" value={avgAGRatio.toFixed(2)} colorClass="cyan" info="Average Air-to-Gas combustion ratio across PHF zones" />
                 </section>
 
-                {/* ROW 1: PRE HEAT FURNACE (PHF) - Stacks dynamically on mobile/tablet */}
+                {/* TIER 2: PRE HEAT FURNACE (PHF) - 2 CHARTS SIDE BY SIDE */}
                 <StageCard 
                     title="Pre Heat Furnace (PHF)" 
                     accentClass="accent-phf" 
@@ -66,8 +67,7 @@ export default function FurnaceDashboard() {
                     colsClass="cols-2"
                 >
                     <ZoneTemperatureChart
-                        title="PHF Zone Temp (°C)"
-                        subtitle="Z1 • Z2 • Z3 • Z4 • Z5 • EXIT PV"
+                        title="Zone Temperature (°C)"
                         iconNode={<i className="fa-solid fa-chart-line"></i>}
                         iconColor="#3b82f6"
                         configFactory={lineChartSPPV}
@@ -78,8 +78,7 @@ export default function FurnaceDashboard() {
                         infoText="PHF Zone Temperature tracks set points (SP) and process values (PV) in °C across 5 heating zones and exit point."
                     />
                     <ZoneTemperatureChart
-                        title="PHF Air Gas Ratio"
-                        subtitle="Z1 • Z2 • Z3 • Z4 • Z5 · SP Line + PV Column"
+                        title="Air / Gas Ratio"
                         iconNode={<i className="fa-solid fa-sliders"></i>}
                         iconColor="#10b981"
                         configFactory={comboSpLinePvColumn}
@@ -91,8 +90,10 @@ export default function FurnaceDashboard() {
                     />
                 </StageCard>
 
-                {/* ROW 2: RTF & SF (2 SYMMETRIC 50-50 CARDS ON PC/LAPTOP, STACKS ON TABLET/PHONE) */}
-                <div className="grid gap-4 sm:gap-5 grid-cols-1 lg:grid-cols-2">
+                {/* TIER 3: RTF, SF, JCF IN THE SAME LANE (3 GRAPHS IN 1 ROW) */}
+                <div className="grid gap-4 sm:gap-5 grid-cols-1 lg:grid-cols-3">
+                    
+                    {/* RTF */}
                     <StageCard 
                         title="Radiant Tube Furnace (RTF)" 
                         accentClass="accent-rtf" 
@@ -100,10 +101,6 @@ export default function FurnaceDashboard() {
                         mode={D.rtfMode}
                     >
                         <ZoneTemperatureChart
-                            title="RTF Zone Temp (°C)"
-                            subtitle="Z1 • Z2 • Z3 • EXIT PV"
-                            iconNode={<i className="fa-solid fa-chart-line"></i>}
-                            iconColor="#10b981"
                             configFactory={lineChartSPPV}
                             labels={[...D.rtfZones, 'EXIT PV']}
                             spData={[...D.rtfZoneSP, avg(D.rtfExitSP)]}
@@ -113,6 +110,7 @@ export default function FurnaceDashboard() {
                         />
                     </StageCard>
 
+                    {/* SF */}
                     <StageCard 
                         title="Soaking Furnace (SF)" 
                         accentClass="accent-sf" 
@@ -120,10 +118,6 @@ export default function FurnaceDashboard() {
                         mode={D.sfMode}
                     >
                         <ZoneTemperatureChart
-                            title="SF Heater & Exit Temp (°C)"
-                            subtitle="HEATER • EXIT PV"
-                            iconNode={<i className="fa-solid fa-chart-line"></i>}
-                            iconColor="#f59e0b"
                             configFactory={lineChartSPPV}
                             labels={['HEATER', 'EXIT PV']}
                             spData={[avg(D.sfHeaterSP), avg(D.sfExitSP)]}
@@ -132,22 +126,15 @@ export default function FurnaceDashboard() {
                             infoText="Soaking Furnace monitors strip temperature equilibrium across the main heater unit and exit point in °C."
                         />
                     </StageCard>
-                </div>
 
-                {/* ROW 3: JCF+HBR & GAS PARAMETERS (2 SYMMETRIC 50-50 CARDS ON PC/LAPTOP, STACKS ON TABLET/PHONE) */}
-                <div className="grid gap-4 sm:gap-5 grid-cols-1 lg:grid-cols-2">
+                    {/* JCF & HBR */}
                     <StageCard 
-                        title="Jet Cooling (JCF) + Hot Bridle (HBR)" 
+                        title="Jet Cooling (JCF) & Hot Bridle (HBR)" 
                         accentClass="accent-jcf" 
                         iconNode={<i className="fa-solid fa-snowflake"></i>} 
                         mode={D.hbrMode}
                     >
-                        {/* JCF & HBR DIFFERENTIATED GRAPH */}
                         <ZoneTemperatureChart
-                            title="JCF & HBR Zone Temp (°C)"
-                            subtitle="JCF (Z1, Z2, Z3) • HBR (EXIT PV)"
-                            iconNode={<i className="fa-solid fa-chart-line"></i>}
-                            iconColor="#8b5cf6"
                             configFactory={jcfHbrChartConfig}
                             yTitle="Temperature (°C)"
                             isJcfHbr={true}
@@ -162,22 +149,23 @@ export default function FurnaceDashboard() {
                             infoText="Differentiates Jet Cooling Furnace (JCF Z1-Z3) cooling temperatures and Hot Bridle (HBR Exit) tensioning stage temperatures in °C."
                         />
                     </StageCard>
-
-                    <StageCard 
-                        title="Gas & Atmosphere Parameters" 
-                        accentClass="accent-gas" 
-                        iconNode={<i className="fa-solid fa-wind"></i>} 
-                    >
-                        {/* GAS PARAMETERS BAR GRAPH */}
-                        <GasPanel 
-                            configFactory={gasBarChartConfig}
-                            labels={gasLabels}
-                            data={gasData}
-                            colors={gasColors}
-                            rawData={rawGasData}
-                        />
-                    </StageCard>
                 </div>
+
+                {/* TIER 4: GAS & ATMOSPHERE PARAMETERS (SPACIOUS FULL WIDTH AT BOTTOM) */}
+                <StageCard 
+                    title="Gas & Atmosphere Parameters" 
+                    accentClass="accent-gas" 
+                    iconNode={<i className="fa-solid fa-wind"></i>} 
+                >
+                    <GasPanel 
+                        configFactory={gasBarChartConfig}
+                        labels={gasLabels}
+                        data={gasData}
+                        colors={gasColors}
+                        rawData={rawGasData}
+                    />
+                </StageCard>
+
             </main>
         </>
     );

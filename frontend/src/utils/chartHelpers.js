@@ -19,7 +19,7 @@ export function commonOptions(yTitle) {
         responsive: true,
         maintainAspectRatio: false,
         layout: {
-            padding: 0
+            padding: { top: 12, bottom: 4, left: 4, right: 8 }
         },
         interaction: { mode: 'index', intersect: false },
         plugins: {
@@ -28,15 +28,15 @@ export function commonOptions(yTitle) {
                 labels: {
                     usePointStyle: true,
                     boxWidth: 8,
-                    padding: 16,
-                    font: { size: 13, weight: '600', family: "'Inter', system-ui, sans-serif" }
+                    padding: 14,
+                    font: { size: 12, weight: '600', family: "'Inter', system-ui, sans-serif" }
                 }
             },
             tooltip: {
-                padding: 12,
+                padding: 10,
                 cornerRadius: 8,
-                titleFont: { size: 14, weight: '700', family: "'Inter', system-ui, sans-serif" },
-                bodyFont: { size: 14, weight: '500', family: "'Inter', system-ui, sans-serif" },
+                titleFont: { size: 13, weight: '700', family: "'Inter', system-ui, sans-serif" },
+                bodyFont: { size: 13, weight: '500', family: "'Inter', system-ui, sans-serif" },
                 callbacks: {
                     title: function(items) {
                         if (!items || !items.length) return '';
@@ -58,15 +58,17 @@ export function commonOptions(yTitle) {
         },
         scales: {
             x: {
-                grid: { display: false, drawBorder: false },
-                ticks: { font: { weight: '600', size: 12, family: "'Inter', system-ui, sans-serif" } }
+                grid: { display: false },
+                border: { display: true, color: '#475569', width: 2 },
+                ticks: { font: { weight: '600', size: 11, family: "'Inter', system-ui, sans-serif" }, color: '#475569' }
             },
             y: {
                 title: { display: false },
-                grid: { color: 'rgba(0, 0, 0, 0.04)', drawBorder: false },
+                grid: { color: 'rgba(226, 232, 240, 0.6)', drawOnChartArea: true },
+                border: { display: true, color: '#475569', width: 2 },
                 beginAtZero: false,
-                grace: '18%',
-                ticks: { font: { weight: '500', size: 12, family: "'Inter', system-ui, sans-serif" } }
+                grace: '25%',
+                ticks: { font: { weight: '600', size: 11, family: "'Inter', system-ui, sans-serif" }, color: '#475569' }
             }
         }
     };
@@ -168,14 +170,14 @@ export function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrP
             labels: labels,
             datasets: [
                 {
-                    label: 'JCF SP',
+                    label: 'JCF SP (Jet Cooling)',
                     data: jcfSpAligned,
                     borderColor: C.cyan,
                     backgroundColor: C.cyan,
                     borderWidth: 2,
                     pointStyle: 'circle',
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.cyan,
                     pointBorderWidth: 2,
@@ -183,14 +185,14 @@ export function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrP
                     spanGaps: false
                 },
                 {
-                    label: 'JCF PV',
+                    label: 'JCF PV (Jet Cooling)',
                     data: jcfPvAligned,
                     borderColor: C.teal,
                     backgroundColor: C.teal,
                     borderWidth: 2,
                     pointStyle: 'circle',
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.teal,
                     pointBorderWidth: 2,
@@ -198,28 +200,28 @@ export function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrP
                     spanGaps: false
                 },
                 {
-                    label: 'HBR SP',
+                    label: 'HBR SP (Hot Bridle)',
                     data: hbrSpAligned,
                     borderColor: C.purple,
                     backgroundColor: C.purple,
                     borderWidth: 2,
                     pointStyle: 'rectRot',
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.purple,
                     pointBorderWidth: 2,
                     spanGaps: false
                 },
                 {
-                    label: 'HBR PV',
+                    label: 'HBR PV (Hot Bridle)',
                     data: hbrPvAligned,
                     borderColor: C.orange,
                     backgroundColor: C.orange,
                     borderWidth: 2,
                     pointStyle: 'rectRot',
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.orange,
                     pointBorderWidth: 2,
@@ -252,14 +254,14 @@ export function gasBarChartConfig(labels, data, colors, yTitle) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: 0 },
+            layout: { padding: { top: 12, bottom: 4, left: 4, right: 8 } },
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    padding: 12,
+                    padding: 10,
                     cornerRadius: 8,
-                    titleFont: { size: 14, weight: '700', family: "'Inter', system-ui, sans-serif" },
-                    bodyFont: { size: 14, weight: '500', family: "'Inter', system-ui, sans-serif" },
+                    titleFont: { size: 13, weight: '700', family: "'Inter', system-ui, sans-serif" },
+                    bodyFont: { size: 13, weight: '500', family: "'Inter', system-ui, sans-serif" },
                     callbacks: {
                         label: function(ctx) {
                             const val = ctx.raw;
@@ -272,15 +274,17 @@ export function gasBarChartConfig(labels, data, colors, yTitle) {
             },
             scales: {
                 x: {
-                    grid: { display: false, drawBorder: false },
-                    ticks: { font: { weight: '600', size: 11, family: "'Inter', system-ui, sans-serif" } }
+                    grid: { display: false },
+                    border: { display: true, color: '#475569', width: 2 },
+                    ticks: { font: { weight: '600', size: 11, family: "'Inter', system-ui, sans-serif" }, color: '#475569' }
                 },
                 y: {
                     title: { display: false },
-                    grid: { color: 'rgba(0, 0, 0, 0.04)', drawBorder: false },
-                    grace: '15%',
+                    grid: { color: 'rgba(226, 232, 240, 0.6)', drawOnChartArea: true },
+                    border: { display: true, color: '#475569', width: 2 },
+                    grace: '20%',
                     beginAtZero: true,
-                    ticks: { font: { size: 11, family: "'Inter', system-ui, sans-serif" } }
+                    ticks: { font: { weight: '600', size: 11, family: "'Inter', system-ui, sans-serif" }, color: '#475569' }
                 }
             }
         }

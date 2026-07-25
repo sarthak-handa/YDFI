@@ -1,15 +1,15 @@
 import React from 'react';
 
 const accents = {
-    'accent-phf': { iconBg: 'bg-blue-500', text: 'text-blue-500', top: 'border-t-blue-500' },
-    'accent-rtf': { iconBg: 'bg-emerald-500', text: 'text-emerald-500', top: 'border-t-emerald-500' },
-    'accent-sf': { iconBg: 'bg-amber-500', text: 'text-amber-500', top: 'border-t-amber-500' },
-    'accent-jcf': { iconBg: 'bg-violet-500', text: 'text-violet-500', top: 'border-t-violet-500' },
-    'accent-gas': { iconBg: 'bg-cyan-500', text: 'text-cyan-500', top: 'border-t-cyan-500' },
+    'accent-phf': { iconBg: 'bg-blue-500', text: 'text-blue-500' },
+    'accent-rtf': { iconBg: 'bg-emerald-500', text: 'text-emerald-500' },
+    'accent-sf': { iconBg: 'bg-amber-500', text: 'text-amber-500' },
+    'accent-jcf': { iconBg: 'bg-violet-500', text: 'text-violet-500' },
+    'accent-gas': { iconBg: 'bg-cyan-500', text: 'text-cyan-500' },
 };
 
 export default function StageCard({ title, accentClass, iconNode, mode, children, colsClass = "cols-1" }) {
-    const theme = accents[accentClass] || { iconBg: 'bg-slate-500', text: 'text-slate-500', top: 'border-t-slate-400' };
+    const theme = accents[accentClass] || { iconBg: 'bg-slate-500', text: 'text-slate-500' };
     
     // Normalize mode text (AUTO, MANUAL, SEMI-AUTO)
     let modeText = '';
@@ -36,7 +36,7 @@ export default function StageCard({ title, accentClass, iconNode, mode, children
     const gridClass = colsClass === 'cols-2' ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1';
 
     return (
-        <div className={`bg-white rounded-xl border border-slate-200 border-t-4 shadow-sm overflow-hidden flex flex-col transition-all duration-150 hover:shadow-md ${theme.top}`}>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col transition-all duration-150 hover:shadow-md">
             <div className="p-[12px_14px] sm:p-[14px_20px] flex items-center gap-2 sm:gap-[10px] border-b border-slate-100 bg-slate-50/50 flex-wrap">
                 <span className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[13px] sm:text-[14px] text-white shrink-0 shadow-xs ${theme.iconBg}`}>
                     {iconNode}

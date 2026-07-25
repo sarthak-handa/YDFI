@@ -190,7 +190,7 @@ function commonOptions(yTitle) {
         responsive: true,
         maintainAspectRatio: false,
         layout: {
-            padding: 0 // CRM: Minimize internal whitespace
+            padding: { top: 12, bottom: 4, left: 4, right: 8 }
         },
         interaction: { mode: 'index', intersect: false },
         plugins: {
@@ -199,15 +199,15 @@ function commonOptions(yTitle) {
                 labels: {
                     usePointStyle: true,
                     boxWidth: 8,
-                    padding: 16,
-                    font: { size: 13, weight: '600' } // CRM Legend 13px
+                    padding: 14,
+                    font: { size: 12, weight: '600', family: "'Inter', system-ui, sans-serif" }
                 }
             },
             tooltip: {
-                padding: 12,
+                padding: 10,
                 cornerRadius: 8,
-                titleFont: { size: 14, weight: '700' }, // CRM Tooltip 14px
-                bodyFont: { size: 14, weight: '500' },
+                titleFont: { size: 13, weight: '700', family: "'Inter', system-ui, sans-serif" },
+                bodyFont: { size: 13, weight: '500', family: "'Inter', system-ui, sans-serif" },
                 callbacks: {
                     title: function(items) {
                         if (!items || !items.length) return '';
@@ -229,15 +229,17 @@ function commonOptions(yTitle) {
         },
         scales: {
             x: {
-                grid: { display: false, drawBorder: false },
-                ticks: { font: { weight: '600', size: 12 } } // CRM Axis 12px
+                grid: { display: false },
+                border: { display: true, color: '#475569', width: 2 },
+                ticks: { font: { weight: '600', size: 11, family: "'Inter', system-ui, sans-serif" }, color: '#475569' }
             },
             y: {
-                title: { display: false }, // Removed to save space, header implies it
-                grid: { color: 'rgba(0, 0, 0, 0.04)', drawBorder: false },
+                title: { display: false },
+                grid: { color: 'rgba(226, 232, 240, 0.6)', drawOnChartArea: true },
+                border: { display: true, color: '#475569', width: 2 },
                 beginAtZero: false,
-                grace: '18%',
-                ticks: { font: { weight: '500', size: 12 } }
+                grace: '25%',
+                ticks: { font: { weight: '600', size: 11, family: "'Inter', system-ui, sans-serif" }, color: '#475569' }
             }
         }
     };

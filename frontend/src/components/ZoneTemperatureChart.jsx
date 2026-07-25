@@ -24,23 +24,28 @@ export default function ZoneTemperatureChart({
         ? configFactory(jcfHbrArgs.jcfLabels, jcfHbrArgs.jcfSp, jcfHbrArgs.jcfPv, jcfHbrArgs.hbrLabel, jcfHbrArgs.hbrSp, jcfHbrArgs.hbrPv, yTitle)
         : configFactory(labels, spData, pvData, yTitle);
 
-    const defaultInfo = infoText || `${title}: Monitors real-time process set points (SP) and actual process values (PV) in ${yTitle.includes('°C') ? '°C' : yTitle}.`;
+    const defaultInfo = infoText || `${title || 'Temperature Chart'}: Monitors real-time process set points (SP) and actual process values (PV) in ${yTitle.includes('°C') ? '°C' : yTitle}.`;
 
     return (
         <>
             {/* STANDARD CARD VIEW */}
             <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-[14px_16px] flex flex-col shadow-sm transition-all duration-150 hover:border-slate-300 hover:shadow-md w-full min-w-0">
+                
+                {/* Clean Header Bar: Only render title/icon if explicit title is passed */}
                 <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-[11px] sm:text-[12px] font-extrabold text-slate-800 uppercase tracking-[.04em] flex items-center gap-1 sm:gap-[6px] break-words">
-                            <span style={{ color: iconColor }}>{iconNode}</span> {title}
-                        </h3>
-                        {subtitle && (
-                            <span className="text-[9px] sm:text-[10px] text-slate-500 font-semibold bg-slate-100 py-[2px] px-2 rounded hidden md:inline-block whitespace-nowrap">
-                                {subtitle}
-                            </span>
-                        )}
-                    </div>
+                    {title ? (
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="text-[11px] sm:text-[12px] font-extrabold text-slate-800 uppercase tracking-[.04em] flex items-center gap-1 sm:gap-[6px] break-words">
+                                {iconNode && <span style={{ color: iconColor }}>{iconNode}</span>} {title}
+                            </h3>
+                            {subtitle && (
+                                <span className="text-[9px] sm:text-[10px] text-slate-500 font-semibold bg-slate-100 py-[2px] px-2 rounded hidden md:inline-block whitespace-nowrap">
+                                    {subtitle}
+                                </span>
+                            )}
+                        </div>
+                    ) : <div />}
+                    
                     <div className="flex items-center gap-1 shrink-0 ml-auto">
                         {/* INFO BUTTON */}
                         <button 
@@ -76,7 +81,7 @@ export default function ZoneTemperatureChart({
                                     <i className="fa-solid fa-circle-info"></i>
                                 </span>
                                 <div>
-                                    <h4 className="text-[13px] sm:text-[14px] font-extrabold text-slate-900 uppercase">{title}</h4>
+                                    <h4 className="text-[13px] sm:text-[14px] font-extrabold text-slate-900 uppercase">{title || 'Stage Info'}</h4>
                                     <p className="text-[9px] sm:text-[10px] text-slate-400 font-semibold uppercase">Stage Documentation</p>
                                 </div>
                             </div>
@@ -94,7 +99,7 @@ export default function ZoneTemperatureChart({
                                 <ul className="list-disc pl-4 space-y-1 text-slate-600">
                                     <li><strong>Unit of Measure:</strong> {yTitle.includes('°C') ? 'Degree Celsius (°C)' : yTitle}</li>
                                     <li><strong>Control Mode:</strong> Real-time SP (Set Point) vs PV (Process Value) tracking</li>
-                                    <li><strong>Scale Optimization:</strong> Dynamic height optimization for clean signal visibility</li>
+                                    <li><strong>L-Axis Alignment:</strong> Crisp L-shaped axis with floating center margin</li>
                                 </ul>
                             </div>
                         </div>
@@ -115,10 +120,10 @@ export default function ZoneTemperatureChart({
                         <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3 sm:mb-4 flex-wrap gap-2 shrink-0">
                             <div className="flex items-center gap-2 sm:gap-3">
                                 <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl shadow-xs text-white flex items-center justify-center text-[14px] sm:text-[16px] shrink-0" style={{ backgroundColor: iconColor }}>
-                                    {iconNode}
+                                    {iconNode || <i className="fa-solid fa-chart-line"></i>}
                                 </span>
                                 <div>
-                                    <h3 className="text-[14px] sm:text-[16px] font-extrabold text-slate-900 uppercase tracking-[.04em]">{title}</h3>
+                                    <h3 className="text-[14px] sm:text-[16px] font-extrabold text-slate-900 uppercase tracking-[.04em]">{title || 'Detailed Analysis'}</h3>
                                     <p className="text-[10px] sm:text-[11px] text-slate-500 font-semibold">Detailed Parameter Analysis ({yTitle})</p>
                                 </div>
                             </div>
