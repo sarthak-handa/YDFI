@@ -39,8 +39,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:#f8fafc;color:#1e293b;l
 .kpi-label{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em}
 .kpi-info-btn{background:none;border:none;color:#cbd5e1;font-size:11px;cursor:pointer;transition:color .15s}
 .kpi-info-btn:hover{color:#64748b}
-.kpi-value{font-size:26px;font-weight:800;color:#0f172a;line-height:1.1;word-break:break-word}
-.kpi-unit{font-size:13px;font-weight:700;color:#64748b;margin-left:4px;display:inline-block}
+.kpi-value-row{display:flex;align-items:baseline;gap:4px;flex-wrap:nowrap}
+.kpi-value{font-size:26px;font-weight:800;color:#0f172a;line-height:1.1;white-space:nowrap}
+.kpi-unit{font-size:13px;font-weight:700;color:#64748b;display:inline-block;white-space:nowrap}
 .kpi-card.slate{border-left-color:#475569}
 .kpi-card.blue{border-left-color:#3b82f6}.kpi-card.blue .kpi-value{color:#2563eb}
 .kpi-card.green{border-left-color:#10b981}.kpi-card.green .kpi-value{color:#059669}

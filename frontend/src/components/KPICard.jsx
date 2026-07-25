@@ -30,9 +30,9 @@ export default function KPICard({ label, value, unit, colorClass, info }) {
                 </button>
             </div>
             
-            <div className={`text-[19px] sm:text-[22px] md:text-[24px] lg:text-[26px] font-extrabold leading-[1.1] break-words ${colorClass === 'slate' ? 'text-slate-900' : textColor}`}>
-                {value}
-                {unit && <span className="text-[11px] sm:text-[12px] md:text-[13px] font-bold text-slate-500 ml-1 inline-block">{unit}</span>}
+            <div className={`text-[19px] sm:text-[22px] md:text-[24px] lg:text-[26px] font-extrabold leading-[1.1] whitespace-nowrap flex items-baseline gap-1 ${colorClass === 'slate' ? 'text-slate-900' : textColor}`}>
+                <span>{value}</span>
+                {unit && <span className="text-[11px] sm:text-[12px] md:text-[13px] font-bold text-slate-500 whitespace-nowrap">{unit}</span>}
             </div>
 
             {/* QUICK INFO TOOLTIP / POPOVER */}
