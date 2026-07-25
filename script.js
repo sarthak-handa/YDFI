@@ -190,7 +190,7 @@ function commonOptions(yTitle) {
         responsive: true,
         maintainAspectRatio: false,
         layout: {
-            padding: { top: 12, bottom: 4, left: 4, right: 8 }
+            padding: { top: 16, bottom: 6, left: 6, right: 16 }
         },
         interaction: { mode: 'index', intersect: false },
         plugins: {
@@ -229,22 +229,30 @@ function commonOptions(yTitle) {
         },
         scales: {
             x: {
+                title: { 
+                    display: true, 
+                    text: '▶', 
+                    align: 'end', 
+                    color: '#0f172a', 
+                    font: { size: 12, weight: '900' },
+                    padding: { top: -14, left: 0 } 
+                },
                 grid: { display: false },
-                border: { display: true, color: '#475569', width: 2 },
-                ticks: { font: { weight: '600', size: 11, family: "'Inter', system-ui, sans-serif" }, color: '#475569' }
+                border: { display: true, color: '#0f172a', width: 2 },
+                ticks: { font: { weight: '700', size: 11, family: "'Inter', system-ui, sans-serif" }, color: '#334155' }
             },
             y: {
                 title: { 
                     display: true, 
-                    text: yTitle || 'Value', 
-                    color: '#334155', 
-                    font: { weight: '700', size: 11, family: "'Inter', system-ui, sans-serif" } 
+                    text: yTitle ? `▲  ${yTitle}` : '▲', 
+                    color: '#0f172a', 
+                    font: { weight: '800', size: 12, family: "'Inter', system-ui, sans-serif" } 
                 },
-                grid: { color: 'rgba(226, 232, 240, 0.6)', drawOnChartArea: true },
-                border: { display: true, color: '#475569', width: 2 },
+                grid: { display: false },
+                border: { display: true, color: '#0f172a', width: 2 },
                 beginAtZero: false,
-                grace: '25%',
-                ticks: { font: { weight: '600', size: 11, family: "'Inter', system-ui, sans-serif" }, color: '#475569' }
+                grace: '35%',
+                ticks: { font: { weight: '700', size: 11, family: "'Inter', system-ui, sans-serif" }, color: '#334155' }
             }
         }
     };
@@ -268,7 +276,7 @@ function lineChartSPPV(labels, spData, pvData, yTitle) {
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.spBlue,
                     pointBorderWidth: 2,
-                    tension: 0.2,
+                    tension: 0,
                     fill: false
                 },
                 {
@@ -283,7 +291,7 @@ function lineChartSPPV(labels, spData, pvData, yTitle) {
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.pvGreen,
                     pointBorderWidth: 2,
-                    tension: 0.2,
+                    tension: 0,
                     fill: false
                 }
             ]
@@ -311,7 +319,7 @@ function comboSpLinePvColumn(labels, spData, pvData, yTitle) {
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.spBlue,
                     pointBorderWidth: 2,
-                    tension: 0.2,
+                    tension: 0,
                     fill: false,
                     order: 1
                 },
@@ -354,7 +362,7 @@ function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrPv, yTit
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.cyan,
                     pointBorderWidth: 2,
-                    tension: 0.2,
+                    tension: 0,
                     spanGaps: false
                 },
                 {
@@ -369,7 +377,7 @@ function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrPv, yTit
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.teal,
                     pointBorderWidth: 2,
-                    tension: 0.2,
+                    tension: 0,
                     spanGaps: false
                 },
                 {
