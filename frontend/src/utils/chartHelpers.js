@@ -160,8 +160,8 @@ export function comboSpLinePvColumn(labels, spData, pvData, yTitle) {
     };
 }
 
-// Specialized Config for JCF + HBR stage differentiation
-export function jcfHbrChartConfig(labels, jcfSp, jcfPv, hbrSp, hbrPv, hbrExitSp, hbrExitPv, yTitle) {
+// Specialized Config for JCF + HBR stage continuous line
+export function jcfHbrChartConfig(labels, spData, pvData, yTitle) {
     const stageLabels = (labels && labels.length === 5) ? labels : ['JCF Z1', 'JCF Z2', 'JCF Z3', 'HBR', 'HBR EXIT'];
     
     return {

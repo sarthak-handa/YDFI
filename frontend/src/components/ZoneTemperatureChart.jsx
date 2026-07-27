@@ -21,9 +21,7 @@ export default function ZoneTemperatureChart({
     const [showInfo, setShowInfo] = useState(false);
 
     // Build chart config
-    const config = isJcfHbr && jcfHbrArgs
-        ? configFactory(jcfHbrArgs.jcfLabels, jcfHbrArgs.jcfSp, jcfHbrArgs.jcfPv, jcfHbrArgs.hbrLabel, jcfHbrArgs.hbrSp, jcfHbrArgs.hbrPv, yTitle)
-        : configFactory(labels, spData, pvData, yTitle);
+    const config = configFactory(labels, spData, pvData, yTitle);
 
     const defaultInfo = infoText || `${title}: Monitors real-time process set points (SP) and actual process values (PV) in ${yTitle.includes('°C') ? '°C' : yTitle}.`;
 
