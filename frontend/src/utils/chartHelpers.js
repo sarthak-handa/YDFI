@@ -164,79 +164,40 @@ export function comboSpLinePvColumn(labels, spData, pvData, yTitle) {
 export function jcfHbrChartConfig(labels, jcfSp, jcfPv, hbrSp, hbrPv, hbrExitSp, hbrExitPv, yTitle) {
     const stageLabels = (labels && labels.length === 5) ? labels : ['JCF Z1', 'JCF Z2', 'JCF Z3', 'HBR', 'HBR EXIT'];
     
-    // Safety array checks
-    const spArray = Array.isArray(jcfSp) ? jcfSp : [480, 480, 480];
-    const pvArray = Array.isArray(jcfPv) ? jcfPv : [156.9, 165.0, 170.0];
-
-    const jcfSpAligned = [spArray[0] ?? 480, spArray[1] ?? 480, spArray[2] ?? 480, null, null];
-    const jcfPvAligned = [pvArray[0] ?? 156.9, pvArray[1] ?? 165.0, pvArray[2] ?? 170.0, null, null];
-    const hbrSpAligned = [null, null, null, hbrSp ?? 480.0, hbrExitSp ?? 469.8];
-    const hbrPvAligned = [null, null, null, hbrPv ?? 338.1, hbrExitPv ?? 481.8];
-
     return {
         type: 'line',
         data: {
             labels: stageLabels,
             datasets: [
                 {
-                    label: 'JCF SP',
-                    data: jcfSpAligned,
-                    borderColor: C.cyan,
-                    backgroundColor: C.cyan,
+                    label: 'SP (Set Point)',
+                    data: spData,
+                    borderColor: C.spBlue,
+                    backgroundColor: C.spBlue,
                     borderWidth: 2,
                     pointStyle: 'circle',
                     pointRadius: 5,
                     pointHoverRadius: 7,
                     pointBackgroundColor: '#ffffff',
-                    pointBorderColor: C.cyan,
+                    pointBorderColor: C.spBlue,
                     pointBorderWidth: 2,
                     tension: 0,
-                    spanGaps: false
+                    fill: false
                 },
                 {
-                    label: 'JCF PV',
-                    data: jcfPvAligned,
-                    borderColor: C.teal,
-                    backgroundColor: C.teal,
+                    label: 'PV (Process Value)',
+                    data: pvData,
+                    borderColor: C.pvGreen,
+                    backgroundColor: C.pvGreen,
                     borderWidth: 2,
                     pointStyle: 'circle',
                     pointRadius: 5,
                     pointHoverRadius: 7,
                     pointBackgroundColor: '#ffffff',
-                    pointBorderColor: C.teal,
+                    pointBorderColor: C.pvGreen,
                     pointBorderWidth: 2,
                     tension: 0,
-                    spanGaps: false
-                },
-                {
-                    label: 'HBR SP',
-                    data: hbrSpAligned,
-                    borderColor: C.purple,
-                    backgroundColor: C.purple,
-                    borderWidth: 2,
-                    pointStyle: 'rectRot',
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    pointBackgroundColor: '#ffffff',
-                    pointBorderColor: C.purple,
-                    pointBorderWidth: 2,
-                    tension: 0,
-                    spanGaps: false
-                },
-                {
-                    label: 'HBR PV',
-                    data: hbrPvAligned,
-                    borderColor: C.orange,
-                    backgroundColor: C.orange,
-                    borderWidth: 2,
-                    pointStyle: 'rectRot',
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    pointBackgroundColor: '#ffffff',
-                    pointBorderColor: C.orange,
-                    pointBorderWidth: 2,
-                    tension: 0,
-                    spanGaps: false
+                    fill: false
                 }
             ]
         },

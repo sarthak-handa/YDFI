@@ -114,18 +114,23 @@ export default function FurnaceDashboard() {
                         iconBg="bg-violet-500"
                         mode={D.hbrMode}
                         configFactory={jcfHbrChartConfig}
+                        labels={['JCF Z1', 'JCF Z2', 'JCF Z3', 'HBR', 'HBR EXIT']}
+                        spData={[
+                            parseFloat(avg(D.jcfZ1SP || 480).toFixed(1)), 
+                            parseFloat(avg(D.jcfZ2SP || 480).toFixed(1)), 
+                            parseFloat(avg(D.jcfZ3SP || 480).toFixed(1)), 
+                            parseFloat(avg(D.hbrSP || 460).toFixed(1)), 
+                            parseFloat(avg(D.hbrExitSP || 460).toFixed(1))
+                        ]}
+                        pvData={[
+                            parseFloat(avg(D.jcfZ1PV || 188).toFixed(1)), 
+                            parseFloat(avg(D.jcfZ2PV || 193).toFixed(1)), 
+                            parseFloat(avg(D.jcfZ3PV || 201).toFixed(1)), 
+                            parseFloat(avg(D.hbrPV || 338.1).toFixed(1)), 
+                            parseFloat(avg(D.hbrExitPV || 481.8).toFixed(1))
+                        ]}
                         yTitle="Temperature (°C)"
-                        isJcfHbr={true}
-                        jcfHbrArgs={{
-                            labels: ['JCF Z1', 'JCF Z2', 'JCF Z3', 'HBR', 'HBR EXIT'],
-                            jcfSp: [avg(D.jcfZ1SP || 480), avg(D.jcfZ1SP || 480), avg(D.jcfZ1SP || 480)],
-                            jcfPv: [avg(D.jcfZ1PV || 156.9), avg(D.jcfZ2PV || 165.0), avg(D.jcfZ3PV || 170.0)],
-                            hbrSp: avg(D.hbrSP || 480),
-                            hbrPv: avg(D.hbrPV || 338.1),
-                            hbrExitSp: avg(D.hbrExitSP || 469.8),
-                            hbrExitPv: avg(D.hbrExitPV || 481.8)
-                        }}
-                        infoText="Differentiates Jet Cooling Furnace (JCF Z1-Z3) cooling temperatures and Hot Bridle (HBR & HBR Exit) tensioning stage temperatures in °C."
+                        infoText="Monitors cooling temperatures continuously across Jet Cooling Furnace (JCF Z1-Z3) and Hot Bridle (HBR & HBR Exit) in °C."
                     />
                 </div>
 
