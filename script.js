@@ -707,7 +707,26 @@ function bootApp() {
 
     const startDateInput = document.getElementById('startDate');
     const endDateInput = document.getElementById('endDate');
+    const rangeInput = document.getElementById('dateRangePicker');
     const granBtns = document.querySelectorAll('.gran-btn');
+
+    let fpInstance = null;
+    if (rangeInput && typeof flatpickr !== 'undefined') {
+        fpInstance = flatpickr(rangeInput, {
+            mode: "range",
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d-m-Y",
+            defaultDate: [startDateInput ? startDateInput.value : "2026-07-17", endDateInput ? endDateInput.value : "2026-07-20"],
+            onClose: function(selectedDates) {
+                if (selectedDates.length === 2) {
+                    if (startDateInput) startDateInput.value = selectedDates[0].toISOString().split('T')[0];
+                    if (endDateInput) endDateInput.value = selectedDates[1].toISOString().split('T')[0];
+                    renderAll();
+                }
+            }
+        });
+    }
 
     granBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -719,6 +738,7 @@ function bootApp() {
     });
 
     function applyPresetRange(range) {
+        if (!startDateInput || !endDateInput) return;
         let endDate = endDateInput.value ? new Date(endDateInput.value) : new Date();
         if (isNaN(endDate.getTime())) endDate = new Date();
         let startDate = new Date(endDate);
@@ -729,13 +749,15 @@ function bootApp() {
             case '6M': startDate.setMonth(endDate.getMonth() - 6); break;
             case '1Y': startDate.setFullYear(endDate.getFullYear() - 1); break;
         }
-        startDateInput.value = startDate.toISOString().split('T')[0];
-        endDateInput.value = endDate.toISOString().split('T')[0];
+        const startStr = startDate.toISOString().split('T')[0];
+        const endStr = endDate.toISOString().split('T')[0];
+        startDateInput.value = startStr;
+        endDateInput.value = endStr;
+        if (fpInstance) {
+            fpInstance.setDate([startStr, endStr]);
+        }
         renderAll();
     }
-
-    if (startDateInput) startDateInput.addEventListener('change', () => renderAll());
-    if (endDateInput) endDateInput.addEventListener('change', () => renderAll());
 
     const fileInput = document.getElementById('csvFile');
     if (fileInput) {

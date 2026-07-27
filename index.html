@@ -28,6 +28,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script>if (typeof Chart === 'undefined') document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\/script>');</script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -48,8 +50,15 @@
     </header>
 
     <div class="filter-bar">
-        <div class="filter-group"><span class="filter-label">Start</span><input type="date" id="startDate" class="filter-input" value="2026-07-17"></div>
-        <div class="filter-group"><span class="filter-label">End</span><input type="date" id="endDate" class="filter-input" value="2026-07-20"></div>
+        <div class="filter-group">
+            <span class="filter-label">Duration</span>
+            <div class="range-picker-wrapper" style="position: relative; display: flex; align-items: center;">
+                <input type="text" id="dateRangePicker" class="filter-input" style="padding-right: 36px; min-width: 240px; cursor: pointer;" placeholder="Select Date Range">
+                <i class="fa-regular fa-calendar" style="position: absolute; right: 12px; color: #94a3b8; pointer-events: none;"></i>
+            </div>
+            <input type="hidden" id="startDate" value="2026-07-17">
+            <input type="hidden" id="endDate" value="2026-07-20">
+        </div>
         <div class="gran-group">
             <button class="gran-btn">1D</button><button class="gran-btn active">7D</button><button class="gran-btn">30D</button><button class="gran-btn">6M</button><button class="gran-btn">1Y</button>
         </div>
