@@ -1,12 +1,16 @@
 /* ACPPL GI Furnace Dashboard — script.js v11
    Aligned with APL Apollo CRM Design System Specs */
 
-Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
-Chart.defaults.font.size = 12; // CRM Axis labels 12px
-Chart.defaults.maintainAspectRatio = false;
-Chart.defaults.plugins.legend.labels.usePointStyle = true;
-Chart.defaults.plugins.legend.labels.boxWidth = 8;
-Chart.defaults.plugins.legend.labels.padding = 16;
+function initChartDefaults() {
+    if (typeof Chart !== 'undefined') {
+        Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+        Chart.defaults.font.size = 12; // CRM Axis labels 12px
+        Chart.defaults.maintainAspectRatio = false;
+        Chart.defaults.plugins.legend.labels.usePointStyle = true;
+        Chart.defaults.plugins.legend.labels.boxWidth = 8;
+        Chart.defaults.plugins.legend.labels.padding = 16;
+    }
+}
 
 const C = {
     spBlue: '#3b82f6',
@@ -23,6 +27,7 @@ const C = {
 
 const charts = {};
 function mk(id, cfg) {
+    if (typeof Chart === 'undefined') return;
     if(charts[id]) charts[id].destroy();
     const el = document.getElementById(id);
     if(el) charts[id] = new Chart(el, cfg);
@@ -669,6 +674,11 @@ window.addEventListener('click', (e) => {
 // ════════════════════════════════════════════════════
 
 function bootApp() {
+    if (typeof Chart === 'undefined') {
+        setTimeout(bootApp, 50);
+        return;
+    }
+    initChartDefaults();
     renderAll();
 
     document.addEventListener('click', (e) => {
