@@ -668,7 +668,7 @@ window.addEventListener('click', (e) => {
 //  EVENT LISTENERS & CSV PARSER
 // ════════════════════════════════════════════════════
 
-window.addEventListener('DOMContentLoaded', () => {
+function bootApp() {
     renderAll();
 
     document.addEventListener('click', (e) => {
@@ -740,7 +740,13 @@ window.addEventListener('DOMContentLoaded', () => {
             reader.readAsText(file);
         });
     }
-});
+}
+
+if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', bootApp);
+} else {
+    bootApp();
+}
 
 function parseCSV(text) {
     const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
