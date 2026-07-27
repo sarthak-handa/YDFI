@@ -161,22 +161,25 @@ export function comboSpLinePvColumn(labels, spData, pvData, yTitle) {
 }
 
 // Specialized Config for JCF + HBR stage differentiation
-export function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrPv, yTitle) {
-    const labels = [...jcfLabels, hbrLabel];
+export function jcfHbrChartConfig(labels, jcfSp, jcfPv, hbrSp, hbrPv, hbrExitSp, hbrExitPv, yTitle) {
+    const stageLabels = (labels && labels.length === 5) ? labels : ['JCF Z1', 'JCF Z2', 'JCF Z3', 'HBR', 'HBR EXIT'];
     
-    // Dataset aligned across points
-    const jcfSpAligned = [...jcfSp, null];
-    const jcfPvAligned = [...jcfPv, null];
-    const hbrSpAligned = [null, null, null, hbrSp];
-    const hbrPvAligned = [null, null, null, hbrPv];
+    // Safety array checks
+    const spArray = Array.isArray(jcfSp) ? jcfSp : [480, 480, 480];
+    const pvArray = Array.isArray(jcfPv) ? jcfPv : [156.9, 165.0, 170.0];
+
+    const jcfSpAligned = [spArray[0] ?? 480, spArray[1] ?? 480, spArray[2] ?? 480, null, null];
+    const jcfPvAligned = [pvArray[0] ?? 156.9, pvArray[1] ?? 165.0, pvArray[2] ?? 170.0, null, null];
+    const hbrSpAligned = [null, null, null, hbrSp ?? 480.0, hbrExitSp ?? 469.8];
+    const hbrPvAligned = [null, null, null, hbrPv ?? 338.1, hbrExitPv ?? 481.8];
 
     return {
         type: 'line',
         data: {
-            labels: labels,
+            labels: stageLabels,
             datasets: [
                 {
-                    label: 'JCF SP (Jet Cooling)',
+                    label: 'JCF SP',
                     data: jcfSpAligned,
                     borderColor: C.cyan,
                     backgroundColor: C.cyan,
@@ -191,7 +194,7 @@ export function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrP
                     spanGaps: false
                 },
                 {
-                    label: 'JCF PV (Jet Cooling)',
+                    label: 'JCF PV',
                     data: jcfPvAligned,
                     borderColor: C.teal,
                     backgroundColor: C.teal,
@@ -206,7 +209,7 @@ export function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrP
                     spanGaps: false
                 },
                 {
-                    label: 'HBR SP (Hot Bridle)',
+                    label: 'HBR SP',
                     data: hbrSpAligned,
                     borderColor: C.purple,
                     backgroundColor: C.purple,
@@ -221,7 +224,7 @@ export function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrP
                     spanGaps: false
                 },
                 {
-                    label: 'HBR PV (Hot Bridle)',
+                    label: 'HBR PV',
                     data: hbrPvAligned,
                     borderColor: C.orange,
                     backgroundColor: C.orange,
@@ -242,33 +245,28 @@ export function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrP
 }
 
 export function gasLollipopChartConfig(paramsData) {
-    const labels = paramsData.map(p => p.name);
+    const labels = paramsData.map(p => p.shortName);
     const normalizedData = paramsData.map(p => p.normalized);
+    const colors = paramsData.map(p => p.color || C.cyan);
 
     return {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Average Value',
+                label: 'Average %',
                 data: normalizedData,
-                backgroundColor: C.cyan,
-                borderColor: C.cyan,
+                backgroundColor: colors,
+                borderColor: colors,
                 borderWidth: 2,
-                barThickness: 4,
-                pointStyle: 'circle',
-                pointRadius: 7,
-                pointHoverRadius: 9,
-                pointBackgroundColor: '#3b82f6',
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2
+                barPercentage: 0.55,
+                borderRadius: 6
             }]
         },
         options: {
-            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { top: 10, bottom: 6, left: 10, right: 40 } },
+            layout: { padding: { top: 16, bottom: 6, left: 10, right: 16 } },
             plugins: {
                 legend: { display: false },
                 tooltip: {
@@ -280,25 +278,25 @@ export function gasLollipopChartConfig(paramsData) {
                         label: function(ctx) {
                             const idx = ctx.dataIndex;
                             const item = paramsData[idx];
-                            return `  Average: ${item.rawVal} ${item.unit} (${item.normalized}%) — Acceptable`;
+                            return `  Average: ${item.normalized}% (${item.rawVal} ${item.unit})`;
                         }
                     }
                 }
             },
             scales: {
                 x: {
-                    title: { display: true, text: 'Average Value (Normalized %)', color: '#0f172a', font: { weight: '800', size: 11 } },
-                    grid: { display: false },
-                    border: { display: true, color: '#0f172a', width: 2 },
-                    min: 0,
-                    max: 120,
-                    ticks: { font: { weight: '700', size: 11 }, color: '#334155', callback: v => `${v}%` }
-                },
-                y: {
-                    title: { display: true, text: 'Parameter Name', color: '#0f172a', font: { weight: '800', size: 11 } },
+                    title: { display: true, text: 'Parameters', color: '#0f172a', font: { weight: '800', size: 11 } },
                     grid: { display: false },
                     border: { display: true, color: '#0f172a', width: 2 },
                     ticks: { font: { weight: '700', size: 11 }, color: '#334155' }
+                },
+                y: {
+                    title: { display: true, text: 'Average %', color: '#0f172a', font: { weight: '800', size: 11 } },
+                    grid: { display: false },
+                    border: { display: true, color: '#0f172a', width: 2 },
+                    beginAtZero: true,
+                    max: 120,
+                    ticks: { font: { weight: '700', size: 11 }, color: '#334155', callback: v => `${v}%` }
                 }
             }
         }

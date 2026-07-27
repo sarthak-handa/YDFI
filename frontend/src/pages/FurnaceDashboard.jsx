@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFurnaceData, avg } from '../hooks/useFurnaceData';
-import { C, lineChartSPPV, comboSpLinePvColumn, gasBarChartConfig, jcfHbrChartConfig } from '../utils/chartHelpers';
+import { C, lineChartSPPV, comboSpLinePvColumn, jcfHbrChartConfig } from '../utils/chartHelpers';
 
 import Header from '../components/Header';
 import KPICard from '../components/KPICard';
@@ -23,23 +23,11 @@ export default function FurnaceDashboard() {
     const avgO2 = avg(D.o2);
     const avgDewPt = avg(D.dewPt);
     const avgCombPV = avg(D.combPV);
+    const avgH2Conc = avg(D.h2Conc);
+    const avgFumeBlower = avg(D.fumeBlower);
+    const avgCombBlower = avg(D.combBlower);
 
-    const gasLabels = [
-        'H₂ Flow (Nm³/h)',
-        'N₂ Flow (Nm³/h)',
-        'O₂ Level (ppm)',
-        'Dew Point (°C)',
-        'Comb Air Press (mmwc)'
-    ];
-    const gasData = [
-        avgH2,
-        avgN2,
-        avgO2,
-        Math.abs(avgDewPt),
-        avgCombPV
-    ];
-    const gasColors = [C.cyan, C.purple, C.red, C.slate, C.indigo];
-    const rawGasData = { avgH2, avgN2, avgO2, avgDewPt, avgCombPV };
+    const rawGasData = { avgH2, avgN2, avgO2, avgDewPt, avgCombPV, avgH2Conc, avgFumeBlower, avgCombBlower };
 
     return (
         <>
@@ -129,14 +117,15 @@ export default function FurnaceDashboard() {
                         yTitle="Temperature (°C)"
                         isJcfHbr={true}
                         jcfHbrArgs={{
-                            jcfLabels: ['JCF Z1', 'JCF Z2', 'JCF Z3'],
-                            jcfSp: D.jcfZoneSP,
-                            jcfPv: D.jcfZonePV,
-                            hbrLabel: 'HBR EXIT',
-                            hbrSp: avg(D.hbrExitSP),
-                            hbrPv: avg(D.hbrExitPV)
+                            labels: ['JCF Z1', 'JCF Z2', 'JCF Z3', 'HBR', 'HBR EXIT'],
+                            jcfSp: [avg(D.jcfZ1SP || 480), avg(D.jcfZ1SP || 480), avg(D.jcfZ1SP || 480)],
+                            jcfPv: [avg(D.jcfZ1PV || 156.9), avg(D.jcfZ2PV || 165.0), avg(D.jcfZ3PV || 170.0)],
+                            hbrSp: avg(D.hbrSP || 480),
+                            hbrPv: avg(D.hbrPV || 338.1),
+                            hbrExitSp: avg(D.hbrExitSP || 469.8),
+                            hbrExitPv: avg(D.hbrExitPV || 481.8)
                         }}
-                        infoText="Differentiates Jet Cooling Furnace (JCF Z1-Z3) cooling temperatures and Hot Bridle (HBR Exit) tensioning stage temperatures in °C."
+                        infoText="Differentiates Jet Cooling Furnace (JCF Z1-Z3) cooling temperatures and Hot Bridle (HBR & HBR Exit) tensioning stage temperatures in °C."
                     />
                 </div>
 

@@ -1,33 +1,38 @@
 import React, { useState } from 'react';
 import { Chart } from 'react-chartjs-2';
 import 'chart.js/auto';
-import { C, gasLollipopChartConfig, gasClusteredColumnLineConfig } from '../utils/chartHelpers';
+import { C, gasLollipopChartConfig } from '../utils/chartHelpers';
 
 export default function GasPanel({ rawData }) {
     const [isZoomed, setIsZoomed] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
-    const [isFlipped, setIsFlipped] = useState(false);
 
     // 7 Executive Gas & Blower Parameters
+    const fumeVal = rawData?.avgFumeBlower ? Math.round(rawData.avgFumeBlower) : 1089;
+    const combVal = rawData?.avgCombBlower ? Math.round(rawData.avgCombBlower) : 2387;
+    const o2Val = rawData?.avgO2 !== undefined ? parseFloat(rawData.avgO2.toFixed(1)) : 37.0;
+    const dewVal = rawData?.avgDewPt !== undefined ? parseFloat(rawData.avgDewPt.toFixed(1)) : -25.1;
+    const h2ConcVal = rawData?.avgH2Conc !== undefined ? parseFloat(rawData.avgH2Conc.toFixed(1)) : 20.1;
+    const h2FlowVal = rawData?.avgH2 !== undefined ? parseFloat(rawData.avgH2.toFixed(1)) : 28.8;
+    const n2FlowVal = rawData?.avgN2 !== undefined ? parseFloat(rawData.avgN2.toFixed(1)) : 243.8;
+
     const paramsData = [
-        { name: 'Fume Exh Blower', shortName: 'Fume Blower', rawVal: 1089, unit: 'rpm', target: 1100, limit: 1200, normalized: 90.8, targetNorm: 91.7, limitNorm: 100, color: C.cyan },
-        { name: 'Comb Blower 1', shortName: 'Comb Blower', rawVal: 2387, unit: 'rpm', target: 2400, limit: 2500, normalized: 95.5, targetNorm: 96.0, limitNorm: 100, color: C.purple },
-        { name: 'O2', shortName: 'O2', rawVal: 37.0, unit: 'ppm', target: 40.0, limit: 50.0, normalized: 74.0, targetNorm: 80.0, limitNorm: 100, color: C.red },
-        { name: 'Dew Point', shortName: 'Dew Point', rawVal: -25.1, unit: '°C', target: -25.0, limit: -20.0, normalized: 80.3, targetNorm: 80.0, limitNorm: 100, color: C.slate },
-        { name: 'H2', shortName: 'H2', rawVal: 20.1, unit: '%', target: 20.0, limit: 25.0, normalized: 80.4, targetNorm: 80.0, limitNorm: 100, color: C.indigo },
-        { name: 'H2 Flow', shortName: 'H2 Flow', rawVal: rawData?.avgH2 ? rawData.avgH2.toFixed(1) : 28.8, unit: 'Nm³/h', target: 30.0, limit: 35.0, normalized: 82.3, targetNorm: 85.7, limitNorm: 100, color: C.teal },
-        { name: 'N2 Flow', shortName: 'N2 Flow', rawVal: rawData?.avgN2 ? rawData.avgN2.toFixed(1) : 243.8, unit: 'Nm³/h', target: 250.0, limit: 300.0, normalized: 81.3, targetNorm: 83.3, limitNorm: 100, color: C.orange }
+        { name: 'Fume Exh Blower', shortName: 'Fume Blower', rawVal: fumeVal, unit: 'rpm', normalized: Number(((fumeVal / 1200) * 100).toFixed(1)), color: C.cyan },
+        { name: 'Comb Blower 1', shortName: 'Comb Blower', rawVal: combVal, unit: 'rpm', normalized: Number(((combVal / 2500) * 100).toFixed(1)), color: C.purple },
+        { name: 'O2 Purity', shortName: 'O2', rawVal: o2Val, unit: 'ppm', normalized: Number(((o2Val / 50.0) * 100).toFixed(1)), color: C.red },
+        { name: 'Dew Point', shortName: 'Dew Point', rawVal: dewVal, unit: '°C', normalized: Number(((Math.abs(dewVal) / 30.0) * 100).toFixed(1)), color: C.slate },
+        { name: 'H2 Conc', shortName: 'H2 Conc', rawVal: h2ConcVal, unit: '%', normalized: Number(((h2ConcVal / 25.0) * 100).toFixed(1)), color: C.indigo },
+        { name: 'H2 Flow', shortName: 'H2 Flow', rawVal: h2FlowVal, unit: 'Nm³/h', normalized: Number(((h2FlowVal / 35.0) * 100).toFixed(1)), color: C.teal },
+        { name: 'N2 Flow', shortName: 'N2 Flow', rawVal: n2FlowVal, unit: 'Nm³/h', normalized: Number(((n2FlowVal / 300.0) * 100).toFixed(1)), color: C.orange }
     ];
 
-    const config = isFlipped 
-        ? gasClusteredColumnLineConfig(paramsData)
-        : gasLollipopChartConfig(paramsData);
+    const config = gasLollipopChartConfig(paramsData);
 
     return (
         <>
             <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-[14px_16px] flex flex-col shadow-sm transition-all duration-150 hover:border-slate-300 hover:shadow-md w-full min-w-0">
                 
-                {/* SINGLE HEADER BAR WITH FLIP BUTTON */}
+                {/* SINGLE HEADER BAR */}
                 <div className="flex justify-between items-center mb-3 pb-2.5 border-b border-slate-100 flex-wrap gap-2">
                     <div className="flex items-center gap-2 flex-wrap">
                         <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-[13px] sm:text-[14px] text-white shrink-0 shadow-xs bg-cyan-500">
@@ -38,21 +43,12 @@ export default function GasPanel({ rawData }) {
                                 Gas &amp; Atmosphere Parameters
                             </h3>
                             <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase">
-                                {isFlipped ? 'Clustered Column + Line View' : 'Multi-Series Horizontal Lollipop View'}
+                                Average % vs Parameters Overview
                             </p>
                         </div>
                     </div>
                     
                     <div className="flex items-center gap-2 shrink-0 ml-auto flex-wrap">
-                        {/* FLIP VIEW BUTTON */}
-                        <button 
-                            onClick={() => setIsFlipped(!isFlipped)}
-                            title="Flip Chart View"
-                            className="bg-slate-900 hover:bg-blue-600 text-white font-bold py-1.5 px-3 rounded-lg text-[10px] sm:text-[11px] flex items-center gap-1.5 transition-all shadow-xs cursor-pointer whitespace-nowrap"
-                        >
-                            <i className="fa-solid fa-arrows-rotate"></i> Flip View
-                        </button>
-
                         <div className="flex items-center gap-1">
                             {/* INFO BUTTON */}
                             <button 
@@ -85,7 +81,7 @@ export default function GasPanel({ rawData }) {
                         <div key={i} className="bg-slate-50 border border-slate-200 py-1 px-2 sm:py-[5px] sm:px-2.5 rounded-md flex items-center gap-1 sm:gap-[6px]">
                             <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.color }}></span>
                             <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">{p.shortName}</span>
-                            <span className="text-[11px] sm:text-[12px] font-extrabold text-slate-900 whitespace-nowrap">{p.rawVal} {p.unit}</span>
+                            <span className="text-[11px] sm:text-[12px] font-extrabold text-slate-900 whitespace-nowrap">{p.rawVal} {p.unit} ({p.normalized}%)</span>
                         </div>
                     ))}
                 </div>
@@ -113,7 +109,7 @@ export default function GasPanel({ rawData }) {
                             </button>
                         </div>
                         <div className="text-[12px] sm:text-[13px] text-slate-600 leading-relaxed mb-6 space-y-3">
-                            <p>Provides dual executive views for total visibility: Multi-Series Horizontal Lollipop view for immediate row-by-row parameter tracking and Clustered Column + Line view for target limit comparison.</p>
+                            <p>Displays real-time average percentage composition and blower performance relative to operational baselines across 7 key gas parameters.</p>
                             <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/80 text-[11px] sm:text-[12px]">
                                 <div className="font-bold text-slate-700 mb-1">Tracked Parameters (7):</div>
                                 <ul className="list-disc pl-4 space-y-1 text-slate-600">
@@ -121,7 +117,8 @@ export default function GasPanel({ rawData }) {
                                     <li>Comb Blower 1 (rpm)</li>
                                     <li>O2 Purity (ppm)</li>
                                     <li>Dew Point (°C)</li>
-                                    <li>H2 Conc (%) &amp; Flow (Nm³/h)</li>
+                                    <li>H2 Conc (%)</li>
+                                    <li>H2 Flow (Nm³/h)</li>
                                     <li>N2 Flow (Nm³/h)</li>
                                 </ul>
                             </div>
@@ -147,16 +144,10 @@ export default function GasPanel({ rawData }) {
                                 </span>
                                 <div>
                                     <h3 className="text-[14px] sm:text-[16px] font-extrabold text-slate-900 uppercase tracking-[.04em]">Gas &amp; Atmosphere Parameters — Full Screen</h3>
-                                    <p className="text-[10px] sm:text-[11px] text-slate-500 font-semibold">{isFlipped ? 'Clustered Column + Line Analysis' : 'Horizontal Lollipop Executive Overview'}</p>
+                                    <p className="text-[10px] sm:text-[11px] text-slate-500 font-semibold">Average % vs Parameters Analysis</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 ml-auto">
-                                <button 
-                                    onClick={() => setIsFlipped(!isFlipped)}
-                                    className="py-1.5 px-3 rounded-lg bg-slate-900 hover:bg-blue-600 text-white font-bold text-[11px] sm:text-[12px] flex items-center gap-1.5 transition-colors cursor-pointer"
-                                >
-                                    <i className="fa-solid fa-arrows-rotate"></i> Flip View
-                                </button>
                                 <button 
                                     onClick={() => setIsZoomed(false)}
                                     className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600 flex items-center justify-center text-base sm:text-lg transition-colors cursor-pointer"

@@ -54,15 +54,22 @@ let D = {
     sfExitSP:   [720, 720, 720, 720, 720, 720, 720, 715, 715, 715],
     sfExitPV:   [727, 716, 718, 719, 715, 721, 710, 714, 712, 719],
 
-    jcfZoneSP: [195, 195, 205],
-    jcfZonePV: [188, 193, 201],
-    hbrExitSP: 460,
-    hbrExitPV: 481,
+    jcfZ1SP: [480, 480, 480, 480, 480, 480, 480, 480, 480, 480],
+    jcfZ1PV: [138.3, 174.4, 165.5, 168.4, 168.5, 168.3, 171.6, 173.9, 172.8, 156.9],
+    jcfZ2PV: [146.3, 183.9, 173.7, 178.0, 178.5, 173.9, 175.6, 174.8, 175.7, 165.0],
+    jcfZ3PV: [153.8, 190.9, 176.6, 178.7, 179.0, 176.4, 174.5, 174.2, 177.3, 170.0],
+    hbrSP:   [480, 480, 480, 480, 480, 480, 480, 480, 480, 480],
+    hbrPV:   [334.3, 334.0, 333.7, 332.5, 332.9, 330.9, 328.3, 326.7, 327.3, 338.1],
+    hbrExitSP: [467.2, 460.0, 460.0, 460.0, 460.0, 460.0, 460.0, 460.0, 460.0, 469.8],
+    hbrExitPV: [469.9, 474.0, 469.1, 471.2, 470.0, 463.1, 460.9, 461.2, 464.8, 481.8],
 
-    h2Flow: [28.7, 28.8, 28.5, 29.4, 28.5, 28.7, 30.9, 29.7, 29.1, 27.6],
-    n2Flow: [244.5, 243.0, 243.3, 243.2, 243.4, 243.3, 242.1, 243.1, 245.9, 240.6],
-    o2:     [41.0, 39.0, 40.0, 42.0, 40.0, 39.0, 44.0, 40.0, 39.0, 38.0],
-    dewPt:  [-21.0, -20.6, -22.2, -21.4, -22.1, -24.2, -13.4, -18.9, -23.5, -22.0],
+    fumeBlower: [1095, 1092, 1122, 1094, 1023, 1042, 1015, 1026, 1001, 1089],
+    combBlower: [2917, 2947, 2961, 2942, 2903, 2914, 2899, 2905, 2891, 2387],
+    h2Conc: [20.01, 20.04, 19.78, 20.07, 19.88, 19.61, 20.26, 20.23, 19.56, 20.1],
+    h2Flow: [28.73, 28.80, 28.59, 29.40, 28.58, 28.72, 30.90, 29.72, 29.17, 28.8],
+    n2Flow: [244.57, 243.09, 243.36, 243.23, 243.40, 243.33, 242.13, 243.19, 245.94, 243.8],
+    o2:     [49.0, 39.0, 40.0, 42.0, 40.0, 39.0, 44.0, 40.0, 39.0, 37.0],
+    dewPt:  [-21.0, -20.6, -22.2, -21.4, -22.1, -24.2, -13.4, -18.9, -23.5, -25.1],
     combSP: [900, 900, 900, 900, 900, 900, 900, 900, 900, 900],
     combPV: [899, 900, 900, 900, 900, 900, 900, 900, 900, 900],
 
@@ -145,46 +152,41 @@ function renderAll() {
     mk('sfZoneTemp', lineChartSPPV(sfLabels, sfSP, sfPV, 'Temperature (°C)'));
 
     // JCF + HBR
-    const jcfLabels = ['JCF Z1', 'JCF Z2', 'JCF Z3'];
-    const jcfSP = D.jcfZoneSP;
-    const jcfPV = D.jcfZonePV;
-    const hbrLabel = 'HBR EXIT';
-    const hbrSP = avg(D.hbrExitSP);
-    const hbrPV = avg(D.hbrExitPV);
-    mk('jcfZoneTemp', jcfHbrChartConfig(jcfLabels, jcfSP, jcfPV, hbrLabel, hbrSP, hbrPV, 'Temperature (°C)'));
+    const stageLabels = ['JCF Z1', 'JCF Z2', 'JCF Z3', 'HBR', 'HBR EXIT'];
+    const jcfSP = [avg(D.jcfZ1SP || 480), avg(D.jcfZ1SP || 480), avg(D.jcfZ1SP || 480)];
+    const jcfPV = [avg(D.jcfZ1PV || 156.9), avg(D.jcfZ2PV || 165.0), avg(D.jcfZ3PV || 170.0)];
+    const hbrSP = avg(D.hbrSP || 480);
+    const hbrPV = avg(D.hbrPV || 338.1);
+    const hbrExitSP = avg(D.hbrExitSP || 469.8);
+    const hbrExitPV = avg(D.hbrExitPV || 481.8);
+    mk('jcfZoneTemp', jcfHbrChartConfig(stageLabels, jcfSP, jcfPV, hbrSP, hbrPV, hbrExitSP, hbrExitPV, 'Temperature (°C)'));
 
     // GAS & ATMOSPHERE PARAMETERS DATASET (7 PARAMETERS)
+    const fumeVal = Math.round(avg(D.fumeBlower || 1089));
+    const combVal = Math.round(avg(D.combBlower || 2387));
+    const o2Val = parseFloat(avg(D.o2 || 37.0).toFixed(1));
+    const dewVal = parseFloat(avg(D.dewPt || -25.1).toFixed(1));
+    const h2ConcVal = parseFloat(avg(D.h2Conc || 20.1).toFixed(1));
+    const h2FlowVal = parseFloat(avg(D.h2Flow || 28.8).toFixed(1));
+    const n2FlowVal = parseFloat(avg(D.n2Flow || 243.8).toFixed(1));
+
     const gasParamsData = [
-        { name: 'Fume Exh Blower', shortName: 'Fume Blower', rawVal: 1089, unit: 'rpm', target: 1100, limit: 1200, normalized: 90.8, targetNorm: 91.7, limitNorm: 100 },
-        { name: 'Comb Blower 1', shortName: 'Comb Blower', rawVal: 2387, unit: 'rpm', target: 2400, limit: 2500, normalized: 95.5, targetNorm: 96.0, limitNorm: 100 },
-        { name: 'O2', shortName: 'O2', rawVal: 37.0, unit: 'ppm', target: 40.0, limit: 50.0, normalized: 74.0, targetNorm: 80.0, limitNorm: 100 },
-        { name: 'Dew Point', shortName: 'Dew Point', rawVal: -25.1, unit: '°C', target: -25.0, limit: -20.0, normalized: 80.3, targetNorm: 80.0, limitNorm: 100 },
-        { name: 'H2', shortName: 'H2', rawVal: 20.1, unit: '%', target: 20.0, limit: 25.0, normalized: 80.4, targetNorm: 80.0, limitNorm: 100 },
-        { name: 'H2 Flow', shortName: 'H2 Flow', rawVal: avg(D.h2Flow).toFixed(1), unit: 'Nm³/h', target: 30.0, limit: 35.0, normalized: 82.3, targetNorm: 85.7, limitNorm: 100 },
-        { name: 'N2 Flow', shortName: 'N2 Flow', rawVal: avg(D.n2Flow).toFixed(1), unit: 'Nm³/h', target: 250.0, limit: 300.0, normalized: 81.3, targetNorm: 83.3, limitNorm: 100 }
+        { name: 'Fume Exh Blower', shortName: 'Fume Blower', rawVal: fumeVal, unit: 'rpm', normalized: Number(((fumeVal / 1200) * 100).toFixed(1)), color: C.cyan },
+        { name: 'Comb Blower 1', shortName: 'Comb Blower', rawVal: combVal, unit: 'rpm', normalized: Number(((combVal / 2500) * 100).toFixed(1)), color: C.purple },
+        { name: 'O2 Purity', shortName: 'O2', rawVal: o2Val, unit: 'ppm', normalized: Number(((o2Val / 50.0) * 100).toFixed(1)), color: C.red },
+        { name: 'Dew Point', shortName: 'Dew Point', rawVal: dewVal, unit: '°C', normalized: Number(((Math.abs(dewVal) / 30.0) * 100).toFixed(1)), color: C.slate },
+        { name: 'H2 Conc', shortName: 'H2 Conc', rawVal: h2ConcVal, unit: '%', normalized: Number(((h2ConcVal / 25.0) * 100).toFixed(1)), color: C.indigo },
+        { name: 'H2 Flow', shortName: 'H2 Flow', rawVal: h2FlowVal, unit: 'Nm³/h', normalized: Number(((h2FlowVal / 35.0) * 100).toFixed(1)), color: C.teal },
+        { name: 'N2 Flow', shortName: 'N2 Flow', rawVal: n2FlowVal, unit: 'Nm³/h', normalized: Number(((n2FlowVal / 300.0) * 100).toFixed(1)), color: C.orange }
     ];
 
-    window.gasParamsDataGlobal = gasParamsData;
-    window.renderGasChartGlobal = function() {
-        const config = window.isGasFlipped 
-            ? gasClusteredColumnLineConfig(gasParamsData)
-            : gasLollipopChartConfig(gasParamsData);
-        mk('gasPieChart', config);
-    };
-
-    window.renderGasChartGlobal();
+    mk('gasPieChart', gasLollipopChartConfig(gasParamsData));
 
     const chipsContainer = document.getElementById('gasSummaryChips');
     if (chipsContainer) {
-        chipsContainer.innerHTML = `
-            <div class="gas-chip"><span class="chip-dot" style="background:${C.cyan}"></span><span class="chip-label">Fume Blower</span><span class="chip-val">1089 rpm</span></div>
-            <div class="gas-chip"><span class="chip-dot" style="background:${C.purple}"></span><span class="chip-label">Comb Blower</span><span class="chip-val">2387 rpm</span></div>
-            <div class="gas-chip"><span class="chip-dot" style="background:${C.red}"></span><span class="chip-label">O₂</span><span class="chip-val">37 ppm</span></div>
-            <div class="gas-chip"><span class="chip-dot" style="background:${C.slate}"></span><span class="chip-label">Dew Point</span><span class="chip-val">-25.1 °C</span></div>
-            <div class="gas-chip"><span class="chip-dot" style="background:${C.indigo}"></span><span class="chip-label">H₂</span><span class="chip-val">20.1 %</span></div>
-            <div class="gas-chip"><span class="chip-dot" style="background:${C.teal}"></span><span class="chip-label">H₂ Flow</span><span class="chip-val">${avg(D.h2Flow).toFixed(1)} Nm³/h</span></div>
-            <div class="gas-chip"><span class="chip-dot" style="background:${C.orange}"></span><span class="chip-label">N₂ Flow</span><span class="chip-val">${avg(D.n2Flow).toFixed(1)} Nm³/h</span></div>
-        `;
+        chipsContainer.innerHTML = gasParamsData.map(p => `
+            <div class="gas-chip"><span class="chip-dot" style="background:${p.color}"></span><span class="chip-label">${p.shortName}</span><span class="chip-val">${p.rawVal} ${p.unit} (${p.normalized}%)</span></div>
+        `).join('');
     }
 }
 
@@ -341,17 +343,21 @@ function comboSpLinePvColumn(labels, spData, pvData, yTitle) {
     };
 }
 
-function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrPv, yTitle) {
-    const labels = [...jcfLabels, hbrLabel];
-    const jcfSpAligned = [...jcfSp, null];
-    const jcfPvAligned = [...jcfPv, null];
-    const hbrSpAligned = [null, null, null, hbrSp];
-    const hbrPvAligned = [null, null, null, hbrPv];
+function jcfHbrChartConfig(labels, jcfSp, jcfPv, hbrSp, hbrPv, hbrExitSp, hbrExitPv, yTitle) {
+    const stageLabels = (labels && labels.length === 5) ? labels : ['JCF Z1', 'JCF Z2', 'JCF Z3', 'HBR', 'HBR EXIT'];
+    
+    const spArray = Array.isArray(jcfSp) ? jcfSp : [480, 480, 480];
+    const pvArray = Array.isArray(jcfPv) ? jcfPv : [156.9, 165.0, 170.0];
+
+    const jcfSpAligned = [spArray[0] ?? 480, spArray[1] ?? 480, spArray[2] ?? 480, null, null];
+    const jcfPvAligned = [pvArray[0] ?? 156.9, pvArray[1] ?? 165.0, pvArray[2] ?? 170.0, null, null];
+    const hbrSpAligned = [null, null, null, hbrSp ?? 480.0, hbrExitSp ?? 469.8];
+    const hbrPvAligned = [null, null, null, hbrPv ?? 338.1, hbrExitPv ?? 481.8];
 
     return {
         type: 'line',
         data: {
-            labels: labels,
+            labels: stageLabels,
             datasets: [
                 {
                     label: 'JCF SP',
@@ -360,8 +366,8 @@ function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrPv, yTit
                     backgroundColor: C.cyan,
                     borderWidth: 2,
                     pointStyle: 'circle',
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.cyan,
                     pointBorderWidth: 2,
@@ -375,8 +381,8 @@ function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrPv, yTit
                     backgroundColor: C.teal,
                     borderWidth: 2,
                     pointStyle: 'circle',
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.teal,
                     pointBorderWidth: 2,
@@ -390,8 +396,8 @@ function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrPv, yTit
                     backgroundColor: C.purple,
                     borderWidth: 2,
                     pointStyle: 'rectRot',
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.purple,
                     pointBorderWidth: 2,
@@ -404,8 +410,8 @@ function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrPv, yTit
                     backgroundColor: C.orange,
                     borderWidth: 2,
                     pointStyle: 'rectRot',
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
                     pointBackgroundColor: '#ffffff',
                     pointBorderColor: C.orange,
                     pointBorderWidth: 2,
@@ -418,33 +424,28 @@ function jcfHbrChartConfig(jcfLabels, jcfSp, jcfPv, hbrLabel, hbrSp, hbrPv, yTit
 }
 
 function gasLollipopChartConfig(paramsData) {
-    const labels = paramsData.map(p => p.name);
+    const labels = paramsData.map(p => p.shortName);
     const normalizedData = paramsData.map(p => p.normalized);
+    const colors = paramsData.map(p => p.color || C.cyan);
 
     return {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Average Value',
+                label: 'Average %',
                 data: normalizedData,
-                backgroundColor: C.cyan,
-                borderColor: C.cyan,
+                backgroundColor: colors,
+                borderColor: colors,
                 borderWidth: 2,
-                barThickness: 4,
-                pointStyle: 'circle',
-                pointRadius: 7,
-                pointHoverRadius: 9,
-                pointBackgroundColor: '#3b82f6',
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2
+                barPercentage: 0.55,
+                borderRadius: 6
             }]
         },
         options: {
-            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { top: 10, bottom: 6, left: 10, right: 40 } },
+            layout: { padding: { top: 16, bottom: 6, left: 10, right: 16 } },
             plugins: {
                 legend: { display: false },
                 tooltip: {
@@ -456,26 +457,30 @@ function gasLollipopChartConfig(paramsData) {
                         label: function(ctx) {
                             const idx = ctx.dataIndex;
                             const item = paramsData[idx];
-                            return `  Average: ${item.rawVal} ${item.unit} (${item.normalized}%) — Acceptable`;
+                            return `  Average: ${item.normalized}% (${item.rawVal} ${item.unit})`;
                         }
                     }
                 }
             },
             scales: {
                 x: {
-                    title: { display: true, text: 'Average Value (Normalized %)', color: '#0f172a', font: { weight: '800', size: 11 } },
-                    grid: { display: false },
-                    border: { display: true, color: '#0f172a', width: 2 },
-                    min: 0,
-                    max: 120,
-                    ticks: { font: { weight: '700', size: 11 }, color: '#334155', callback: v => `${v}%` }
-                },
-                y: {
-                    title: { display: true, text: 'Parameter Name', color: '#0f172a', font: { weight: '800', size: 11 } },
+                    title: { display: true, text: 'Parameters', color: '#0f172a', font: { weight: '800', size: 11 } },
                     grid: { display: false },
                     border: { display: true, color: '#0f172a', width: 2 },
                     ticks: { font: { weight: '700', size: 11 }, color: '#334155' }
+                },
+                y: {
+                    title: { display: true, text: 'Average %', color: '#0f172a', font: { weight: '800', size: 11 } },
+                    grid: { display: false },
+                    border: { display: true, color: '#0f172a', width: 2 },
+                    beginAtZero: true,
+                    max: 120,
+                    ticks: { font: { weight: '700', size: 11 }, color: '#334155', callback: v => `${v}%` }
                 }
+            }
+        }
+    };
+}
             }
         }
     };
