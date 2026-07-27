@@ -674,12 +674,13 @@ window.addEventListener('click', (e) => {
 // ════════════════════════════════════════════════════
 
 function bootApp() {
+    renderAll();
+
     if (typeof Chart === 'undefined') {
         setTimeout(bootApp, 50);
         return;
     }
     initChartDefaults();
-    renderAll();
 
     document.addEventListener('click', (e) => {
         const infoBtn = e.target.closest('.btn-info');
