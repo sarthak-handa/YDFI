@@ -458,10 +458,7 @@ function gasLollipopChartConfig(paramsData) {
         }
     };
 }
-            }
-        }
-    };
-}
+
 
 function gasClusteredColumnLineConfig(paramsData) {
     const labels = paramsData.map(p => p.shortName);
