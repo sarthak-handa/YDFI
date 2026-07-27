@@ -1,11 +1,12 @@
 import React from 'react';
+import logoImg from '../assets/images/YDLOGO.png';
 
 export default function Header({ fileName, onCSVUpload }) {
     return (
         <>
             <header className="bg-white min-h-[64px] h-auto flex flex-wrap items-center justify-between py-2.5 px-4 sm:px-6 gap-3 border-b border-slate-200 sticky top-0 z-50 shadow-xs">
                 <div className="flex items-center gap-3 sm:gap-[14px] shrink-0">
-                    <img src="/src/assets/images/YDLOGO.png" alt="Yogiji Digi" className="h-8 sm:h-10 w-auto transition-all" />
+                    <img src={logoImg} alt="Yogiji Digi" className="h-8 sm:h-10 w-auto transition-all" />
                     <div>
                         <h1 className="text-[14px] sm:text-[16px] font-extrabold text-slate-900 tracking-[.04em] leading-tight">ACPPL GI FURNACE</h1>
                         <p className="text-[9px] sm:text-[10px] text-slate-400 font-semibold uppercase tracking-[.06em]">Industrial Furnace Analytics</p>
